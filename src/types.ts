@@ -21,6 +21,10 @@ export interface Employee {
   id: string;
   employeeId: string;
   fullName: string;
+  surname?: string;
+  firstName?: string;
+  middleName?: string;
+  nameExtension?: string;
   position: string;
   division: string;
   employmentStatus: "Permanent" | "Temporary" | "Co-terminus" | "Contractual";

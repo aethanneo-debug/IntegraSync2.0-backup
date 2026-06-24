@@ -960,6 +960,10 @@ app.post("/api/employees", authenticateToken, (req: any, res) => {
     id: `emp-${Date.now()}`,
     employeeId: data.employeeId,
     fullName: data.fullName,
+    surname: data.surname,
+    firstName: data.firstName,
+    middleName: data.middleName,
+    nameExtension: data.nameExtension,
     position: data.position,
     division: data.division,
     employmentStatus: data.employmentStatus,
@@ -1085,10 +1089,36 @@ app.delete("/api/employees/:id", authenticateToken, (req: any, res) => {
 });
 
 // PDS Upload and View Endpoints (base64 simulation)
-app.get("/api/employees/:employeeId/pds", authenticateToken, (req: any, res) => {
+app.get("/api/employees/:employeeId/pds-profile", authenticateToken, (req: any, res) => {
   const { employeeId } = req.params;
+
+  if (req.user.role === UserRole.EMPLOYEE && req.user.employeeId !== employeeId) {
+    return res.status(403).json({ status: "error", message: "Unauthorized: Employees can only access their own PDS" });
+  }
+
+  const employee = db.employees.find(e => e.employeeId === employeeId);
+  if (!employee) {
+    return res.status(404).json({ status: "error", message: "Target employee record not found" });
+  }
+
   const pdsRecord = (db.pds || []).find((p: any) => p.employeeId === employeeId);
-  res.json({ status: "success", data: pdsRecord ? pdsRecord : { data: null } });
+  res.json({
+    status: "success",
+    data: {
+      employee: {
+        employeeId: employee.employeeId,
+        surname: employee.surname,
+        firstName: employee.firstName,
+        middleName: employee.middleName,
+        nameExtension: employee.nameExtension,
+        fullName: employee.fullName,
+        email: employee.email,
+        contactNumber: employee.contactNumber,
+        address: employee.address
+      },
+      pds: pdsRecord ? pdsRecord : null
+    }
+  });
 });
 
 app.post("/api/employees/:employeeId/pds", authenticateToken, (req: any, res) => {
@@ -1109,9 +1139,9 @@ app.post("/api/employees/:employeeId/pds", authenticateToken, (req: any, res) =>
     if (!db.pds) db.pds = [];
     const existingIndex = db.pds.findIndex((p: any) => p.employeeId === employeeId);
     if (existingIndex >= 0) {
-      db.pds[existingIndex] = { ...db.pds[existingIndex], data };
+      db.pds[existingIndex] = { ...db.pds[existingIndex], ...data };
     } else {
-      db.pds.push({ id: `pds-${Date.now()}`, employeeId, data });
+      db.pds.push({ id: `pds-${Date.now()}`, employeeId, ...data });
     }
   }
 

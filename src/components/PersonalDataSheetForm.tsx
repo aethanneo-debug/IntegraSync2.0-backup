@@ -5,7 +5,7 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
   const isHrOrAdmin = ["Administrator / Division Chief", "HR Officer"].includes(user.role);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(isHrOrAdmin ? "" : user.employeeId);
   const [activeTab, setActiveTab] = useState(1);
-  const [formData, setFormData] = useState({
+  const emptyPdsDefaults = {
     surname: '', firstName: '', middleName: '', nameExtension: '', dateOfBirth: '', placeOfBirth: '',
     sex: 'Male', civilStatus: 'Single', heightM: '', weightKg: '', bloodType: '', gsisId: '', pagibigId: '', philhealthId: '', sssId: '', tinNo: '', agencyEmployeeNo: '', citizenshipType: 'Filipino',
     dualCitizenshipBy: '', dualCountry: '',
@@ -16,71 +16,145 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
     fatherSurname: '', fatherFirstName: '', fatherMiddleName: '', fatherExtension: '',
     motherMaidenSurname: '', motherFirstName: '', motherMiddleName: '', 
     children: [], education: [], civilService: [], serviceRecords: [], trainings: []
-  });
+  };
 
+  const [formData, setFormData] = useState(emptyPdsDefaults);
   const [trainingsLedger, setTrainingsLedger] = useState([]);
   const [serviceRecordsLedger, setServiceRecordsLedger] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [reloadTrigger, setReloadTrigger] = useState(0);
 
   useEffect(() => {
-    if (selectedEmployeeId) {
-      fetchPDS();
-      fetchTrainings();
-      fetchServiceRecords();
-    } else {
-      setFormData(prev => ({...prev, children: [], education: [], civilService: []}));
+    if (!selectedEmployeeId) {
+      setFormData(emptyPdsDefaults);
       setTrainingsLedger([]);
       setServiceRecordsLedger([]);
+      setErrorMsg("");
+      setSuccessMsg("");
+      return;
     }
-  }, [selectedEmployeeId]);
 
-  const fetchPDS = async () => {
-    try {
-      const res = await apiCall(`/api/employees/${selectedEmployeeId}/pds`);
-      const data = res.data || res;
-      if (data && data.data) { // PDSBase has a 'data' field containing the JSON
-        setFormData(prev => ({ ...prev, ...data.data }));
-      }
-    } catch (err) {
-      console.error("Failed to load PDS", err);
-    }
-  };
+    const controller = new AbortController();
+    const requestedEmployeeId = selectedEmployeeId;
 
-  const fetchTrainings = async () => {
-    try {
-      const res = await apiCall(`/api/employees/${selectedEmployeeId}/trainings`);
-      const data = res.data || res;
-      if (Array.isArray(data)) {
-        const mapped = data.map(t => ({
-          title: t.title,
-          organizer: t.organizer,
-          dateConducted: t.date_conducted || t.dateConducted,
-          trainingHours: t.training_hours || t.trainingHours,
-          status: t.status
-        }));
-        setTrainingsLedger(mapped);
-      }
-    } catch (err) {
-      console.error("Failed to load trainings", err);
-    }
-  };
+    async function loadSelectedEmployee() {
+      setLoading(true);
+      setFormData(emptyPdsDefaults);
+      setTrainingsLedger([]);
+      setServiceRecordsLedger([]);
+      setErrorMsg("");
+      // Keep successMsg if it was set by handleSave
+      // setSuccessMsg(""); 
 
-  const fetchServiceRecords = async () => {
-    try {
-      const res = await apiCall(`/api/employees/${selectedEmployeeId}/history`);
-      const data = res.data || res;
-      if (Array.isArray(data)) {
-        const mapped = data.map(h => ({
-          effectiveDate: h.effective_date || h.effectiveDate,
-          action: h.action,
-          newDetails: h.new_details || h.newDetails,
-          updatedBy: h.updated_by || h.updatedBy
-        }));
-        setServiceRecordsLedger(mapped);
+      try {
+        const [pdsRes, trainRes, histRes] = await Promise.all([
+          apiCall(`/api/employees/${requestedEmployeeId}/pds-profile`, { signal: controller.signal }),
+          apiCall(`/api/employees/${requestedEmployeeId}/trainings`, { signal: controller.signal }),
+          apiCall(`/api/employees/${requestedEmployeeId}/history`, { signal: controller.signal })
+        ]);
+
+        if (requestedEmployeeId !== selectedEmployeeId) {
+          return;
+        }
+
+        if (pdsRes.status === "success") {
+          const emp = pdsRes.data.employee || {};
+          const savedPds = pdsRes.data.pds || {};
+
+          let fallbackSurname = emp.surname || "";
+          let fallbackFirstName = emp.firstName || "";
+          let fallbackMiddleName = emp.middleName || "";
+          let fallbackNameExtension = emp.nameExtension || "";
+
+          if (!fallbackSurname && emp.fullName) {
+             const nameParts = emp.fullName.replace(/^(Hon\.|Atty\.|Dr\.|Mr\.|Ms\.)\s+/i, '').split(' ');
+             fallbackSurname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+             
+             const possibleExt = nameParts[nameParts.length - 1].toLowerCase();
+             if (["jr.", "sr.", "ii", "iii", "iv"].includes(possibleExt) && nameParts.length > 2) {
+                fallbackNameExtension = nameParts.pop();
+                fallbackSurname = nameParts.pop();
+             }
+
+             fallbackFirstName = nameParts.slice(0, nameParts.length > 1 && nameParts[nameParts.length - 1].endsWith('.') ? -2 : -1).join(' ');
+             fallbackMiddleName = nameParts.length > 1 && nameParts[nameParts.length - 1].endsWith('.') ? nameParts[nameParts.length - 1] : '';
+             
+             if (!fallbackFirstName && !fallbackMiddleName) {
+               fallbackFirstName = nameParts[0] || "";
+             }
+          }
+
+          const employeeFallback = {
+            surname: fallbackSurname,
+            firstName: fallbackFirstName,
+            middleName: fallbackMiddleName,
+            nameExtension: fallbackNameExtension,
+            agencyEmployeeNo: emp.employeeId || "",
+            emailAddress: emp.email || "",
+            mobileNo: emp.contactNumber || "",
+            telephoneNo: emp.contactNumber || "",
+            rHouseNo: emp.address || "",
+            pHouseNo: emp.address || "",
+          };
+
+          setFormData({
+            ...emptyPdsDefaults,
+            ...employeeFallback,
+            ...savedPds,
+            children: savedPds.children || [],
+            education: savedPds.education || [],
+            civilService: savedPds.civilService || [],
+          });
+          
+          if (!pdsRes.data.pds) {
+            setSuccessMsg("No saved PDS found. Employee information has been prefilled.");
+          } else if (!successMsg) { // Only set if not already showing save success
+            setSuccessMsg("PDS information loaded successfully.");
+          }
+        }
+
+        if (trainRes.status === "success") {
+          const trainData = trainRes.data || trainRes;
+          if (Array.isArray(trainData)) {
+            setTrainingsLedger(trainData.map(t => ({
+              title: t.title,
+              organizer: t.organizer,
+              dateConducted: t.date_conducted || t.dateConducted,
+              trainingHours: t.training_hours || t.trainingHours,
+              status: t.status
+            })));
+          }
+        }
+
+        if (histRes.status === "success") {
+           const histData = histRes.data || histRes;
+           if (Array.isArray(histData)) {
+             setServiceRecordsLedger(histData.map(h => ({
+               effectiveDate: h.effective_date || h.effectiveDate,
+               action: h.action,
+               newDetails: h.new_details || h.newDetails,
+               updatedBy: h.updated_by || h.updatedBy
+             })));
+           }
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setErrorMsg("Employee record could not be loaded.");
+          console.error("Failed to load employee records", error);
+        }
+      } finally {
+        if (requestedEmployeeId === selectedEmployeeId) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error("Failed to load service records", err);
     }
-  };
+
+    loadSelectedEmployee();
+
+    return () => controller.abort();
+  }, [selectedEmployeeId, reloadTrigger]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,15 +162,23 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
   };
 
   const handleSave = async () => {
-    if (!selectedEmployeeId) return alert("Select an employee first.");
+    if (!selectedEmployeeId) {
+      setErrorMsg("Please select an employee.");
+      return;
+    }
     try {
+      setLoading(true);
+      setErrorMsg("");
       await apiCall(`/api/employees/${selectedEmployeeId}/pds`, {
         method: 'POST',
         body: JSON.stringify({ data: formData })
       });
-      alert("PDS information saved successfully.");
+      setSuccessMsg("PDS information saved successfully.");
+      setReloadTrigger(prev => prev + 1);
     } catch (err) {
-      alert("Error saving PDS: " + err.message);
+      setErrorMsg("Error saving PDS: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -414,6 +496,10 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
             </select>
           </div>
         )}
+
+        {loading && <div className="mb-4 text-sm text-blue-600 font-medium">Loading employee PDS...</div>}
+        {errorMsg && <div className="mb-4 text-sm text-rose-600 font-medium">{errorMsg}</div>}
+        {successMsg && !loading && <div className="mb-4 text-sm text-emerald-600 font-medium">{successMsg}</div>}
 
         {!selectedEmployeeId ? (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 p-8 text-center rounded-lg shadow-sm">

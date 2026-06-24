@@ -47,7 +47,11 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   // Form values
   const [formData, setFormData] = useState({
     employeeId: "",
-    fullName: "",
+    honorific: "",
+    surname: "",
+    firstName: "",
+    middleName: "",
+    nameExtension: "",
     position: "",
     division: "Adjudication Division",
     employmentStatus: "Permanent",
@@ -94,9 +98,22 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     try {
+      const fullName = [
+        formData.honorific,
+        formData.firstName,
+        formData.middleName,
+        formData.surname,
+        formData.nameExtension
+      ].filter(Boolean).join(" ");
+
+      const payload = {
+        ...formData,
+        fullName
+      };
+
       const res = await apiCall("/api/employees", {
         method: "POST",
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       if (res.status === "success") {
         alert("Personnel file recorded under structural indexes successfully!");
@@ -106,7 +123,11 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
         // Reset form
         setFormData({
           employeeId: "",
-          fullName: "",
+          honorific: "",
+          surname: "",
+          firstName: "",
+          middleName: "",
+          nameExtension: "",
           position: "",
           division: "Adjudication Division",
           employmentStatus: "Permanent",
@@ -532,15 +553,26 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Full Name *</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Maria Clara V. Santos"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
-                  />
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Surname *</label>
+                  <input required type="text" placeholder="Santos" value={formData.surname} onChange={(e) => setFormData({ ...formData, surname: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">First Name *</label>
+                  <input required type="text" placeholder="Maria Clara" value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Middle Name</label>
+                  <input type="text" placeholder="Villanueva" value={formData.middleName} onChange={(e) => setFormData({ ...formData, middleName: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs" />
+                </div>
+                <div className="space-y-1 flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Honorific</label>
+                    <input type="text" placeholder="Hon." value={formData.honorific} onChange={(e) => setFormData({ ...formData, honorific: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Ext.</label>
+                    <input type="text" placeholder="Jr." value={formData.nameExtension} onChange={(e) => setFormData({ ...formData, nameExtension: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs" />
+                  </div>
                 </div>
 
                 {/* POSITION AND DIVISION */}
