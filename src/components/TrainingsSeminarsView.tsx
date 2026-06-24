@@ -113,13 +113,19 @@ export default function TrainingsSeminarsView({ user, employees }) {
   };
 
   return (
-    <div className="p-8 bg-slate-50 min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-6">
-        
+    <div className="flex-1 flex flex-col h-full bg-slate-50 overflow-y-auto w-full relative">
+      <div className="p-6 max-w-5xl mx-auto w-full">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">Trainings & Seminars</h1>
+            <p className="text-xs text-slate-500 mt-1">Official learning interventions and adjudicated employment history.</p>
+          </div>
+        </div>
+
         {isHrOrAdmin && (
-          <div className="bg-white p-4 rounded-lg border border-slate-200 flex items-center gap-4 shadow-sm">
-            <label className="text-xs font-bold text-slate-600 uppercase">Target Employee Record:</label>
-            <select className="border border-slate-300 rounded p-2 text-xs w-72 bg-slate-50" value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)}>
+          <div className="bg-white p-4 rounded-lg border border-slate-200 mb-6 flex items-center gap-4 shadow-sm">
+            <label className="text-xs font-bold text-slate-600 uppercase">Select Target Employee:</label>
+            <select className="border border-slate-300 rounded p-2 text-xs w-64 bg-slate-50" value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)}>
               <option value="">-- Choose Employee --</option>
               {employees?.map(emp => (
                 <option key={emp.employeeId} value={emp.employeeId}>{emp.fullName} ({emp.employeeId})</option>
@@ -133,91 +139,107 @@ export default function TrainingsSeminarsView({ user, employees }) {
             <p className="font-semibold text-sm">Please select an employee to view their Trainings and Employment History.</p>
           </div>
         ) : (
-          <>
-            <div className="bg-white p-6 shadow-sm rounded-lg border border-slate-200">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h2 className="text-sm font-bold text-slate-700 tracking-wider uppercase">Trainings & Seminars Ledger</h2>
-                  <p className="text-xs text-slate-500 mt-1">Official learning interventions requiring HR verification.</p>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-6 space-y-6">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center mb-4 border-b pb-2">
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-700 uppercase">Trainings & Seminars Ledger</h2>
+                    <p className="text-[10px] text-slate-500">Includes all submitted seminars. Official learning interventions requiring HR verification.</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold uppercase shadow transition"
+                  >
+                    + Add Training Record
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-xs font-bold uppercase shadow transition"
-                >
-                  + Add Training Record
-                </button>
+
+                <table className="w-full text-left text-xs border-collapse bg-white border border-slate-200">
+                  <thead>
+                    <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold">
+                      <th className="p-2">Training Title</th>
+                      <th className="p-2">Organizer</th>
+                      <th className="p-2 text-center">Date Conducted</th>
+                      <th className="p-2 text-center">Hours</th>
+                      <th className="p-2 text-center">Verification Status</th>
+                      <th className="p-2 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trainings.map((training) => (
+                      <tr key={training.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="p-2">
+                          <div className="font-semibold text-slate-700">{training.title}</div>
+                          {training.certificateFilename && (
+                            <div className="text-[10px] text-slate-500 mt-1">Cert: {training.certificateFilename}</div>
+                          )}
+                          {training.remarks && (
+                            <div className="text-[10px] text-rose-600 mt-1">Remarks: {training.remarks}</div>
+                          )}
+                        </td>
+                        <td className="p-2 text-slate-600">{training.organizer}</td>
+                        <td className="p-2 text-center text-slate-600">{training.dateConducted}</td>
+                        <td className="p-2 text-center text-slate-600">{training.trainingHours}</td>
+                        <td className="p-2 text-center">
+                          <span className={`px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider ${training.status === 'Verified' ? 'bg-emerald-100 text-emerald-800' : training.status === 'Returned' || training.status === 'Rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                            {training.status || 'Pending Verification'}
+                          </span>
+                        </td>
+                        <td className="p-2 text-center">
+                          {isHrOrAdmin && training.status !== 'Verified' && (
+                            <button onClick={() => openVerifyModal(training)} className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] px-3 py-1.5 rounded font-bold shadow uppercase tracking-wider">
+                              Review
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {trainings.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-400 text-sm italic">
+                          No training records submitted for this employee.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
 
               <div className="space-y-4">
-                {trainings.map((training) => (
-                  <div key={training.id} className="border border-slate-200 rounded-lg p-5 hover:border-blue-300 transition-colors shadow-sm bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-sm font-bold text-slate-900">{training.title}</h3>
-                        <span className={`px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider ${training.status === 'Verified' ? 'bg-emerald-100 text-emerald-800' : training.status === 'Returned' || training.status === 'Rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
-                          {training.status || 'Pending Verification'}
-                        </span>
-                      </div>
-                      <p className="text-slate-600 text-xs mb-2">{training.organizer} • {training.dateConducted}</p>
-                      <div className="flex items-center gap-3">
-                        <span className="text-blue-700 font-bold text-[10px] bg-blue-100 px-2 py-1 rounded">{training.trainingHours} Credit Hours</span>
-                        {training.certificateFilename && (
-                          <span className="text-slate-500 text-[10px] underline cursor-pointer">View Cert: {training.certificateFilename}</span>
-                        )}
-                      </div>
-                      {training.remarks && (
-                        <p className="text-xs text-rose-600 mt-2 bg-rose-50 p-2 rounded border border-rose-100"><strong>HR Remarks:</strong> {training.remarks}</p>
-                      )}
-                    </div>
-                    
-                    {isHrOrAdmin && training.status !== 'Verified' && (
-                      <div className="flex-shrink-0">
-                        <button onClick={() => openVerifyModal(training)} className="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2 rounded font-bold shadow">
-                          Review & Verify
-                        </button>
-                      </div>
+                <div className="border-b pb-2 mb-4">
+                  <h2 className="text-sm font-bold text-slate-700 uppercase">Employment Service Records</h2>
+                  <p className="text-[10px] text-slate-500">Service records trace your entire employment history. System-generated through administrative HR actions.</p>
+                </div>
+                
+                <table className="w-full text-left text-xs border-collapse bg-white border border-slate-200">
+                  <thead>
+                    <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold">
+                      <th className="p-2">Effective Date</th>
+                      <th className="p-2">Action / Position</th>
+                      <th className="p-2">Remarks / Details</th>
+                      <th className="p-2">Updated By</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map((h, idx) => (
+                      <tr key={h.id || idx} className="border-b border-slate-100">
+                        <td className="p-2 whitespace-nowrap">{h.effectiveDate}</td>
+                        <td className="p-2 font-semibold text-slate-700">{h.action}</td>
+                        <td className="p-2">{h.newDetails}</td>
+                        <td className="p-2">{h.updatedBy}</td>
+                      </tr>
+                    ))}
+                    {history.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="p-4 text-center text-slate-400 italic">No employment history events logged.</td>
+                      </tr>
                     )}
-                  </div>
-                ))}
-                {trainings.length === 0 && (
-                  <div className="p-8 border-2 border-dashed border-slate-200 rounded-lg text-center text-slate-400 text-sm">
-                    No training records submitted for this employee.
-                  </div>
-                )}
+                  </tbody>
+                </table>
               </div>
             </div>
-
-            <div className="bg-white p-6 shadow-sm rounded-lg border border-slate-200">
-              <h2 className="text-sm font-bold text-slate-700 tracking-wider uppercase mb-2">Adjudicated Employment History</h2>
-              <p className="text-xs text-slate-500 mb-6">Service records generated through official HR administrative actions.</p>
-              
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-100 border-y border-slate-200 text-slate-600 font-bold">
-                    <th className="p-3">Effective Date</th>
-                    <th className="p-3">Action / Event</th>
-                    <th className="p-3">Details</th>
-                    <th className="p-3">HR Operator</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((h, idx) => (
-                    <tr key={h.id || idx} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="p-3 whitespace-nowrap text-slate-700">{h.effectiveDate}</td>
-                      <td className="p-3 font-semibold text-slate-800">{h.action}</td>
-                      <td className="p-3 text-slate-600">{h.newDetails}</td>
-                      <td className="p-3 text-slate-500">{h.updatedBy}</td>
-                    </tr>
-                  ))}
-                  {history.length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="p-6 text-center text-slate-400 italic">No employment history events logged.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
+          </div>
         )}
       </div>
 
