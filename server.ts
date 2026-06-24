@@ -1085,19 +1085,37 @@ app.delete("/api/employees/:id", authenticateToken, (req: any, res) => {
 });
 
 // PDS Upload and View Endpoints (base64 simulation)
+app.get("/api/employees/:employeeId/pds", authenticateToken, (req: any, res) => {
+  const { employeeId } = req.params;
+  const pdsRecord = (db.pds || []).find((p: any) => p.employeeId === employeeId);
+  res.json({ status: "success", data: pdsRecord ? pdsRecord : { data: null } });
+});
+
 app.post("/api/employees/:employeeId/pds", authenticateToken, (req: any, res) => {
   const { employeeId } = req.params;
-  const { filename } = req.body;
+  const { filename, data } = req.body;
 
   const emp = db.employees.find(e => e.employeeId === employeeId);
   if (!emp) {
     return res.status(404).json({ status: "error", message: "Target employee record not found" });
   }
 
-  emp.pdsFieldName = filename || "PDS_Document_Uploaded.pdf";
-  emp.pdsUploadedAt = new Date().toISOString();
+  if (filename) {
+    emp.pdsFieldName = filename || "PDS_Document_Uploaded.pdf";
+    emp.pdsUploadedAt = new Date().toISOString();
+  }
 
-  logEvent(req.user.id, req.user.username, req.user.role, "Upload PDS", `Uploaded official Personal Data Sheet (PDS) for ${emp.fullName} (${employeeId})`);
+  if (data) {
+    if (!db.pds) db.pds = [];
+    const existingIndex = db.pds.findIndex((p: any) => p.employeeId === employeeId);
+    if (existingIndex >= 0) {
+      db.pds[existingIndex] = { ...db.pds[existingIndex], data };
+    } else {
+      db.pds.push({ id: `pds-${Date.now()}`, employeeId, data });
+    }
+  }
+
+  logEvent(req.user.id, req.user.username, req.user.role, "Upload PDS", `Updated Personal Data Sheet (PDS) for ${emp.fullName} (${employeeId})`);
   saveDB();
   res.json({ status: "success", data: emp });
 });
