@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, date
-from sqlalchemy import Column, String, Integer, Decimal, Date, DateTime, ForeignKey, Text
+from sqlalchemy import Column, String, Integer, Decimal, Date, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -12,6 +12,17 @@ class Role(Base):
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+class Office(Base):
+    __tablename__ = "offices"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    office_code = Column(String(50), unique=True, nullable=False)
+    office_name = Column(String(150), nullable=False)
+    description = Column(Text)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class User(Base):
     __tablename__ = "users"
 
@@ -22,11 +33,13 @@ class User(Base):
     full_name = Column(String(150), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="RESTRICT"), nullable=False)
     employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="SET NULL"), unique=True)
+    office_id = Column(String(36), ForeignKey("offices.id", ondelete="SET NULL"))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     role_rel = relationship("Role")
-    employee_rel = relationship("ModelEmployee", back_populates="user_rel")
+    employee_rel = relationship("ModelEmployee", back_populates="user_rel", foreign_keys=[employee_id])
+    office_rel = relationship("Office")
 
 class ModelEmployee(Base):
     __tablename__ = "employees"
@@ -36,7 +49,8 @@ class ModelEmployee(Base):
     full_name = Column(String(150), nullable=False)
     position = Column(String(100), nullable=False)
     division = Column(String(100), nullable=False)
-    employment_status = Column(String(50), nullable=False) -- 'Permanent', 'Temporary', etc.
+    office_id = Column(String(36), ForeignKey("offices.id", ondelete="SET NULL"))
+    employment_status = Column(String(50), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     address = Column(Text)
     date_hired = Column(Date, nullable=False)
@@ -48,7 +62,8 @@ class ModelEmployee(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user_rel = relationship("User", uselist=False, back_populates="employee_rel")
+    user_rel = relationship("User", uselist=False, back_populates="employee_rel", foreign_keys="User.employee_id")
+    office_rel = relationship("Office")
     history_rel = relationship("ModelEmploymentHistory", back_populates="employee")
     trainings_rel = relationship("ModelTraining", back_populates="employee")
     seminars_rel = relationship("ModelSeminar", back_populates="employee")
@@ -88,7 +103,7 @@ class ModelPDS(Base):
     __tablename__ = "employee_pds"
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False, unique=True)
-    data = Column(Text, nullable=False) # JSON blob for simplicity
+    data = Column(Text, nullable=False) 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -106,6 +121,109 @@ class ModelSeminar(Base):
 
     employee = relationship("ModelEmployee", back_populates="seminars_rel")
 
+class FiscalYear(Base):
+    __tablename__ = "fiscal_years"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    label = Column(String(50), unique=True, nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    status = Column(String(50), nullable=False)
+    rollover_policy = Column(String(50), nullable=False)
+    created_by = Column(String(150))
+    activated_by = Column(String(150))
+    closed_by = Column(String(150))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class OfficeBudget(Base):
+    __tablename__ = "office_budgets"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    fiscal_year_id = Column(String(36), ForeignKey("fiscal_years.id", ondelete="RESTRICT"), nullable=False)
+    office_id = Column(String(36), ForeignKey("offices.id", ondelete="RESTRICT"), nullable=False)
+    base_annual_allocation = Column(Decimal(15,2), default=0.00)
+    rollover_amount = Column(Decimal(15,2), default=0.00)
+    adjustment_amount = Column(Decimal(15,2), default=0.00)
+    total_annual_allocation = Column(Decimal(15,2), default=0.00)
+    encumbered_amount = Column(Decimal(15,2), default=0.00)
+    utilized_amount = Column(Decimal(15,2), default=0.00)
+    available_amount = Column(Decimal(15,2), default=0.00)
+    status = Column(String(50), default="Active")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    office_rel = relationship("Office")
+    fiscal_year_rel = relationship("FiscalYear")
+
+class QuarterlyBudgetAllocation(Base):
+    __tablename__ = "quarterly_budget_allocations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    office_budget_id = Column(String(36), ForeignKey("office_budgets.id", ondelete="CASCADE"), nullable=False)
+    quarter_number = Column(Integer, nullable=False)
+    allocated_amount = Column(Decimal(15,2), default=0.00)
+    encumbered_amount = Column(Decimal(15,2), default=0.00)
+    utilized_amount = Column(Decimal(15,2), default=0.00)
+    available_amount = Column(Decimal(15,2), default=0.00)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    office_budget_rel = relationship("OfficeBudget")
+
+class MonthlyBudgetAllocation(Base):
+    __tablename__ = "monthly_budget_allocations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    quarterly_budget_id = Column(String(36), ForeignKey("quarterly_budget_allocations.id", ondelete="CASCADE"), nullable=False)
+    month_number = Column(Integer, nullable=False)
+    allocated_amount = Column(Decimal(15,2), default=0.00)
+    encumbered_amount = Column(Decimal(15,2), default=0.00)
+    utilized_amount = Column(Decimal(15,2), default=0.00)
+    available_amount = Column(Decimal(15,2), default=0.00)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    quarterly_budget_rel = relationship("QuarterlyBudgetAllocation")
+
+class BudgetLedgerEntry(Base):
+    __tablename__ = "budget_ledger_entries"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    office_budget_id = Column(String(36), ForeignKey("office_budgets.id", ondelete="CASCADE"), nullable=False)
+    quarterly_budget_id = Column(String(36), ForeignKey("quarterly_budget_allocations.id", ondelete="SET NULL"))
+    monthly_budget_id = Column(String(36), ForeignKey("monthly_budget_allocations.id", ondelete="SET NULL"))
+    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="SET NULL"))
+    activity_id = Column(String(36))
+    request_id = Column(String(36))
+    liquidation_id = Column(String(36))
+    financial_transaction_id = Column(String(36))
+    entry_type = Column(String(50), nullable=False)
+    reference_number = Column(String(100))
+    description = Column(Text)
+    debit_amount = Column(Decimal(15,2), default=0.00)
+    credit_amount = Column(Decimal(15,2), default=0.00)
+    posting_status = Column(String(50), default="Posted")
+    posted_by = Column(String(150))
+    posted_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class FiscalYearRollover(Base):
+    __tablename__ = "fiscal_year_rollovers"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    source_fiscal_year_id = Column(String(36), ForeignKey("fiscal_years.id", ondelete="RESTRICT"), nullable=False)
+    target_fiscal_year_id = Column(String(36), ForeignKey("fiscal_years.id", ondelete="RESTRICT"), nullable=False)
+    office_id = Column(String(36), ForeignKey("offices.id", ondelete="RESTRICT"), nullable=False)
+    rollover_policy = Column(String(50), nullable=False)
+    source_remaining_amount = Column(Decimal(15,2), default=0.00)
+    carried_forward_amount = Column(Decimal(15,2), default=0.00)
+    reset_amount = Column(Decimal(15,2), default=0.00)
+    executed_by = Column(String(150), nullable=False)
+    executed_at = Column(DateTime, default=datetime.utcnow)
+    status = Column(String(50), default="Completed")
+
 class ModelFinancialTransaction(Base):
     __tablename__ = "financial_transactions"
 
@@ -115,8 +233,9 @@ class ModelFinancialTransaction(Base):
     supplier = Column(String(255), nullable=False)
     amount = Column(Decimal(15, 2), nullable=False)
     description = Column(Text, nullable=False)
+    office_id = Column(String(36), ForeignKey("offices.id", ondelete="RESTRICT"))
     receipt_file_name = Column(String(255))
-    status = Column(String(50), default="Pending Validation", nullable=False)
+    status = Column(String(50), default="Draft", nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -161,6 +280,21 @@ class ModelAsset(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class ModelAssetIssuance(Base):
+    __tablename__ = "asset_issuances"
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    asset_id = Column(String(36), ForeignKey("assets.id", ondelete="CASCADE"), nullable=False)
+    asset_number = Column(String(100), nullable=False)
+    assigned_to_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="RESTRICT"), nullable=False)
+    assigned_to_name = Column(String(150), nullable=False)
+    date_issued = Column(Date, nullable=False)
+    quantity = Column(Integer, default=1)
+    condition_on_issue = Column(Text, nullable=False)
+    return_date = Column(Date)
+    condition_on_return = Column(Text)
+    clearance_status = Column(String(50))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class ModelSupplyItem(Base):
     __tablename__ = "supply_items"
 
@@ -179,11 +313,24 @@ class ModelRequest(Base):
     request_type = Column(String(50), nullable=False)
     employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
     employee_name = Column(String(150), nullable=False)
+    office_id = Column(String(36), ForeignKey("offices.id", ondelete="SET NULL"))
     date_requested = Column(Date, default=date.today)
-    status = Column(String(50), default="Pending Review", nullable=False)
+    status = Column(String(50), default="Draft", nullable=False)
     approved_by = Column(String(150))
     remarks = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class WorkflowHistory(Base):
+    __tablename__ = "workflow_history"
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    entity_type = Column(String(50), nullable=False)
+    entity_id = Column(String(36), nullable=False)
+    previous_status = Column(String(50))
+    new_status = Column(String(50), nullable=False)
+    remarks = Column(Text)
+    acted_by = Column(String(150), nullable=False)
+    acted_as_role = Column(String(100), nullable=False)
+    acted_at = Column(DateTime, default=datetime.utcnow)
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
@@ -194,5 +341,10 @@ class AuditLog(Base):
     username = Column(String(100), nullable=False)
     role = Column(String(100), nullable=False)
     action = Column(Text, nullable=False)
+    entity_type = Column(String(100))
+    entity_id = Column(String(100))
+    previous_value = Column(Text)
+    new_value = Column(Text)
     details = Column(Text)
     ip_address = Column(String(100))
+    created_at = Column(DateTime, default=datetime.utcnow)

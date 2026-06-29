@@ -109,6 +109,7 @@ export default function FinanceView({
   const [consolidationValue, setConsolidationValue] = useState("Q2"); // Q1, Q2, Q3, Q4, or Month Names
 
   const [activeFiscalYear, setActiveFiscalYear] = useState<string>("2026");
+  const [fiscalYears, setFiscalYears] = useState<any[]>([]);
   const [isFiscalYearModalOpen, setIsFiscalYearModalOpen] = useState(false);
 
   // For budget edit
@@ -121,6 +122,7 @@ export default function FinanceView({
   const [isVersionHistoryModalOpen, setIsVersionHistoryModalOpen] = useState(false);
   const [isReplaceFileModalOpen, setIsReplaceFileModalOpen] = useState(false);
   const [replacementFilename, setReplacementFilename] = useState("");
+  const [activeVaultFilter, setActiveVaultFilter] = useState<string | null>(null);
 
   // Forms values
   const [txFormData, setTxFormData] = useState({
@@ -167,27 +169,37 @@ export default function FinanceView({
   async function fetchFinanceAddons() {
     try {
       setLoading(true);
-      const resLiq = await apiCall("/api/finance/liquidations");
+      const resFy = await apiCall("/api/fiscal-years").catch(() => null);
+      if (resFy) {
+        setFiscalYears(resFy);
+        // Find active if none selected
+        const active = resFy.find((f: any) => f.status === "Active");
+        if (active && !activeFiscalYear) setActiveFiscalYear(active.label);
+      }
+      
+      const resLiq = await apiCall("/api/finance/liquidations").catch(() => ({ status: "error", data: [] }));
       if (resLiq.status === "success") {
         setLiquidations(resLiq.data);
       }
-      const resBud = await apiCall("/api/finance/budgets");
-      if (resBud.status === "success") {
+      const resBud = await apiCall("/api/budgets").catch(() => ({ status: "error", data: [] }));
+      if (Array.isArray(resBud)) {
+        setBudgets(resBud); // Assuming endpoint returns array
+      } else if (resBud.status === "success") {
         setBudgets(resBud.data);
       }
-      const resBudReq = await apiCall("/api/finance/budget-requests");
+      const resBudReq = await apiCall("/api/finance/budget-requests").catch(() => ({ status: "error", data: [] }));
       if (resBudReq.status === "success") {
         setBudgetRequests(resBudReq.data);
       }
-      const resAud = await apiCall("/api/finance/audit-logs");
+      const resAud = await apiCall("/api/finance/audit-logs").catch(() => ({ status: "error", data: [] }));
       if (resAud.status === "success") {
         setAuditLogs(resAud.data);
       }
-      const resSub = await apiCall("/api/liquidation-submissions");
+      const resSub = await apiCall("/api/liquidation-submissions").catch(() => ({ status: "error", data: [] }));
       if (resSub.status === "success") {
         setSubmissions(resSub.data);
       }
-      const resLnk = await apiCall("/api/finance/activity-budget-links");
+      const resLnk = await apiCall("/api/finance/activity-budget-links").catch(() => ({ status: "error", data: [] }));
       if (resLnk.status === "success") {
         setBudgetLinks(resLnk.data);
       }
@@ -1151,34 +1163,40 @@ export default function FinanceView({
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200/85">
               {[
-                { type: "Purchase Request", desc: "Approved procurement requirements", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Purchase Request").length + 1 },
-                { type: "Invoice", desc: "Suppliers official cargo invoices", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Invoice").length + 1 },
-                { type: "Disbursement Voucher", desc: "Cash release certifications", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Disbursement Voucher").length + 1 },
-                { type: "Liquidation Report", desc: "Post-expenditure reconciliation sheets", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Liquidation Report").length + 1 },
+                { type: "Purchase Request", desc: "Approved procurement requirements", count: yearFilteredTxns.flatMap(t => t.supportingDocuments || []).filter(d => d.type === "Purchase Request").length },
+                { type: "Invoice", desc: "Suppliers official cargo invoices", count: yearFilteredTxns.flatMap(t => t.supportingDocuments || []).filter(d => d.type === "Invoice").length },
+                { type: "Disbursement Voucher", desc: "Cash release certifications", count: yearFilteredTxns.flatMap(t => t.supportingDocuments || []).filter(d => d.type === "Disbursement Voucher").length },
+                { type: "Liquidation Report", desc: "Post-expenditure reconciliation sheets", count: yearFilteredTxns.flatMap(t => t.supportingDocuments || []).filter(d => d.type === "Liquidation Report").length },
               ].map((box, i) => (
-                <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200/60 flex flex-col justify-between">
+                <button 
+                  key={i} 
+                  onClick={() => setActiveVaultFilter(activeVaultFilter === box.type ? null : box.type)}
+                  className={`p-4 text-left rounded-xl border flex flex-col justify-between transition-all cursor-pointer ${activeVaultFilter === box.type ? "bg-blue-50 border-blue-400 shadow-md ring-1 ring-blue-400" : "bg-slate-50 border-slate-200/60 hover:border-slate-300 hover:shadow-sm"}`}
+                >
                   <div>
-                    <h3 className="text-xs font-bold text-slate-800 font-mono">{box.type} (PR)</h3>
+                    <h3 className="text-xs font-bold text-slate-800 font-mono">{box.type}</h3>
                     <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">{box.desc}</p>
                   </div>
-                  <div className="flex justify-between items-end mt-4">
+                  <div className="flex justify-between items-end mt-4 w-full">
                     <span className="text-lg font-bold font-mono text-slate-700">{box.count} PDFs</span>
                     <span className="text-[9px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-black px-1.5 py-0.5 rounded">SECURE</span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
 
             {/* MASTER LIST OF ALL EXPENSE DOCUMENTS WITH VERSIONING */}
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
               <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-850 uppercase tracking-widest font-mono">Dossier File Version Logs</span>
-                <span className="text-[10px] text-slate-400 font-mono tracking-tight font-black">{yearFilteredTxns.reduce((acc, t) => acc + (t.supportingDocuments?.length || 0), 0)} FILES MANAGED</span>
+                <span className="text-xs font-bold text-slate-850 uppercase tracking-widest font-mono">Dossier File Version Logs {activeVaultFilter && `(${activeVaultFilter})`}</span>
+                <span className="text-[10px] text-slate-400 font-mono tracking-tight font-black">
+                  {yearFilteredTxns.flatMap(t => t.supportingDocuments || []).filter(d => activeVaultFilter ? d.type === activeVaultFilter : true).length} FILES MANAGED
+                </span>
               </div>
 
               <div className="divide-y divide-slate-100 max-h-[500px] overflow-y-auto custom-scrollbar border border-slate-150 rounded-lg p-1 bg-white">
                 {yearFilteredTxns.map((tx) => (
-                  tx.supportingDocuments?.map((doc: SupportingDocument) => (
+                  tx.supportingDocuments?.filter(doc => activeVaultFilter ? doc.type === activeVaultFilter : true).map((doc: SupportingDocument) => (
                     <div key={doc.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-slate-50/50 transition-colors">
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
@@ -1225,8 +1243,8 @@ export default function FinanceView({
                   ))
                 ))}
 
-                {yearFilteredTxns.reduce((acc, t) => acc + (t.supportingDocuments?.length || 0), 0) === 0 && (
-                  <p className="p-8 text-center text-slate-400 text-xs font-mono italic">No secondary documents attached inside index registries.</p>
+                {yearFilteredTxns.flatMap(t => t.supportingDocuments || []).filter(d => activeVaultFilter ? d.type === activeVaultFilter : true).length === 0 && (
+                  <p className="p-8 text-center text-slate-400 text-xs font-mono italic">No documents found matching the selected criteria.</p>
                 )}
               </div>
             </div>
@@ -2960,10 +2978,18 @@ export default function FinanceView({
                     }}
                     className="w-full bg-white border border-slate-300 text-slate-800 p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm cursor-pointer appearance-none"
                   >
-                    <option value="2026">Fiscal Year 2026</option>
-                    <option value="2025">Fiscal Year 2025</option>
-                    <option value="2024">Fiscal Year 2024</option>
-                    <option value="2023">Fiscal Year 2023</option>
+                    {fiscalYears.length > 0 ? (
+                      fiscalYears.map(fy => (
+                        <option key={fy.id} value={fy.label}>Fiscal Year {fy.label} {fy.status === "Active" ? "(Active)" : ""}</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="2026">Fiscal Year 2026</option>
+                        <option value="2025">Fiscal Year 2025</option>
+                        <option value="2024">Fiscal Year 2024</option>
+                        <option value="2023">Fiscal Year 2023</option>
+                      </>
+                    )}
                   </select>
                   <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>

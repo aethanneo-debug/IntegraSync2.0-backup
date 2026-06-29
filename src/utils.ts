@@ -60,7 +60,10 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     ...(options.headers || {}),
   };
 
-  const response = await fetch(endpoint, {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+  const fullUrl = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`;
+
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });

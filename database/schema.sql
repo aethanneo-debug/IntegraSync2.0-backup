@@ -18,14 +18,25 @@ CREATE TABLE roles (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE offices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    office_code VARCHAR(50) UNIQUE NOT NULL,
+    office_name VARCHAR(150) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL, -- bcrypt hashed
+    password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(150) NOT NULL,
     role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
-    employee_id VARCHAR(50) UNIQUE, -- cross-link matching workforce code
+    employee_id VARCHAR(50) UNIQUE,
+    office_id UUID REFERENCES offices(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -40,26 +51,26 @@ CREATE TABLE employees (
     full_name VARCHAR(150) NOT NULL,
     position VARCHAR(100) NOT NULL,
     division VARCHAR(100) NOT NULL,
-    employment_status VARCHAR(50) NOT NULL CHECK (employment_status IN ('Permanent', 'Temporary', 'Co-terminus', 'Contractual')),
+    office_id UUID REFERENCES offices(id) ON DELETE SET NULL,
+    employment_status VARCHAR(50) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     address TEXT,
     date_hired DATE NOT NULL,
     contact_number VARCHAR(20),
     emergency_contact_name VARCHAR(150),
     emergency_contact_phone VARCHAR(20),
-    pds_file_name VARCHAR(255), -- Personal Data Sheet file path / name
+    pds_file_name VARCHAR(255),
     pds_uploaded_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Register foreign key constraint on users matching employees after table declarations
 ALTER TABLE users ADD CONSTRAINT fk_user_employee FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE SET NULL;
 
 CREATE TABLE employment_history (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
-    action VARCHAR(100) NOT NULL, -- Promotions, Transfers, Designations, Service Record Updates
+    action VARCHAR(100) NOT NULL,
     previous_details TEXT,
     new_details TEXT,
     effective_date DATE NOT NULL,
@@ -75,7 +86,18 @@ CREATE TABLE trainings (
     date_conducted DATE NOT NULL,
     certificate_file_name VARCHAR(255),
     training_hours INTEGER NOT NULL CHECK (training_hours > 0),
+    status VARCHAR(50) DEFAULT 'Pending Verification',
+    remarks TEXT,
+    verified_by VARCHAR(150),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE employee_pds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE UNIQUE,
+    data TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE seminars (
@@ -90,7 +112,105 @@ CREATE TABLE seminars (
 );
 
 -- ====================================================================
--- SECTION 3: EXPENSE JOURNALING & RECEIPT LIQUIDATION SYSTEM (FINANCE MODULE)
+-- SECTION 3: FISCAL & BUDGET MANAGEMENT
+-- ====================================================================
+
+CREATE TABLE fiscal_years (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    label VARCHAR(50) UNIQUE NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status VARCHAR(50) NOT NULL CHECK (status IN ('Draft', 'Active', 'Closed', 'Archived')),
+    rollover_policy VARCHAR(50) NOT NULL CHECK (rollover_policy IN ('Carry Forward', 'Reset to Zero')),
+    created_by VARCHAR(150),
+    activated_by VARCHAR(150),
+    closed_by VARCHAR(150),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE office_budgets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    fiscal_year_id UUID NOT NULL REFERENCES fiscal_years(id) ON DELETE RESTRICT,
+    office_id UUID NOT NULL REFERENCES offices(id) ON DELETE RESTRICT,
+    base_annual_allocation DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    rollover_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    adjustment_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    total_annual_allocation DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    encumbered_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    utilized_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    available_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    status VARCHAR(50) DEFAULT 'Active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (fiscal_year_id, office_id)
+);
+
+CREATE TABLE quarterly_budget_allocations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    office_budget_id UUID NOT NULL REFERENCES office_budgets(id) ON DELETE CASCADE,
+    quarter_number INTEGER NOT NULL CHECK (quarter_number IN (1, 2, 3, 4)),
+    allocated_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    encumbered_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    utilized_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    available_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (office_budget_id, quarter_number)
+);
+
+CREATE TABLE monthly_budget_allocations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    quarterly_budget_id UUID NOT NULL REFERENCES quarterly_budget_allocations(id) ON DELETE CASCADE,
+    month_number INTEGER NOT NULL CHECK (month_number BETWEEN 1 AND 12),
+    allocated_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    encumbered_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    utilized_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    available_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (quarterly_budget_id, month_number)
+);
+
+CREATE TABLE budget_ledger_entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    office_budget_id UUID NOT NULL REFERENCES office_budgets(id) ON DELETE CASCADE,
+    quarterly_budget_id UUID REFERENCES quarterly_budget_allocations(id) ON DELETE SET NULL,
+    monthly_budget_id UUID REFERENCES monthly_budget_allocations(id) ON DELETE SET NULL,
+    employee_id VARCHAR(50) REFERENCES employees(employee_id) ON DELETE SET NULL,
+    activity_id UUID, -- For future extension
+    request_id UUID,
+    liquidation_id UUID, -- If separate from financial_transaction_id
+    financial_transaction_id UUID,
+    entry_type VARCHAR(50) NOT NULL CHECK (entry_type IN ('Allocation', 'Encumbrance', 'Expense', 'Adjustment', 'Reversal', 'Rollover')),
+    reference_number VARCHAR(100),
+    description TEXT,
+    debit_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    credit_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    posting_status VARCHAR(50) DEFAULT 'Posted',
+    posted_by VARCHAR(150),
+    posted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE fiscal_year_rollovers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    source_fiscal_year_id UUID NOT NULL REFERENCES fiscal_years(id) ON DELETE RESTRICT,
+    target_fiscal_year_id UUID NOT NULL REFERENCES fiscal_years(id) ON DELETE RESTRICT,
+    office_id UUID NOT NULL REFERENCES offices(id) ON DELETE RESTRICT,
+    rollover_policy VARCHAR(50) NOT NULL,
+    source_remaining_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    carried_forward_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    reset_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    executed_by VARCHAR(150) NOT NULL,
+    executed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'Completed'
+);
+
+
+-- ====================================================================
+-- SECTION 4: EXPENSE JOURNALING & RECEIPT LIQUIDATION SYSTEM (FINANCE MODULE)
 -- ====================================================================
 
 CREATE TABLE financial_transactions (
@@ -100,8 +220,9 @@ CREATE TABLE financial_transactions (
     supplier VARCHAR(255) NOT NULL,
     amount DECIMAL(15,2) NOT NULL CHECK (amount >= 0.00),
     description TEXT NOT NULL,
-    receipt_file_name VARCHAR(255), -- scanned OR file name
-    status VARCHAR(50) NOT NULL DEFAULT 'Pending Validation' CHECK (status IN ('Pending Validation', 'Under Review', 'Validated', 'Liquidated', 'Archived')),
+    office_id UUID REFERENCES offices(id) ON DELETE RESTRICT,
+    receipt_file_name VARCHAR(255),
+    status VARCHAR(50) NOT NULL DEFAULT 'Draft' CHECK (status IN ('Draft', 'Submitted', 'Endorsed', 'Approved', 'Posted', 'Returned', 'Rejected', 'Archived')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -110,7 +231,7 @@ CREATE TABLE supporting_documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     transaction_id VARCHAR(50) NOT NULL REFERENCES financial_transactions(transaction_id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    type VARCHAR(100) NOT NULL CHECK (type IN ('Purchase Request', 'Liquidation Report', 'Invoice', 'Disbursement Voucher', 'Other')),
+    type VARCHAR(100) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -125,18 +246,18 @@ CREATE TABLE transaction_history (
 );
 
 -- ====================================================================
--- SECTION 4: OFFICE INVENTORY & PROPERTY ACCOUNTABILITY (ASSETS MODULE)
+-- SECTION 5: OFFICE INVENTORY & PROPERTY ACCOUNTABILITY (ASSETS MODULE)
 -- ====================================================================
 
 CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     asset_number VARCHAR(100) UNIQUE NOT NULL,
     serial_number VARCHAR(100) NOT NULL,
-    category VARCHAR(100) NOT NULL CHECK (category IN ('IT Equipment', 'Office Furniture', 'Vehicles', 'Office Supplies', 'Other')),
+    category VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     date_acquired DATE NOT NULL,
     cost DECIMAL(15,2) NOT NULL CHECK (cost >= 0.00),
-    status VARCHAR(50) NOT NULL DEFAULT 'Available' CHECK (status IN ('Available', 'Assigned', 'Returned', 'Damaged', 'Lost', 'Archived')),
+    status VARCHAR(50) NOT NULL DEFAULT 'Available',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -152,7 +273,7 @@ CREATE TABLE asset_issuances (
     condition_on_issue TEXT NOT NULL,
     return_date DATE,
     condition_on_return TEXT,
-    clearance_status VARCHAR(50) CHECK (clearance_status IN ('Cleared', 'Pending', 'Disapproved')),
+    clearance_status VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -167,63 +288,36 @@ CREATE TABLE supply_items (
 );
 
 -- ====================================================================
--- SECTION 5: DIGITAL REQUEST & APPROVAL WORKFLOW
+-- SECTION 6: DIGITAL REQUEST & APPROVAL WORKFLOW
 -- ====================================================================
 
--- Base super-table partitioning requests patterns
 CREATE TABLE requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    request_type VARCHAR(50) NOT NULL CHECK (request_type IN ('Leave Request', 'Service Record Request', 'Vehicle Request', 'Zoom Access Request', 'Supply Request')),
+    request_type VARCHAR(50) NOT NULL,
     employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
     employee_name VARCHAR(150) NOT NULL,
+    office_id UUID REFERENCES offices(id) ON DELETE SET NULL,
     date_requested DATE NOT NULL DEFAULT CURRENT_DATE,
-    status VARCHAR(50) NOT NULL DEFAULT 'Pending Review' CHECK (status IN ('Pending Review', 'Approved', 'Rejected')),
+    status VARCHAR(50) NOT NULL DEFAULT 'Draft',
     approved_by VARCHAR(150),
     remarks TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE leave_requests (
-    request_id UUID PRIMARY KEY REFERENCES requests(id) ON DELETE CASCADE,
-    leave_type VARCHAR(100) NOT NULL CHECK (leave_type IN ('Sick Leave', 'Vacation Leave', 'Maternity/Paternity Leave', 'Emergency Leave', 'Special Privilege')),
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    reason TEXT NOT NULL
-);
-
-CREATE TABLE service_record_requests (
-    request_id UUID PRIMARY KEY REFERENCES requests(id) ON DELETE CASCADE,
-    purpose TEXT NOT NULL,
-    copies INTEGER NOT NULL DEFAULT 1
-);
-
-CREATE TABLE vehicle_requests (
-    request_id PRIMARY KEY REFERENCES requests(id) ON DELETE CASCADE,
-    destination VARCHAR(255) NOT NULL,
-    purpose TEXT NOT NULL,
-    date_needed DATE NOT NULL,
-    passengers TEXT NOT NULL
-);
-
-CREATE TABLE zoom_requests (
-    request_id UUID PRIMARY KEY REFERENCES requests(id) ON DELETE CASCADE,
-    meeting_title VARCHAR(255) NOT NULL,
-    meeting_date DATE NOT NULL,
-    start_time VARCHAR(20) NOT NULL,
-    end_time VARCHAR(20) NOT NULL,
-    alternative_host VARCHAR(255)
-);
-
-CREATE TABLE supply_requests (
-    request_id UUID PRIMARY KEY REFERENCES requests(id) ON DELETE CASCADE,
-    supply_id UUID NOT NULL REFERENCES supply_items(id) ON DELETE CASCADE,
-    supply_name VARCHAR(255) NOT NULL,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    purpose TEXT NOT NULL
+CREATE TABLE workflow_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type VARCHAR(50) NOT NULL, -- 'Request', 'FinancialTransaction'
+    entity_id UUID NOT NULL,
+    previous_status VARCHAR(50),
+    new_status VARCHAR(50) NOT NULL,
+    remarks TEXT,
+    acted_by VARCHAR(150) NOT NULL,
+    acted_as_role VARCHAR(100) NOT NULL,
+    acted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ====================================================================
--- SECTION 6: SYSTEM AUDIT TRAILING & EVENT LOGGING
+-- SECTION 7: SYSTEM AUDIT TRAILING & EVENT LOGGING
 -- ====================================================================
 
 CREATE TABLE audit_logs (
@@ -232,48 +326,67 @@ CREATE TABLE audit_logs (
     user_id VARCHAR(100) NOT NULL,
     username VARCHAR(100) NOT NULL,
     role VARCHAR(100) NOT NULL,
-    action TEXT NOT NULL, -- "Login", "Create", "Approve", etc.
+    action TEXT NOT NULL,
+    entity_type VARCHAR(100),
+    entity_id VARCHAR(100),
+    previous_value TEXT,
+    new_value TEXT,
     details TEXT,
-    ip_address VARCHAR(100)
+    ip_address VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- ====================================================================
--- SECTION 7: DATABASE DQL OPTIMIZING INDEXES
--- ====================================================================
-
-CREATE INDEX idx_employees_lookup ON employees(full_name, employee_id, division);
-CREATE INDEX idx_financial_txn_status ON financial_transactions(status, transaction_date);
-CREATE INDEX idx_assets_status ON assets(status, asset_number);
-CREATE INDEX idx_requests_status ON requests(status, request_type);
-CREATE INDEX idx_audit_timestamp ON audit_logs(timestamp);
 
 -- ====================================================================
 -- SECTION 8: PRIMARY SECURITY SEEDING
 -- ====================================================================
 
 INSERT INTO roles (id, name, description) VALUES
-(1, 'Super Administrator', 'Full system access, audit trailing reviews, backup and security managers.'),
-(2, 'HR Officer', 'Responsible for employee profiles, Personal Data Sheets (PDS), training catalogs.'),
-(3, 'Finance Officer', 'Responsible for receipts monitoring, liquidation validations, invoices.'),
-(4, 'Property Custodian', 'Handles assets inventory, supply item stock and issuance ledgers.'),
-(5, 'Department Head', 'Adjudicates and reviews leave forms, fuel tickets, zoom licenses.'),
-(6, 'Employee', 'Views own profiles, submits leaves, property queries, zoom applications.');
+(1, 'SUPER_ADMIN', 'Super Administrator'),
+(2, 'DIVISION_CHIEF', 'Division Chief'),
+(3, 'HR_OFFICER', 'HR Officer'),
+(4, 'FINANCE_OFFICER', 'Finance Officer'),
+(5, 'BUDGET_OFFICER', 'Budget Officer'),
+(6, 'EMPLOYEE', 'Employee');
 
--- Clear default passwords are pre-configured in FastAPI backend (hashed: 'password123' using bcrypt)
--- Administrative Users
-INSERT INTO employees (id, employee_id, full_name, position, division, employment_status, email, address, date_hired, contact_number) VALUES
-('aa000000-0000-0000-0000-000000000001', 'EMP001', 'Hon. Romeo M. Alcantara', 'Regional Executive Adjudicator', 'Adjudication Division', 'Permanent', 'admin@hsac.gov.ph', 'La Union, Philippines', '2020-03-01', '09171234567'),
-('aa000000-0000-0000-0000-000000000002', 'EMP002', 'Maria Clara V. Santos', 'Administrative Officer IV (HR)', 'Administrative and Finance Division', 'Permanent', 'clara.santos@hsac.gov.ph', 'San Fernando City, La Union', '2021-06-15', '09182345678'),
-('aa000000-0000-0000-0000-000000000003', 'EMP003', 'Juan dela Cruz', 'Financial Analyst II', 'Administrative and Finance Division', 'Permanent', 'juan.delacruz@hsac.gov.ph', 'Bauang, La Union', '2022-01-10', '09193456789'),
-('aa000000-0000-0000-0000-000000000004', 'EMP004', 'Pedro B. Penduko', 'Property Custodian / AO II', 'Administrative and Finance Division', 'Permanent', 'pedro.penduko@hsac.gov.ph', 'San Juan, La Union', '2021-09-01', '09204567890'),
-('aa000000-0000-0000-0000-000000000005', 'EMP005', 'Dr. Jose P. Rizal', 'Legal Officer IV', 'Legal Division', 'Permanent', 'jose.rizal@hsac.gov.ph', 'La Union, Philippines', '2019-11-20', '09159998888'),
-('aa000000-0000-0000-0000-000000000006', 'EMP006', 'Andres B. Bonifacio', 'Adjudication Assistant', 'Adjudication Division', 'Contractual', 'andres.bonifacio@hsac.gov.ph', 'Agoo, La Union', '2023-01-16', '09162223333');
+INSERT INTO offices (id, office_code, office_name, description) VALUES
+('dd000000-0000-0000-0000-000000000001', 'ODC', 'Office of the Division Chief', 'Division Chief Office'),
+('dd000000-0000-0000-0000-000000000002', 'AFD', 'Administrative and Finance Division', 'Admin and Finance'),
+('dd000000-0000-0000-0000-000000000003', 'ADJ', 'Adjudication Division', 'Adjudication'),
+('dd000000-0000-0000-0000-000000000004', 'LEG', 'Legal Unit', 'Legal'),
+('dd000000-0000-0000-0000-000000000005', 'ITU', 'Information Technology Unit', 'IT Support');
 
--- User accounts credentials mapping (Pre-hashed hash is: '$2b$12$N9qo8uLOqpGC12Xf8.Y.QOXgWfWf1N1qjK6M1N8P1S.P6g6C6C7C7' for demo clarity 'password123')
-INSERT INTO users (id, username, email, password_hash, full_name, role_id, employee_id) VALUES
-('bb000000-0000-0000-0000-000000000001', 'admin', 'admin@hsac.gov.ph', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Hon. Romeo M. Alcantara', 1, 'EMP001'),
-('bb000000-0000-0000-0000-000000000002', 'hr', 'clara.santos@hsac.gov.ph', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Maria Clara V. Santos', 2, 'EMP002'),
-('bb000000-0000-0000-0000-000000000003', 'finance', 'juan.delacruz@hsac.gov.ph', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Juan dela Cruz', 3, 'EMP003'),
-('bb000000-0000-0000-0000-000000000004', 'custodian', 'pedro.penduko@hsac.gov.ph', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Pedro B. Penduko', 4, 'EMP004'),
-('bb000000-0000-0000-0000-000000000005', 'head', 'jose.rizal@hsac.gov.ph', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Dr. Jose P. Rizal', 5, 'EMP005'),
-('bb000000-0000-0000-0000-000000000006', 'employee', 'andres.bonifacio@hsac.gov.ph', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Andres B. Bonifacio', 6, 'EMP006');
+INSERT INTO employees (id, employee_id, full_name, position, division, office_id, employment_status, email, address, date_hired, contact_number) VALUES
+('aa000000-0000-0000-0000-000000000001', 'EMP001', 'Super Admin User', 'Systems Administrator', 'Admin', 'dd000000-0000-0000-0000-000000000002', 'Permanent', 'superadmin@example.com', 'HQ', '2020-03-01', '09000000001'),
+('aa000000-0000-0000-0000-000000000002', 'EMP002', 'Division Chief User', 'Division Chief', 'Executive', 'dd000000-0000-0000-0000-000000000001', 'Permanent', 'chief@example.com', 'HQ', '2020-03-01', '09000000002'),
+('aa000000-0000-0000-0000-000000000003', 'EMP003', 'HR Officer User', 'HR Manager', 'HR', 'dd000000-0000-0000-0000-000000000002', 'Permanent', 'hr@example.com', 'HQ', '2020-03-01', '09000000003'),
+('aa000000-0000-0000-0000-000000000004', 'EMP004', 'Finance Officer User', 'Finance Manager', 'Finance', 'dd000000-0000-0000-0000-000000000002', 'Permanent', 'finance@example.com', 'HQ', '2020-03-01', '09000000004'),
+('aa000000-0000-0000-0000-000000000005', 'EMP005', 'Budget Officer User', 'Budget Manager', 'Budget', 'dd000000-0000-0000-0000-000000000002', 'Permanent', 'budget@example.com', 'HQ', '2020-03-01', '09000000005'),
+('aa000000-0000-0000-0000-000000000006', 'EMP006', 'Employee User', 'IT Specialist', 'IT', 'dd000000-0000-0000-0000-000000000005', 'Permanent', 'employee@example.com', 'HQ', '2020-03-01', '09000000006');
+
+-- Password is 'password123'
+INSERT INTO users (id, username, email, password_hash, full_name, role_id, employee_id, office_id) VALUES
+('bb000000-0000-0000-0000-000000000001', 'superadmin', 'superadmin@example.com', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Super Admin User', 1, 'EMP001', 'dd000000-0000-0000-0000-000000000002'),
+('bb000000-0000-0000-0000-000000000002', 'chief', 'chief@example.com', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Division Chief User', 2, 'EMP002', 'dd000000-0000-0000-0000-000000000001'),
+('bb000000-0000-0000-0000-000000000003', 'hrofficer', 'hr@example.com', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'HR Officer User', 3, 'EMP003', 'dd000000-0000-0000-0000-000000000002'),
+('bb000000-0000-0000-0000-000000000004', 'financeofficer', 'finance@example.com', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Finance Officer User', 4, 'EMP004', 'dd000000-0000-0000-0000-000000000002'),
+('bb000000-0000-0000-0000-000000000005', 'budgetofficer', 'budget@example.com', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Budget Officer User', 5, 'EMP005', 'dd000000-0000-0000-0000-000000000002'),
+('bb000000-0000-0000-0000-000000000006', 'employee', 'employee@example.com', '$2b$12$e0MdxpG4f6L/M8fbyb71IuxE00NlF3D8Uf2S.z3YfXz7gM14v9GWe', 'Employee User', 6, 'EMP006', 'dd000000-0000-0000-0000-000000000005');
+
+INSERT INTO fiscal_years (id, label, start_date, end_date, status, rollover_policy, created_by, activated_by, created_at, updated_at) VALUES
+('ee000000-0000-0000-0000-000000000001', 'FY-2025-2026', '2025-07-01', '2026-06-30', 'Active', 'Carry Forward', 'Super Admin User', 'Super Admin User', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO office_budgets (id, fiscal_year_id, office_id, base_annual_allocation, rollover_amount, adjustment_amount, total_annual_allocation, encumbered_amount, utilized_amount, available_amount) VALUES
+('ff000000-0000-0000-0000-000000000001', 'ee000000-0000-0000-0000-000000000001', 'dd000000-0000-0000-0000-000000000005', 120000.00, 0.00, 0.00, 120000.00, 0.00, 0.00, 120000.00);
+
+-- Quarterly Allocations for IT Unit
+INSERT INTO quarterly_budget_allocations (id, office_budget_id, quarter_number, allocated_amount, encumbered_amount, utilized_amount, available_amount) VALUES
+('11000000-0000-0000-0000-000000000001', 'ff000000-0000-0000-0000-000000000001', 1, 30000.00, 0.00, 0.00, 30000.00),
+('11000000-0000-0000-0000-000000000002', 'ff000000-0000-0000-0000-000000000001', 2, 30000.00, 0.00, 0.00, 30000.00),
+('11000000-0000-0000-0000-000000000003', 'ff000000-0000-0000-0000-000000000001', 3, 30000.00, 0.00, 0.00, 30000.00),
+('11000000-0000-0000-0000-000000000004', 'ff000000-0000-0000-0000-000000000001', 4, 30000.00, 0.00, 0.00, 30000.00);
+
+-- Monthly Allocations for Quarter 1
+INSERT INTO monthly_budget_allocations (id, quarterly_budget_id, month_number, allocated_amount, encumbered_amount, utilized_amount, available_amount) VALUES
+('22000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000001', 1, 10000.00, 0.00, 0.00, 10000.00),
+('22000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000001', 2, 10000.00, 0.00, 0.00, 10000.00),
+('22000000-0000-0000-0000-000000000003', '11000000-0000-0000-0000-000000000001', 3, 10000.00, 0.00, 0.00, 10000.00);

@@ -549,6 +549,30 @@ function getInitialData(): DBStructure {
           { id: "th-7", status: TransactionStatus.UNDER_REVIEW, changedBy: "Juan dela Cruz", changedAt: "2026-06-04T11:00:00Z", remarks: "Checking itinerary of Trip Ticket." },
           { id: "th-8", status: TransactionStatus.VALIDATED, changedBy: "Juan dela Cruz", changedAt: "2026-06-05T09:12:00Z", remarks: "Validated. Cleared for budget allocation." }
         ]
+      },
+      {
+        id: "tx-4",
+        transactionId: "TXN-2025-099",
+        transactionDate: "2025-08-15",
+        supplier: "Demo Supplier 2025",
+        amount: 5000.00,
+        description: "Demo transaction for previous FY 2025",
+        receiptFilename: "demo_receipt_2025.png",
+        status: TransactionStatus.LIQUIDATED,
+        supportingDocuments: [],
+        history: []
+      },
+      {
+        id: "tx-5",
+        transactionId: "TXN-2024-001",
+        transactionDate: "2024-03-10",
+        supplier: "Demo Supplier 2024",
+        amount: 8000.00,
+        description: "Demo transaction for previous FY 2024",
+        receiptFilename: "demo_receipt_2024.png",
+        status: TransactionStatus.LIQUIDATED,
+        supportingDocuments: [],
+        history: []
       }
     ],
     assets: [
@@ -813,6 +837,25 @@ function logEvent(userId: string, username: string, role: string, action: string
   db.auditLogs.unshift(newLog);
   saveDB();
 }
+
+app.get("/api/fiscal-years", authenticateToken, (req, res) => {
+  const fyData = [
+    { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
+    { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
+    { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
+    { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
+  ];
+  res.json(fyData);
+});
+
+app.get("/api/fiscal-years/active", authenticateToken, (req, res) => {
+  res.json({ id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" });
+});
+
+app.get("/api/budgets", authenticateToken, (req, res) => {
+  res.json({ status: "success", data: db.budgetAllocations || [] });
+});
+
 
 function logFinanceAudit(user: string, action: string, module: string, previousValue: string, newValue: string) {
   const newLog: FinanceAuditLog = {

@@ -1,20 +1,32 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import date, datetime
 from decimal import Decimal
 
-# Role Schema
+# Roles
 class RoleBase(BaseModel):
     name: str
     description: Optional[str] = None
 
-class RoleCreate(RoleBase):
-    pass
-
 class RoleOut(RoleBase):
     id: int
     created_at: datetime
+    class Config:
+        from_attributes = True
 
+# Offices
+class OfficeBase(BaseModel):
+    office_code: str
+    office_name: str
+    description: Optional[str] = None
+    is_active: Optional[bool] = True
+
+class OfficeCreate(OfficeBase):
+    pass
+
+class OfficeOut(OfficeBase):
+    id: str
+    created_at: datetime
     class Config:
         from_attributes = True
 
@@ -25,6 +37,7 @@ class UserBase(BaseModel):
     full_name: str
     role_id: int
     employee_id: Optional[str] = None
+    office_id: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -36,8 +49,8 @@ class UserOut(BaseModel):
     full_name: str
     role_id: int
     employee_id: Optional[str] = None
+    office_id: Optional[str] = None
     created_at: datetime
-
     class Config:
         from_attributes = True
 
@@ -45,12 +58,94 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+# Fiscal Year Schemas
+class FiscalYearBase(BaseModel):
+    label: str
+    start_date: date
+    end_date: date
+    status: str
+    rollover_policy: str
+
+class FiscalYearCreate(FiscalYearBase):
+    pass
+
+class FiscalYearOut(FiscalYearBase):
+    id: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class FiscalYearRolloverRequest(BaseModel):
+    source_fiscal_year_id: str
+    target_fiscal_year_id: str
+    rollover_policy: str
+
+# Office Budgets
+class OfficeBudgetBase(BaseModel):
+    fiscal_year_id: str
+    office_id: str
+    base_annual_allocation: Decimal
+
+class OfficeBudgetCreate(OfficeBudgetBase):
+    pass
+
+class OfficeBudgetOut(OfficeBudgetBase):
+    id: str
+    rollover_amount: Decimal
+    adjustment_amount: Decimal
+    total_annual_allocation: Decimal
+    encumbered_amount: Decimal
+    utilized_amount: Decimal
+    available_amount: Decimal
+    status: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+# Allocations
+class QuarterlyBudgetAllocationOut(BaseModel):
+    id: str
+    office_budget_id: str
+    quarter_number: int
+    allocated_amount: Decimal
+    encumbered_amount: Decimal
+    utilized_amount: Decimal
+    available_amount: Decimal
+    class Config:
+        from_attributes = True
+
+class MonthlyBudgetAllocationOut(BaseModel):
+    id: str
+    quarterly_budget_id: str
+    month_number: int
+    allocated_amount: Decimal
+    encumbered_amount: Decimal
+    utilized_amount: Decimal
+    available_amount: Decimal
+    class Config:
+        from_attributes = True
+
+# Ledger Entries
+class BudgetLedgerEntryOut(BaseModel):
+    id: str
+    office_budget_id: str
+    entry_type: str
+    reference_number: Optional[str]
+    description: Optional[str]
+    debit_amount: Decimal
+    credit_amount: Decimal
+    posting_status: str
+    posted_at: datetime
+    class Config:
+        from_attributes = True
+
 # Employee Schemas
 class EmployeeBase(BaseModel):
     employee_id: str
     full_name: str
     position: str
     division: str
+    office_id: Optional[str] = None
     employment_status: str
     email: EmailStr
     address: Optional[str] = None
@@ -62,85 +157,22 @@ class EmployeeBase(BaseModel):
 class EmployeeCreate(EmployeeBase):
     pass
 
-class EmployeeUpdate(BaseModel):
-    full_name: Optional[str] = None
-    position: Optional[str] = None
-    division: Optional[str] = None
-    employment_status: Optional[str] = None
-    email: Optional[EmailStr] = None
-    address: Optional[str] = None
-    contact_number: Optional[str] = None
-    emergency_contact_name: Optional[str] = None
-    emergency_contact_phone: Optional[str] = None
-
 class EmployeeOut(EmployeeBase):
     id: str
     pds_file_name: Optional[str] = None
     pds_uploaded_at: Optional[datetime] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-# Training Schema
-class TrainingBase(BaseModel):
-    title: str
-    organizer: str
-    date_conducted: date
-    training_hours: int
-    certificate_file_name: Optional[str] = None
-
-class TrainingCreate(TrainingBase):
-    employee_id: str
-
-class TrainingStatusUpdate(BaseModel):
-    status: str
-    remarks: Optional[str] = None
-
-class TrainingOut(TrainingBase):
-    id: str
-    employee_id: str
-    status: str
-    remarks: Optional[str] = None
-    verified_by: Optional[str] = None
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-# PDS Schema
-class PDSBase(BaseModel):
-    employee_id: str
-    data: dict
-
-class PDSCreate(PDSBase):
-    pass
-
-class PDSOut(PDSBase):
-    id: str
-    created_at: datetime
     class Config:
         from_attributes = True
 
 # Financial Transaction Schemas
-class SupportingDocumentBase(BaseModel):
-    name: str
-    type: str # PR, LR, Invoice, etc
-    file_name: str
-
-class SupportingDocumentOut(SupportingDocumentBase):
-    id: str
-    uploaded_at: datetime
-
-    class Config:
-        from_attributes = True
-
 class TransactionBase(BaseModel):
     transaction_id: str
     transaction_date: date
     supplier: str
     amount: Decimal
     description: str
+    office_id: Optional[str] = None
 
 class TransactionCreate(TransactionBase):
     receipt_file_name: Optional[str] = None
@@ -149,53 +181,20 @@ class TransactionOut(TransactionBase):
     id: str
     status: str
     receipt_file_name: Optional[str] = None
-    supporting_documents: List[SupportingDocumentOut] = []
     created_at: datetime
     updated_at: datetime
-
     class Config:
         from_attributes = True
 
-# Asset Schemas
-class AssetBase(BaseModel):
-    asset_number: str
-    serial_number: str
-    category: str
-    description: str
-    date_acquired: date
-    cost: Decimal
-
-class AssetCreate(AssetBase):
-    pass
-
-class AssetOut(AssetBase):
-    id: str
-    status: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-# Requests Schemas
-class RequestBase(BaseModel):
-    request_type: str
-    employee_id: str
-    employee_name: str
-    date_requested: date
-
-class RequestCreate(BaseModel):
-    request_type: str
-    details: dict # Dynamic fields based on request type
-
-class RequestOut(RequestBase):
-    id: str
-    status: str
-    approved_by: Optional[str] = None
+# Approvals & Postings
+class WorkflowAction(BaseModel):
+    action: str # Endorse, Approve, Return, Reject
     remarks: Optional[str] = None
-    created_at: datetime
 
-    class Config:
-        from_attributes = True
+class BudgetPostingRequest(BaseModel):
+    financial_transaction_id: str
+    quarter_number: int
+    month_number: int
 
 # Audit Log Schema
 class AuditLogOut(BaseModel):
@@ -207,6 +206,13 @@ class AuditLogOut(BaseModel):
     action: str
     details: Optional[str] = None
     ip_address: Optional[str] = None
-
     class Config:
         from_attributes = True
+
+class ReportSummary(BaseModel):
+    label: str
+    total_allocation: Decimal
+    total_utilized: Decimal
+    total_encumbered: Decimal
+    total_available: Decimal
+    utilization_percentage: float
