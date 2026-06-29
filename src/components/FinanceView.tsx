@@ -108,6 +108,9 @@ export default function FinanceView({
   const [consolidationPeriod, setConsolidationPeriod] = useState<"Monthly" | "Quarterly">("Quarterly");
   const [consolidationValue, setConsolidationValue] = useState("Q2"); // Q1, Q2, Q3, Q4, or Month Names
 
+  const [activeFiscalYear, setActiveFiscalYear] = useState<string>("2026");
+  const [isFiscalYearModalOpen, setIsFiscalYearModalOpen] = useState(false);
+
   // For budget edit
   const [editingBudget, setEditingBudget] = useState<BudgetAllocation | null>(null);
   const [newAllocationVal, setNewAllocationVal] = useState("");
@@ -487,7 +490,7 @@ export default function FinanceView({
   const exportMethods = {
     transactions: () => {
       const headers = ["Voucher ID", "Supplier", "Transaction Date", "Amount (PHP)", "Status", "Department", "Category", "Created By", "Scope Description"];
-      const rows = txnList.map(tx => [
+      const rows = yearFilteredTxns.map(tx => [
         tx.transactionId,
         tx.supplier,
         tx.transactionDate,
@@ -502,7 +505,7 @@ export default function FinanceView({
     },
     liquidations: () => {
       const headers = ["Liquidation Number", "Reference Request", "Employee", "Department", "Allocated Released", "Liquidated Amount", "Remaining Balance Return", "Status", "Close Date"];
-      const rows = liquidations.map(l => [
+      const rows = yearFilteredLiquidations.map(l => [
         l.liquidationNo,
         l.requestRef,
         l.employee,
@@ -529,7 +532,10 @@ export default function FinanceView({
   };
 
   // Live filter matching for Transactions
-  const filteredTxns = txnList.filter((tx) => {
+  const yearFilteredTxns = txnList.filter(tx => tx.transactionDate.startsWith(activeFiscalYear));
+  const yearFilteredLiquidations = liquidations.filter(l => (l.liquidationDate && l.liquidationDate.startsWith(activeFiscalYear)) || (l.createdAt && l.createdAt.startsWith(activeFiscalYear)));
+
+  const filteredTxns = yearFilteredTxns.filter((tx) => {
     const matchesSearch = 
       tx.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -551,13 +557,13 @@ export default function FinanceView({
   ];
 
   // Calculations for dashboard indicators
-  const totalExpenditureVal = txnList.reduce((sum, tx) => sum + tx.amount, 0);
-  const validatedTxCount = txnList.filter(tx => tx.status === TransactionStatus.VALIDATED).length;
-  const pendingTxCount = txnList.filter(tx => tx.status === TransactionStatus.PENDING_VALIDATION).length;
+  const totalExpenditureVal = yearFilteredTxns.reduce((sum, tx) => sum + tx.amount, 0);
+  const validatedTxCount = yearFilteredTxns.filter(tx => tx.status === TransactionStatus.VALIDATED).length;
+  const pendingTxCount = yearFilteredTxns.filter(tx => tx.status === TransactionStatus.PENDING_VALIDATION).length;
   
-  const pendingLiqCount = liquidations.filter(l => l.status !== "Completed").length;
-  const completedLiqCount = liquidations.filter(l => l.status === "Completed").length;
-  const totalApprovedLiqAmount = liquidations.filter(l => l.status === "Completed").reduce((acc, l) => acc + l.amountLiquidated, 0);
+  const pendingLiqCount = yearFilteredLiquidations.filter(l => l.status !== "Completed").length;
+  const completedLiqCount = yearFilteredLiquidations.filter(l => l.status === "Completed").length;
+  const totalApprovedLiqAmount = yearFilteredLiquidations.filter(l => l.status === "Completed").reduce((acc, l) => acc + l.amountLiquidated, 0);
 
   const totalBudgetAllocationSum = budgets.reduce((acc, b) => acc + b.budgetAllocation, 0);
   const totalBudgetUtilizedSum = budgets.reduce((acc, b) => acc + b.budgetUtilized, 0);
@@ -580,10 +586,13 @@ export default function FinanceView({
                 </h1>
                 <p className="text-xs text-slate-500 mt-1">Real-time fiscal reporting, regional ledger compliance monitors, and cash allocation statistics.</p>
               </div>
-              <span className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold py-1.5 px-2.5 uppercase tracking-wider rounded-lg border flex items-center gap-1">
+              <button 
+                onClick={() => setIsFiscalYearModalOpen(true)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold py-1.5 px-2.5 uppercase tracking-wider rounded-lg border flex items-center gap-1 cursor-pointer transition-colors"
+              >
                 <Calendar size={11} />
-                <span>FY 2026 ACTIVE</span>
-              </span>
+                <span>FY {activeFiscalYear} ACTIVE</span>
+              </button>
             </div>
 
             {/* TEN METRICS CARD ROWS */}
@@ -591,7 +600,7 @@ export default function FinanceView({
               {[
                 { 
                   label: "Total Transactions", 
-                  value: txnList.length, 
+                  value: yearFilteredTxns.length, 
                   desc: "Ledger Volume Count", 
                   icon: Layers, 
                   color: "border-slate-200 hover:border-slate-400 hover:bg-slate-50/30", 
@@ -770,8 +779,8 @@ export default function FinanceView({
                     { category: "Maintenance", icon: AlertTriangle, color: "bg-rose-100 text-rose-800 border-rose-200" },
                     { category: "Other", icon: Layers, color: "bg-slate-100 text-slate-800 border-slate-200" },
                   ].map((cat, idx) => {
-                    const matchesCount = txnList.filter(tx => tx.category === cat.category).length;
-                    const sum = txnList.filter(tx => tx.category === cat.category).reduce((acc, tx) => acc + tx.amount, 0);
+                    const matchesCount = yearFilteredTxns.filter(tx => tx.category === cat.category).length;
+                    const sum = yearFilteredTxns.filter(tx => tx.category === cat.category).reduce((acc, tx) => acc + tx.amount, 0);
 
                     return (
                       <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50/50 rounded-xl border border-slate-100">
@@ -861,8 +870,8 @@ export default function FinanceView({
                   {["All", ...workflowSteps].map((tab) => {
                     const isActive = activeJournalTab === tab;
                     const count = tab === "All" 
-                      ? txnList.length 
-                      : txnList.filter(t => t.status === tab).length;
+                      ? yearFilteredTxns.length 
+                      : yearFilteredTxns.filter(t => t.status === tab).length;
 
                     return (
                       <button
@@ -1142,10 +1151,10 @@ export default function FinanceView({
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200/85">
               {[
-                { type: "Purchase Request", desc: "Approved procurement requirements", count: txnList.flatMap(t => t.supportingDocuments).filter(d => d.type === "Purchase Request").length + 1 },
-                { type: "Invoice", desc: "Suppliers official cargo invoices", count: txnList.flatMap(t => t.supportingDocuments).filter(d => d.type === "Invoice").length + 1 },
-                { type: "Disbursement Voucher", desc: "Cash release certifications", count: txnList.flatMap(t => t.supportingDocuments).filter(d => d.type === "Disbursement Voucher").length + 1 },
-                { type: "Liquidation Report", desc: "Post-expenditure reconciliation sheets", count: txnList.flatMap(t => t.supportingDocuments).filter(d => d.type === "Liquidation Report").length + 1 },
+                { type: "Purchase Request", desc: "Approved procurement requirements", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Purchase Request").length + 1 },
+                { type: "Invoice", desc: "Suppliers official cargo invoices", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Invoice").length + 1 },
+                { type: "Disbursement Voucher", desc: "Cash release certifications", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Disbursement Voucher").length + 1 },
+                { type: "Liquidation Report", desc: "Post-expenditure reconciliation sheets", count: yearFilteredTxns.flatMap(t => t.supportingDocuments).filter(d => d.type === "Liquidation Report").length + 1 },
               ].map((box, i) => (
                 <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200/60 flex flex-col justify-between">
                   <div>
@@ -1164,11 +1173,11 @@ export default function FinanceView({
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
               <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-850 uppercase tracking-widest font-mono">Dossier File Version Logs</span>
-                <span className="text-[10px] text-slate-400 font-mono tracking-tight font-black">{txnList.reduce((acc, t) => acc + (t.supportingDocuments?.length || 0), 0)} FILES MANAGED</span>
+                <span className="text-[10px] text-slate-400 font-mono tracking-tight font-black">{yearFilteredTxns.reduce((acc, t) => acc + (t.supportingDocuments?.length || 0), 0)} FILES MANAGED</span>
               </div>
 
               <div className="divide-y divide-slate-100 max-h-[500px] overflow-y-auto custom-scrollbar border border-slate-150 rounded-lg p-1 bg-white">
-                {txnList.map((tx) => (
+                {yearFilteredTxns.map((tx) => (
                   tx.supportingDocuments?.map((doc: SupportingDocument) => (
                     <div key={doc.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white hover:bg-slate-50/50 transition-colors">
                       <div className="space-y-1">
@@ -1216,7 +1225,7 @@ export default function FinanceView({
                   ))
                 ))}
 
-                {txnList.reduce((acc, t) => acc + (t.supportingDocuments?.length || 0), 0) === 0 && (
+                {yearFilteredTxns.reduce((acc, t) => acc + (t.supportingDocuments?.length || 0), 0) === 0 && (
                   <p className="p-8 text-center text-slate-400 text-xs font-mono italic">No secondary documents attached inside index registries.</p>
                 )}
               </div>
@@ -1400,7 +1409,7 @@ export default function FinanceView({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {liquidations.map((liq) => (
+                  {yearFilteredLiquidations.map((liq) => (
                     <tr key={liq.id} className="hover:bg-slate-50/50">
                       <td className="p-4 font-mono font-black text-slate-700">{liq.liquidationNo}</td>
                       <td className="p-4 font-mono text-slate-400">{liq.requestRef}</td>
@@ -1444,7 +1453,7 @@ export default function FinanceView({
                       )}
                     </tr>
                   ))}
-                  {liquidations.length === 0 && (
+                  {yearFilteredLiquidations.length === 0 && (
                     <tr>
                       <td colSpan={9} className="text-center py-12 text-slate-400 font-mono italic">No liquidation advances currently monitored.</td>
                     </tr>
@@ -2916,6 +2925,55 @@ export default function FinanceView({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* FISCAL YEAR MODAL */}
+      {isFiscalYearModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="font-semibold text-sm tracking-tight text-slate-800 flex items-center gap-2">
+                <Calendar size={16} className="text-blue-600" />
+                Select Fiscal Year
+              </h3>
+              <button 
+                onClick={() => setIsFiscalYearModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+                  Available Fiscal Years
+                </label>
+                <div className="relative">
+                  <select 
+                    value={activeFiscalYear}
+                    onChange={(e) => {
+                      setActiveFiscalYear(e.target.value);
+                      setIsFiscalYearModalOpen(false);
+                    }}
+                    className="w-full bg-white border border-slate-300 text-slate-800 p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm cursor-pointer appearance-none"
+                  >
+                    <option value="2026">Fiscal Year 2026</option>
+                    <option value="2025">Fiscal Year 2025</option>
+                    <option value="2024">Fiscal Year 2024</option>
+                    <option value="2023">Fiscal Year 2023</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                Selecting a prior fiscal year will automatically update all ledgers, reporting charts, and financial indicators.
+              </p>
+            </div>
           </div>
         </div>
       )}

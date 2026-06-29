@@ -141,7 +141,40 @@ export default function TrainingsSeminarsView({ user, employees }) {
         ) : (
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-6 space-y-6">
-              <div className="space-y-4">
+              
+              {/* Personnel Information Summary */}
+              {(() => {
+                const emp = employees?.find(e => e.employeeId === selectedEmployeeId);
+                if (!emp) return null;
+                
+                const renderReadOnlyField = (label, value) => (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">{label}</label>
+                    <input type="text" readOnly value={value || ''} className="border border-slate-300 bg-slate-50 p-2 text-xs rounded w-full text-slate-700" />
+                  </div>
+                );
+
+                return (
+                  <div className="space-y-4">
+                    <div className="border-b pb-2 mb-4">
+                      <h4 className="text-sm font-bold uppercase text-slate-700">Personnel Information</h4>
+                      <p className="text-[10px] text-slate-500">Basic details of the selected employee.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {renderReadOnlyField('Employee ID', emp.employeeId)}
+                      <div className="md:col-span-3">
+                        {renderReadOnlyField('Full Name', emp.fullName)}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {renderReadOnlyField('Position', emp.position)}
+                      {renderReadOnlyField('Division / Office', emp.division)}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="space-y-4 pt-4 border-t border-slate-100">
                 <div className="flex justify-between items-center mb-4 border-b pb-2">
                   <div>
                     <h2 className="text-sm font-bold text-slate-700 uppercase">Trainings & Seminars Ledger</h2>
