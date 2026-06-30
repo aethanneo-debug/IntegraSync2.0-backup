@@ -60,15 +60,24 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
     ...(options.headers || {}),
   };
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
-  const fullUrl = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`;
+  const fullUrl = endpoint.startsWith("http") ? endpoint : endpoint;
 
   const response = await fetch(fullUrl, {
     ...options,
     headers,
   });
 
-  const json = await response.json();
+  const text = await response.text();
+  let json;
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch (err) {
+    if (!response.ok) {
+      throw new Error(`API error occurred (Status: ${response.status})`);
+    }
+    throw new Error("Invalid response format from server");
+  }
+
   if (!response.ok) {
     throw new Error(json.message || `API error occurred (Status: ${response.status})`);
   }

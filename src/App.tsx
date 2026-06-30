@@ -161,18 +161,34 @@ export default function App() {
     setAuthError("");
     setLoading(true);
     try {
-      const res = await apiCall("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: emailInput, password: passwordInput })
       });
-      if (res.status === "success") {
+
+      const text = await response.text();
+      let res;
+      try {
+        res = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        throw new Error("Invalid response from server. Please try again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(res.message || `API error occurred (Status: ${response.status})`);
+      }
+
+      if (res.status === "success" || response.ok) {
         const token = res.token || (res.data && res.data.token);
         if (token) {
           localStorage.setItem("ipfms_token", token);
         }
         const loggedUser = res.data?.user || res.user;
-        setUser(loggedUser);
-        setActiveTab(getDefaultTabForRole(loggedUser.role));
+        if (loggedUser) {
+          setUser(loggedUser);
+          setActiveTab(getDefaultTabForRole(loggedUser.role));
+        }
       }
     } catch (err: any) {
       setAuthError(err.message || "Invalid credentials. Please attempt again.");
