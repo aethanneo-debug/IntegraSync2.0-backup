@@ -741,7 +741,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
                       <input
                         required
                         type="text"
-                        placeholder="Dr. Rizal, Andres Bonifacio"
+                        placeholder="Eulogio IV Esturas, Jolly Joy A. Almoite"
                         value={vehicleForm.passengers}
                         onChange={(e) => setVehicleForm({ ...vehicleForm, passengers: e.target.value })}
                         className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"

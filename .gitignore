@@ -6,3 +6,4 @@ coverage/
 *.log
 .env*
 !.env.example
+backend_fastapi/generated_employee_credentials.csv

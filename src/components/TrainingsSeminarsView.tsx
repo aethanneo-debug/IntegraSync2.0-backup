@@ -128,7 +128,7 @@ export default function TrainingsSeminarsView({ user, employees }) {
             <select className="border border-slate-300 rounded p-2 text-xs w-64 bg-slate-50" value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)}>
               <option value="">-- Choose Employee --</option>
               {employees?.map(emp => (
-                <option key={emp.employeeId} value={emp.employeeId}>{emp.fullName} ({emp.employeeId})</option>
+                <option key={emp.employeeId} value={emp.employeeId}>{emp.fullName}</option>
               ))}
             </select>
           </div>
@@ -161,7 +161,7 @@ export default function TrainingsSeminarsView({ user, employees }) {
                       <p className="text-[10px] text-slate-500">Basic details of the selected employee.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      {renderReadOnlyField('Employee ID', emp.employeeId)}
+                      {renderReadOnlyField('Plantilla No.', emp.plantillaNumber || "N/A – Non-Plantilla")}
                       <div className="md:col-span-3">
                         {renderReadOnlyField('Full Name', emp.fullName)}
                       </div>
@@ -286,7 +286,10 @@ export default function TrainingsSeminarsView({ user, employees }) {
             </div>
             <div className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded text-xs text-blue-800 border border-blue-100 font-medium">
-                Record will be attached to Employee ID: <strong>{selectedEmployeeId}</strong>
+                Record will be attached to: <strong>{(() => {
+                  const emp = employees?.find(e => e.id === selectedEmployeeId || e.employeeId === selectedEmployeeId);
+                  return emp ? `${emp.fullName} (${emp.plantillaNumber || "N/A – Non-Plantilla"})` : selectedEmployeeId;
+                })()}</strong>
               </div>
               
               <div className="space-y-1">

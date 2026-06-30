@@ -168,7 +168,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">System Username</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Email Address</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Access Level Role</th>
-                  <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Employee ID</th>
+                  <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Plantilla Number</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Status</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono text-right">Actions</th>
                 </tr>
@@ -227,7 +227,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                         </span>
                       </td>
                       <td className="px-6 py-4 text-xs font-mono text-slate-500">
-                        {usr.employeeId || "None Assigned"}
+                        {usr.plantillaNumber || "None Assigned"}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold font-mono tracking-wider border ${

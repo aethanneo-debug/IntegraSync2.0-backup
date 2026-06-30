@@ -491,7 +491,7 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
             <select className="border border-slate-300 rounded p-2 text-xs w-64 bg-slate-50" value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)}>
               <option value="">-- Choose Employee --</option>
               {employees.map(emp => (
-                <option key={emp.employeeId} value={emp.employeeId}>{emp.fullName} ({emp.employeeId})</option>
+                <option key={emp.employeeId} value={emp.employeeId}>{emp.fullName}</option>
               ))}
             </select>
           </div>

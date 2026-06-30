@@ -13,13 +13,18 @@ export interface User {
   fullName: string;
   role: UserRole;
   employeeId?: string;
+  plantillaNumber?: string;
   status?: "Active" | "Deactivated";
+  passwordHash?: string;
+  requirePasswordChange?: boolean;
   createdAt: string;
 }
 
 export interface Employee {
   id: string;
-  employeeId: string;
+  employeeId: string; // for compatibility with legacy endpoints
+  plantillaNumber?: string;
+  employeeType?: string;
   fullName: string;
   surname?: string;
   firstName?: string;
@@ -27,15 +32,19 @@ export interface Employee {
   nameExtension?: string;
   position: string;
   division: string;
-  employmentStatus: "Permanent" | "Temporary" | "Co-terminus" | "Contractual";
-  email: string;
-  address: string;
+  employmentStatus: string;
+  salaryGrade?: number;
+  step?: number;
+  email?: string;
+  officialEmail?: string;
+  address?: string;
   dateHired: string;
-  contactNumber: string;
-  emergencyContactName: string;
-  emergencyContactPhone: string;
-  pdsFieldName?: string; // name of the uploaded PDS PDF
+  contactNumber?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  pdsFieldName?: string;
   pdsUploadedAt?: string;
+  isActive?: boolean;
 }
 
 export interface EmploymentHistory {

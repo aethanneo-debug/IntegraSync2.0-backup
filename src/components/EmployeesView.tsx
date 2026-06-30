@@ -46,7 +46,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   
   // Form values
   const [formData, setFormData] = useState({
-    employeeId: "",
+    plantillaNumber: "",
     honorific: "",
     surname: "",
     firstName: "",
@@ -79,7 +79,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
 
   useEffect(() => {
     if (selectedEmp) {
-      loadEmployeeDetails(selectedEmp.employeeId);
+      loadEmployeeDetails(selectedEmp.id);
     }
   }, [selectedEmp]);
 
@@ -97,6 +97,10 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   // Handle personnel registration
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    if (!formData.position || !formData.position.trim()) {
+      alert("Validation Error: Official Designation (Position) is mandatory for active personnel registration.");
+      return;
+    }
     try {
       const fullName = [
         formData.honorific,
@@ -111,6 +115,11 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
         fullName
       };
 
+      // Compatibility fallback
+      if (!payload.employeeId) {
+        payload.employeeId = payload.plantillaNumber || `EMP-${Date.now()}`;
+      }
+
       const res = await apiCall("/api/employees", {
         method: "POST",
         body: JSON.stringify(payload)
@@ -122,7 +131,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
         fetchSummary();
         // Reset form
         setFormData({
-          employeeId: "",
+          plantillaNumber: "",
           honorific: "",
           surname: "",
           firstName: "",
@@ -149,7 +158,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
     e.preventDefault();
     if (!selectedEmp) return;
     try {
-      const res = await apiCall(`/api/employees/${selectedEmp.employeeId}/trainings`, {
+      const res = await apiCall(`/api/employees/${selectedEmp.id}/trainings`, {
         method: "POST",
         body: JSON.stringify({
           title: trainingData.title,
@@ -162,7 +171,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
       if (res.status === "success") {
         alert("Seminar / Training hours credited successfully!");
         setIsTrainingModalOpen(false);
-        loadEmployeeDetails(selectedEmp.employeeId);
+        loadEmployeeDetails(selectedEmp.id);
         // Reset form
         setTrainingData({
           title: "",
@@ -196,8 +205,8 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   // Mock Uploading PDS document
   function handleUploadPDSMock() {
     if (!selectedEmp) return;
-    const filename = `${selectedEmp.employeeId}_PDS_Form_2026.pdf`;
-    apiCall(`/api/employees/${selectedEmp.employeeId}/pds`, {
+    const filename = `${selectedEmp.plantillaNumber || selectedEmp.id}_PDS_Form.pdf`;
+    apiCall(`/api/employees/${selectedEmp.id}/pds`, {
       method: "POST",
       body: JSON.stringify({ filename })
     }).then(res => {
@@ -213,7 +222,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   const filteredEmployees = employeesList.filter((emp) => {
     const matchesSearch = 
       emp.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (emp.plantillaNumber && emp.plantillaNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
       emp.position.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDivision = filterDivision ? emp.division === filterDivision : true;
     const matchesStatus = filterStatus ? emp.employmentStatus === filterStatus : true;
@@ -287,7 +296,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px] select-none">
-                  <th className="p-4 w-28">Employee ID</th>
+                  <th className="p-4 w-28">Plantilla No.</th>
                   <th className="p-4">Full Name</th>
                   <th className="p-4">Division</th>
                   <th className="p-4">Official Designation</th>
@@ -305,7 +314,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
                         selectedEmp?.id === emp.id ? "bg-slate-100 font-semibold" : "hover:bg-slate-50"
                       }`}
                     >
-                      <td className="p-4 font-mono font-semibold text-slate-700">{emp.employeeId}</td>
+                      <td className="p-4 font-mono font-semibold text-slate-700">{emp.plantillaNumber || "N/A"}</td>
                       <td className="p-4 text-slate-900 font-medium">{emp.fullName}</td>
                       <td className="p-4 text-slate-600">{emp.division}</td>
                       <td className="p-4 text-slate-500">{emp.position}</td>
@@ -374,7 +383,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
               </div>
               <h2 className="text-sm font-bold text-slate-800">{selectedEmp.fullName}</h2>
               <p className="text-[11px] text-slate-500 mt-0.5">{selectedEmp.position}</p>
-              <p className="text-[10px] font-mono text-slate-400 mt-1 select-all">{selectedEmp.employeeId}</p>
+              <p className="text-[10px] font-mono text-slate-400 mt-1 select-all">{selectedEmp.plantillaNumber || "No Plantilla Number"}</p>
             </div>
 
             {/* DIRECT INFORMATION KEY VALUES */}
@@ -389,7 +398,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
                 </div>
                 <div className="flex items-center">
                   <Mail size={14} className="text-slate-400 mr-2.5 shrink-0" />
-                  <span className="text-slate-600 font-medium select-all">{selectedEmp.email}</span>
+                  <span className="text-slate-600 font-medium select-all">{selectedEmp.officialEmail || "N/A"}</span>
                 </div>
                 <div className="flex items-center">
                   <Smartphone size={14} className="text-slate-400 mr-2.5 shrink-0" />
@@ -541,18 +550,14 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
                 
                 {/* ID AND NAME */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Employee ID (Must Be Unique) *</label>
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Plantilla Number (Optional)</label>
                   <input
-                    required
                     type="text"
-                    placeholder="EMP001"
-                    value={formData.employeeId}
-                    onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                    placeholder="HSAC-RAB1-..."
+                    value={formData.plantillaNumber}
+                    onChange={(e) => setFormData({ ...formData, plantillaNumber: e.target.value })}
                     className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
                   />
-                </div>
-
-                <div className="space-y-1">
                   <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Surname *</label>
                   <input required type="text" placeholder="Santos" value={formData.surname} onChange={(e) => setFormData({ ...formData, surname: e.target.value })} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs" />
                 </div>
@@ -718,7 +723,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
             
             <form onSubmit={handleAddTraining} className="p-5 space-y-4">
               <p className="text-[10px] text-slate-500 bg-slate-50 p-2 rounded border border-slate-150 leading-relaxed">
-                Adding professional hours to: <strong className="text-slate-700">{selectedEmp.fullName} ({selectedEmp.employeeId})</strong>
+                Adding professional hours to: <strong className="text-slate-700">{selectedEmp.fullName} ({selectedEmp.plantillaNumber || selectedEmp.id.substring(0, 8)})</strong>
               </p>
 
               <div className="space-y-1">

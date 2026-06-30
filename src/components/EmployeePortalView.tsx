@@ -372,7 +372,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                   </div>
                   <div>
                     <h2 className="text-xs font-bold text-slate-800">{profile.fullName}</h2>
-                    <p className="text-[10px] text-slate-400 font-mono">Employee ID: {profile.employeeId}</p>
+                    <p className="text-[10px] text-slate-400 font-mono">Plantilla No: {profile.plantillaNumber || "N/A – Non-Plantilla"}</p>
                   </div>
                 </div>
 

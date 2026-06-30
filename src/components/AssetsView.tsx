@@ -175,8 +175,23 @@ export default function AssetsView({ user, assets, supplies, employees, fetchSum
 
   // Fast direct supply issuance from stockroom
   async function handleIssueSupplyQuick(supplyId: string, qtyNeeded: number, unit: string) {
-    const employeeId = prompt(`Specify Employee ID to issue ${qtyNeeded} ${unit} to:`);
-    if (!employeeId) return;
+    const input = prompt(`Specify Plantilla Number or Full Name of the employee to issue ${qtyNeeded} ${unit} to:`);
+    if (!input) return;
+
+    const cleanInput = input.trim().toLowerCase();
+    const emp = employees.find(e => 
+      e.id.toLowerCase() === cleanInput ||
+      e.employeeId?.toLowerCase() === cleanInput ||
+      (e.plantillaNumber && e.plantillaNumber.toLowerCase() === cleanInput) ||
+      e.fullName.toLowerCase().includes(cleanInput)
+    );
+
+    if (!emp) {
+      alert(`Could not find an active personnel matching "${input}". Please provide a valid Plantilla Number or Full Name.`);
+      return;
+    }
+
+    const employeeId = emp.id;
 
     try {
       const res = await apiCall("/api/supplies/issue", {
@@ -767,7 +782,7 @@ export default function AssetsView({ user, assets, supplies, employees, fetchSum
                   <option value="">-- Choose Employee --</option>
                   {employees.map(e => (
                     <option key={e.id} value={e.employeeId}>
-                      {e.fullName} ({e.position} • {e.employeeId})
+                      {e.fullName}
                     </option>
                   ))}
                 </select>

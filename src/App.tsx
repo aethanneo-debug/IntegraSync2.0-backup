@@ -51,6 +51,12 @@ export default function App() {
   const [passwordInput, setPasswordInput] = useState("");
   const [authError, setAuthError] = useState("");
 
+  // First-time Password Change States
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+  const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [passwordChangeError, setPasswordChangeError] = useState("");
+
   // Retrieve current session on mount
   useEffect(() => {
     checkSession();
@@ -91,6 +97,9 @@ export default function App() {
         const loggedUser = res.data;
         setUser(loggedUser);
         setActiveTab(getDefaultTabForRole(loggedUser.role));
+        if (loggedUser.requirePasswordChange) {
+          setShowPasswordChangeModal(true);
+        }
       }
     } catch {
       // Normal: Not logged in
@@ -170,6 +179,9 @@ export default function App() {
       const text = await response.text();
       let res;
       try {
+        if (text.trim().toLowerCase().startsWith("<!doctype")) {
+           throw new Error("Server returned HTML format (Possible 404 or Server Error)");
+        }
         res = text ? JSON.parse(text) : {};
       } catch (parseError) {
         throw new Error("Invalid response from server. Please try again.");
@@ -188,6 +200,9 @@ export default function App() {
         if (loggedUser) {
           setUser(loggedUser);
           setActiveTab(getDefaultTabForRole(loggedUser.role));
+          if (loggedUser.requirePasswordChange) {
+            setShowPasswordChangeModal(true);
+          }
         }
       }
     } catch (err: any) {
@@ -518,6 +533,92 @@ export default function App() {
                 className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition-all"
               >
                 Dismiss Guideline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPasswordChangeModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100 flex flex-col">
+            <div className="bg-slate-900 text-white p-5 flex items-center space-x-3">
+              <Lock className="text-yellow-400 shrink-0" size={20} />
+              <div>
+                <h3 className="font-bold text-sm tracking-wide">FIRST-TIME PASSWORD CHANGE</h3>
+                <p className="text-[10px] text-slate-300">Administrative security protocol requires a new credential password.</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              {passwordChangeError && (
+                <div className="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-xs rounded-lg font-medium">
+                  {passwordChangeError}
+                </div>
+              )}
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Current Temporary Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Enter the temp password you logged in with" 
+                  className="w-full border border-slate-200 p-2 text-xs rounded-lg focus:border-slate-800 outline-none font-mono" 
+                  value={currentPasswordInput} 
+                  onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">New Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Minimum 6 characters" 
+                  className="w-full border border-slate-200 p-2 text-xs rounded-lg focus:border-slate-800 outline-none font-mono" 
+                  value={newPasswordInput} 
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                />
+              </div>
+
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                By updating your password, your digital workspace profile will be synchronized securely under standard encrypt directives.
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button 
+                type="button"
+                onClick={async () => {
+                  setPasswordChangeError("");
+                  if (!currentPasswordInput || !newPasswordInput) {
+                    setPasswordChangeError("Both current and new passwords are required.");
+                    return;
+                  }
+                  if (newPasswordInput.length < 6) {
+                    setPasswordChangeError("New password must be at least 6 characters.");
+                    return;
+                  }
+                  try {
+                    const res = await apiCall("/api/auth/change-password", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        currentPassword: currentPasswordInput,
+                        newPassword: newPasswordInput
+                      })
+                    });
+                    if (res.status === "success") {
+                      alert("Password updated successfully! Welcome to your official HSAC workspace.");
+                      setShowPasswordChangeModal(false);
+                      setCurrentPasswordInput("");
+                      setNewPasswordInput("");
+                      triggerRefresh();
+                    } else {
+                      setPasswordChangeError(res.message || "Failed to update password.");
+                    }
+                  } catch (err: any) {
+                    setPasswordChangeError(err.message || "An unexpected error occurred.");
+                  }
+                }}
+                className="w-full px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition-all"
+              >
+                Save and Synchronize
               </button>
             </div>
           </div>

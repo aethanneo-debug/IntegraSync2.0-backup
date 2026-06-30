@@ -35,7 +35,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(150) NOT NULL,
     role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
-    employee_id VARCHAR(50) UNIQUE,
+    employee_record_id UUID UNIQUE REFERENCES employees(id) ON DELETE SET NULL,
     office_id UUID REFERENCES offices(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -47,13 +47,21 @@ CREATE TABLE users (
 
 CREATE TABLE employees (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id VARCHAR(50) UNIQUE NOT NULL,
+    plantilla_number VARCHAR(50),
+    employee_type VARCHAR(50) NOT NULL DEFAULT 'Plantilla',
     full_name VARCHAR(150) NOT NULL,
     position VARCHAR(100) NOT NULL,
     division VARCHAR(100) NOT NULL,
     office_id UUID REFERENCES offices(id) ON DELETE SET NULL,
     employment_status VARCHAR(50) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    salary_grade INTEGER,
+    step INTEGER,
+    position_effective_date DATE,
+    appointment_date DATE,
+    csc_approval_date DATE,
+    entry_to_government DATE,
+    entry_to_hsac DATE,
+    official_email VARCHAR(255),
     address TEXT,
     date_hired DATE NOT NULL,
     contact_number VARCHAR(20),
@@ -61,15 +69,21 @@ CREATE TABLE employees (
     emergency_contact_phone VARCHAR(20),
     pds_file_name VARCHAR(255),
     pds_uploaded_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT TRUE,
+    archived_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE users ADD CONSTRAINT fk_user_employee FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE SET NULL;
+CREATE UNIQUE INDEX uq_employees_plantilla_number 
+ON employees (plantilla_number) 
+WHERE plantilla_number IS NOT NULL;
+
+-- ALTER TABLE users ADD CONSTRAINT fk_user_employee FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE SET NULL;
 
 CREATE TABLE employment_history (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+    employee_record_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
     action VARCHAR(100) NOT NULL,
     previous_details TEXT,
     new_details TEXT,
@@ -80,7 +94,7 @@ CREATE TABLE employment_history (
 
 CREATE TABLE trainings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+    employee_record_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
     organizer VARCHAR(255) NOT NULL,
     date_conducted DATE NOT NULL,
@@ -94,7 +108,7 @@ CREATE TABLE trainings (
 
 CREATE TABLE employee_pds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE UNIQUE,
+    employee_record_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE UNIQUE,
     data TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -102,7 +116,7 @@ CREATE TABLE employee_pds (
 
 CREATE TABLE seminars (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+    employee_record_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
     organizer VARCHAR(255) NOT NULL,
     date_conducted DATE NOT NULL,
@@ -177,7 +191,7 @@ CREATE TABLE budget_ledger_entries (
     office_budget_id UUID NOT NULL REFERENCES office_budgets(id) ON DELETE CASCADE,
     quarterly_budget_id UUID REFERENCES quarterly_budget_allocations(id) ON DELETE SET NULL,
     monthly_budget_id UUID REFERENCES monthly_budget_allocations(id) ON DELETE SET NULL,
-    employee_id VARCHAR(50) REFERENCES employees(employee_id) ON DELETE SET NULL,
+    employee_record_id UUID REFERENCES employees(id) ON DELETE SET NULL,
     activity_id UUID, -- For future extension
     request_id UUID,
     liquidation_id UUID, -- If separate from financial_transaction_id
@@ -266,7 +280,7 @@ CREATE TABLE asset_issuances (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
     asset_number VARCHAR(100) NOT NULL,
-    assigned_to_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE RESTRICT,
+    assigned_to_id UUID NOT NULL REFERENCES employees(id) ON DELETE RESTRICT,
     assigned_to_name VARCHAR(150) NOT NULL,
     date_issued DATE NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 1,
@@ -294,7 +308,7 @@ CREATE TABLE supply_items (
 CREATE TABLE requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     request_type VARCHAR(50) NOT NULL,
-    employee_id VARCHAR(50) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+    employee_record_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
     employee_name VARCHAR(150) NOT NULL,
     office_id UUID REFERENCES offices(id) ON DELETE SET NULL,
     date_requested DATE NOT NULL DEFAULT CURRENT_DATE,

@@ -70,12 +70,15 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
   const text = await response.text();
   let json;
   try {
-    json = text ? JSON.parse(text) : {};
-  } catch (err) {
-    if (!response.ok) {
-      throw new Error(`API error occurred (Status: ${response.status})`);
+    if (text.trim().toLowerCase().startsWith("<!doctype")) {
+      throw new Error("Server returned an HTML response instead of JSON (Possible 404 or Server Crash)");
     }
-    throw new Error("Invalid response format from server");
+    json = text ? JSON.parse(text) : {};
+  } catch (err: any) {
+    if (!response.ok) {
+      throw new Error(`API error occurred (Status: ${response.status}) - ${err.message || "Invalid JSON"}`);
+    }
+    throw new Error(`Invalid response format from server: ${err.message}`);
   }
 
   if (!response.ok) {

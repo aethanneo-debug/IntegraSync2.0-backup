@@ -32,7 +32,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(150), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="RESTRICT"), nullable=False)
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="SET NULL"), unique=True)
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="SET NULL"), unique=True)
     office_id = Column(String(36), ForeignKey("offices.id", ondelete="SET NULL"))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -45,13 +45,21 @@ class ModelEmployee(Base):
     __tablename__ = "employees"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    employee_id = Column(String(50), unique=True, index=True, nullable=False)
+    plantilla_number = Column(String(50), unique=True, index=True, nullable=True)
+    employee_type = Column(String(50), nullable=False, default="Plantilla")
     full_name = Column(String(150), nullable=False)
     position = Column(String(100), nullable=False)
     division = Column(String(100), nullable=False)
     office_id = Column(String(36), ForeignKey("offices.id", ondelete="SET NULL"))
     employment_status = Column(String(50), nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
+    salary_grade = Column(Integer)
+    step = Column(Integer)
+    position_effective_date = Column(Date)
+    appointment_date = Column(Date)
+    csc_approval_date = Column(Date)
+    entry_to_government = Column(Date)
+    entry_to_hsac = Column(Date)
+    official_email = Column(String(255), nullable=True)
     address = Column(Text)
     date_hired = Column(Date, nullable=False)
     contact_number = Column(String(20))
@@ -59,10 +67,12 @@ class ModelEmployee(Base):
     emergency_contact_phone = Column(String(20))
     pds_file_name = Column(String(255))
     pds_uploaded_at = Column(DateTime)
+    is_active = Column(Boolean, default=True)
+    archived_at = Column(DateTime)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user_rel = relationship("User", uselist=False, back_populates="employee_rel", foreign_keys="User.employee_id")
+    user_rel = relationship("User", uselist=False, back_populates="employee_rel", foreign_keys="User.employee_record_id")
     office_rel = relationship("Office")
     history_rel = relationship("ModelEmploymentHistory", back_populates="employee")
     trainings_rel = relationship("ModelTraining", back_populates="employee")
@@ -72,7 +82,7 @@ class ModelEmploymentHistory(Base):
     __tablename__ = "employment_history"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     action = Column(String(100), nullable=False)
     previous_details = Column(Text)
     new_details = Column(Text)
@@ -86,7 +96,7 @@ class ModelTraining(Base):
     __tablename__ = "trainings"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(255), nullable=False)
     organizer = Column(String(255), nullable=False)
     date_conducted = Column(Date, nullable=False)
@@ -102,7 +112,7 @@ class ModelTraining(Base):
 class ModelPDS(Base):
     __tablename__ = "employee_pds"
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False, unique=True)
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, unique=True)
     data = Column(Text, nullable=False) 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -111,7 +121,7 @@ class ModelSeminar(Base):
     __tablename__ = "seminars"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(255), nullable=False)
     organizer = Column(String(255), nullable=False)
     date_conducted = Column(Date, nullable=False)
@@ -193,7 +203,7 @@ class BudgetLedgerEntry(Base):
     office_budget_id = Column(String(36), ForeignKey("office_budgets.id", ondelete="CASCADE"), nullable=False)
     quarterly_budget_id = Column(String(36), ForeignKey("quarterly_budget_allocations.id", ondelete="SET NULL"))
     monthly_budget_id = Column(String(36), ForeignKey("monthly_budget_allocations.id", ondelete="SET NULL"))
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="SET NULL"))
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="SET NULL"))
     activity_id = Column(String(36))
     request_id = Column(String(36))
     liquidation_id = Column(String(36))
@@ -285,7 +295,7 @@ class ModelAssetIssuance(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     asset_id = Column(String(36), ForeignKey("assets.id", ondelete="CASCADE"), nullable=False)
     asset_number = Column(String(100), nullable=False)
-    assigned_to_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="RESTRICT"), nullable=False)
+    assigned_to_id = Column(String(36), ForeignKey("employees.id", ondelete="RESTRICT"), nullable=False)
     assigned_to_name = Column(String(150), nullable=False)
     date_issued = Column(Date, nullable=False)
     quantity = Column(Integer, default=1)
@@ -311,7 +321,7 @@ class ModelRequest(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     request_type = Column(String(50), nullable=False)
-    employee_id = Column(String(50), ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
+    employee_record_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
     employee_name = Column(String(150), nullable=False)
     office_id = Column(String(36), ForeignKey("offices.id", ondelete="SET NULL"))
     date_requested = Column(Date, default=date.today)

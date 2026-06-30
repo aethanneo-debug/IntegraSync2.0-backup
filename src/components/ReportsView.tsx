@@ -51,7 +51,7 @@ export default function ReportsView({ user, employees, transactions, assets, sup
   // Report 1: Regional HR Personnel Master List
   function exportEmployeesCSV() {
     const headers = [
-      "Employee ID",
+      "Plantilla Number",
       "Full Name",
       "Position/Title",
       "Division",
@@ -65,7 +65,7 @@ export default function ReportsView({ user, employees, transactions, assets, sup
     ];
 
     const rows = employees.map(emp => [
-      emp.employeeId,
+      emp.plantillaNumber || "N/A – Non-Plantilla",
       emp.fullName,
       emp.position,
       emp.division,
@@ -117,7 +117,7 @@ export default function ReportsView({ user, employees, transactions, assets, sup
       "Acquisition Date",
       "Status",
       "PAR Holder Name",
-      "PAR Holder Employee ID"
+      "PAR Holder Plantilla Number"
     ];
 
     const rows = assets.map(ast => [
@@ -129,7 +129,7 @@ export default function ReportsView({ user, employees, transactions, assets, sup
       formatDate(ast.dateAcquired),
       ast.status,
       ast.assignedToName || "None",
-      ast.assignedToId || "None"
+      employees.find(e => e.id === ast.assignedToId || e.employeeId === ast.assignedToId)?.plantillaNumber || (ast.assignedToId ? "N/A – Non-Plantilla" : "None")
     ]);
 
     exportCSV(headers, rows, "HSAC_RAB1_Assets_PAR_Catalog.csv");
@@ -162,7 +162,7 @@ export default function ReportsView({ user, employees, transactions, assets, sup
       "Request ID",
       "Date Filed",
       "Employee Filer",
-      "Employee ID",
+      "Plantilla Number",
       "Request Type",
       "Status",
       "Assessor Action Remarks",
@@ -173,7 +173,7 @@ export default function ReportsView({ user, employees, transactions, assets, sup
       req.id,
       formatDate(req.dateRequested),
       req.employeeName,
-      req.employeeId,
+      employees.find(e => e.id === req.employeeId || e.employeeId === req.employeeId)?.plantillaNumber || "N/A – Non-Plantilla",
       req.requestType,
       req.status,
       req.remarks || "No remarks logged.",

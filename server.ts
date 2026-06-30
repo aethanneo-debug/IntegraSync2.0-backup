@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { 
   UserRole, 
@@ -104,7 +105,7 @@ function getInitialData(): DBStructure {
             id: "liqp-2",
             liquidationNo: "LIQ-2026-002",
             requestRef: "REQ-SPL-044",
-            employee: "Pedro B. Penduko",
+            employee: "Jolly Joy A. Almoite",
             department: "Administrative and Finance Division",
             amountReleased: 15000.00,
             amountLiquidated: 14500.00,
@@ -173,7 +174,7 @@ function getInitialData(): DBStructure {
           {
             id: "notif-1",
             title: "Leave Request Submitted",
-            message: "Adjudicator Andres Bonifacio has submitted an urgent Vacation Leave Request for your review.",
+            message: "Atty. Korrine Madeleine Flores - Fontanilla has submitted an urgent Vacation Leave Request for your review.",
             type: "urgent",
             isRead: false,
             timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
@@ -243,7 +244,7 @@ function getInitialData(): DBStructure {
           changed = true;
         }
         if (!tx.createdBy) {
-          tx.createdBy = tx.id === "tx-1" ? "Andres B. Bonifacio" : tx.id === "tx-3" ? "Andres B. Bonifacio" : "Pedro B. Penduko";
+          tx.createdBy = tx.id === "tx-1" ? "Samantha C. Bernardo" : tx.id === "tx-3" ? "Samantha C. Bernardo" : "Jolly Joy A. Almoite";
           changed = true;
         }
         if (!tx.dateCreated) {
@@ -419,11 +420,11 @@ function getInitialData(): DBStructure {
       {
         id: "emp-4",
         employeeId: "EMP004",
-        fullName: "Pedro B. Penduko",
+        fullName: "Eulogio IV Esturas",
         position: "Property Custodian / AO II",
         division: "Administrative and Finance Division",
         employmentStatus: "Permanent",
-        email: "pedro.penduko@hsac.gov.ph",
+        email: "eulogio.esturas@hsac.gov.ph",
         address: "San Juan, La Union",
         dateHired: "2021-09-01",
         contactNumber: "09204567890",
@@ -435,15 +436,15 @@ function getInitialData(): DBStructure {
       {
         id: "emp-5",
         employeeId: "EMP005",
-        fullName: "Dr. Jose P. Rizal",
+        fullName: "Froilan J. Estepa",
         position: "Legal Officer IV",
         division: "Legal Division",
         employmentStatus: "Permanent",
-        email: "jose.rizal@hsac.gov.ph",
-        address: "Calamba, Laguna / San Fernando, La Union",
+        email: "froilan.estepa@hsac.gov.ph",
+        address: "San Fernando City, La Union",
         dateHired: "2019-11-20",
         contactNumber: "09159998888",
-        emergencyContactName: "Paciano Rizal",
+        emergencyContactName: "Teresita Estepa",
         emergencyContactPhone: "09151112222",
         pdsFieldName: "EMP005_PDS_Official.pdf",
         pdsUploadedAt: "2026-02-05T08:45:00Z"
@@ -451,15 +452,15 @@ function getInitialData(): DBStructure {
       {
         id: "emp-6",
         employeeId: "EMP006",
-        fullName: "Andres B. Bonifacio",
+        fullName: "Jolly Joy A. Almoite",
         position: "Adjudication Assistant",
         division: "Adjudication Division",
         employmentStatus: "Contractual",
-        email: "andres.bonifacio@hsac.gov.ph",
+        email: "jolly.almoite@hsac.gov.ph",
         address: "Agoo, La Union",
         dateHired: "2023-01-16",
         contactNumber: "09162223333",
-        emergencyContactName: "Gregoria de Jesus",
+        emergencyContactName: "Juan Almoite",
         emergencyContactPhone: "09164445555",
         pdsFieldName: "EMP006_PDS.pdf",
         pdsUploadedAt: "2026-03-01T15:00:00Z"
@@ -528,7 +529,7 @@ function getInitialData(): DBStructure {
           { id: "doc-5", name: "Scope of Work Approval", type: "Other", filename: "SOW_A3Tech.pdf", uploadedAt: "2026-06-01T09:00:00Z" }
         ],
         history: [
-          { id: "th-5", status: TransactionStatus.PENDING_VALIDATION, changedBy: "Pedro B. Penduko", changedAt: "2026-06-02T09:30:00Z", remarks: "Awaiting submission of structural invoice and job completion certification from service heads." }
+          { id: "th-5", status: TransactionStatus.PENDING_VALIDATION, changedBy: "Jolly Joy A. Almoite", changedAt: "2026-06-02T09:30:00Z", remarks: "Awaiting submission of structural invoice and job completion certification from service heads." }
         ]
       },
       {
@@ -579,7 +580,7 @@ function getInitialData(): DBStructure {
       { id: "ast-1", assetNumber: "HSAC-RAB1-AST-001", serialNumber: "5CD1923JXP", category: "IT Equipment", description: "HP ProBook Laptop Core i5, 16GB RAM, 512GB SSD", dateAcquired: "2024-03-10", cost: 48500.00, status: AssetStatus.ASSIGNED, assignedToId: "EMP002", assignedToName: "Maria Clara V. Santos" },
       { id: "ast-2", assetNumber: "HSAC-RAB1-AST-002", serialNumber: "5CD1923K9D", category: "IT Equipment", description: "HP ProBook Laptop Core i5, 16GB RAM, 512GB SSD", dateAcquired: "2024-03-10", cost: 48500.00, status: AssetStatus.AVAILABLE },
       { id: "ast-3", assetNumber: "HSAC-RAB1-AST-003", serialNumber: "SN-VHL-ISZ8810", category: "Vehicles", description: "Executive Service Vehicle - Isuzu D-MAX 3.0 BluePower 4x4", dateAcquired: "2023-01-20", cost: 1450000.00, status: AssetStatus.ASSIGNED, assignedToId: "EMP001", assignedToName: "Hon. Romeo M. Alcantara" },
-      { id: "ast-4", assetNumber: "HSAC-RAB1-AST-004", serialNumber: "OFC-DSK-2024-09", category: "Office Furniture", description: "Executive Mahogany Wooden Desk with drawers", dateAcquired: "2024-06-15", cost: 18000.00, status: AssetStatus.ASSIGNED, assignedToId: "EMP005", assignedToName: "Dr. Jose P. Rizal" },
+      { id: "ast-4", assetNumber: "HSAC-RAB1-AST-004", serialNumber: "OFC-DSK-2024-09", category: "Office Furniture", description: "Executive Mahogany Wooden Desk with drawers", dateAcquired: "2024-06-15", cost: 18000.00, status: AssetStatus.ASSIGNED, assignedToId: "EMP-FROILAN", assignedToName: "Froilan J. Estepa" },
       { id: "ast-5", assetNumber: "HSAC-RAB1-AST-005", serialNumber: "PRJ-EPS-7712", category: "IT Equipment", description: "Epson Multimedia Projector for Adjudication Hearing Room 1", dateAcquired: "2025-02-05", cost: 26000.00, status: AssetStatus.AVAILABLE },
       { id: "ast-6", assetNumber: "HSAC-RAB1-AST-006", serialNumber: "OFC-CHR-4422", category: "Office Furniture", description: "Ergonomic High-Back Executive Mesh Office Chair", dateAcquired: "2024-06-15", cost: 8500.00, status: AssetStatus.DAMAGED },
       { id: "ast-7", assetNumber: "HSAC-RAB1-AST-007", serialNumber: "TAB-APL-IPD09", category: "IT Equipment", description: "Apple iPad Pro 11-inch (M2, 128GB, Wi-Fi)", dateAcquired: "2024-08-22", cost: 52000.00, status: AssetStatus.LOST }
@@ -587,7 +588,7 @@ function getInitialData(): DBStructure {
     assetIssuances: [
       { id: "iss-1", assetId: "ast-1", assetNumber: "HSAC-RAB1-AST-001", assignedToId: "EMP002", assignedToName: "Maria Clara V. Santos", dateIssued: "2024-03-12", quantity: 1, conditionOnIssue: "Brand New in box" },
       { id: "iss-2", assetId: "ast-3", assetNumber: "HSAC-RAB1-AST-003", assignedToId: "EMP001", assignedToName: "Hon. Romeo M. Alcantara", dateIssued: "2023-01-22", quantity: 1, conditionOnIssue: "Brand New" },
-      { id: "iss-3", assetId: "ast-4", assetNumber: "HSAC-RAB1-AST-004", assignedToId: "EMP005", assignedToName: "Dr. Jose P. Rizal", dateIssued: "2024-06-16", quantity: 1, conditionOnIssue: "Good - Minor scratches" }
+      { id: "iss-3", assetId: "ast-4", assetNumber: "HSAC-RAB1-AST-004", assignedToId: "EMP-FROILAN", assignedToName: "Froilan J. Estepa", dateIssued: "2024-06-16", quantity: 1, conditionOnIssue: "Good - Minor scratches" }
     ],
     supplyItems: [
       { id: "sup-1", name: "A4 Multi-purpose Bond Paper (80gsm)", totalQuantity: 150, availableQuantity: 112, unit: "reams" },
@@ -597,16 +598,16 @@ function getInitialData(): DBStructure {
       { id: "sup-5", name: "Heavy Duty Expanding Folders (Legal)", totalQuantity: 500, availableQuantity: 410, unit: "pieces" }
     ],
     supplyIssuances: [
-      { id: "si-1", supplyId: "sup-1", supplyName: "A4 Multi-purpose Bond Paper (80gsm)", issuedToId: "EMP005", issuedToName: "Dr. Jose P. Rizal", quantity: 10, dateIssued: "2026-05-18" },
-      { id: "si-2", supplyId: "sup-2", supplyName: "Black Gel Ink Pen 0.5mm", issuedToId: "EMP006", issuedToName: "Andres B. Bonifacio", quantity: 12, dateIssued: "2026-05-20" },
-      { id: "si-3", supplyId: "sup-5", supplyName: "Heavy Duty Expanding Folders (Legal)", issuedToId: "EMP006", issuedToName: "Andres B. Bonifacio", quantity: 50, dateIssued: "2026-05-22" }
+      { id: "si-1", supplyId: "sup-1", supplyName: "A4 Multi-purpose Bond Paper (80gsm)", issuedToId: "EMP-FROILAN", issuedToName: "Froilan J. Estepa", quantity: 10, dateIssued: "2026-05-18" },
+      { id: "si-2", supplyId: "sup-2", supplyName: "Black Gel Ink Pen 0.5mm", issuedToId: "EMP-JOLLY", issuedToName: "Jolly Joy A. Almoite", quantity: 12, dateIssued: "2026-05-20" },
+      { id: "si-3", supplyId: "sup-5", supplyName: "Heavy Duty Expanding Folders (Legal)", issuedToId: "EMP-JOLLY", issuedToName: "Jolly Joy A. Almoite", quantity: 50, dateIssued: "2026-05-22" }
     ],
     requests: [
       {
         id: "req-1",
         requestType: RequestType.LEAVE,
-        employeeId: "EMP006",
-        employeeName: "Andres B. Bonifacio",
+        employeeId: "EMP-JOLLY",
+        employeeName: "Jolly Joy A. Almoite",
         dateRequested: "2026-06-01",
         status: RequestStatus.PENDING,
         leaveType: "Vacation Leave",
@@ -629,14 +630,14 @@ function getInitialData(): DBStructure {
       {
         id: "req-3",
         requestType: RequestType.VEHICLE,
-        employeeId: "EMP005",
-        employeeName: "Dr. Jose P. Rizal",
+        employeeId: "emp-samantha",
+        employeeName: "Samantha C. Bernardo",
         dateRequested: "2026-06-04",
         status: RequestStatus.PENDING,
         destination: "Bangui, Ilocos Norte - Dispute Mediation Site Visit",
         purpose: "Conduct compulsory ocular inspection of disputable housing settlements.",
         dateNeeded: "2026-06-18",
-        passengers: "Dr. Jose Rizal, Andres Bonifacio, Engr. Juan Perez"
+        passengers: "Eulogio IV Esturas, Jolly Joy A. Almoite, Froilan J. Estepa"
       } as any,
       {
         id: "req-4",
@@ -692,7 +693,7 @@ function getInitialData(): DBStructure {
         id: "liqp-2",
         liquidationNo: "LIQ-2026-002",
         requestRef: "REQ-SPL-044",
-        employee: "Pedro B. Penduko",
+        employee: "Jolly Joy A. Almoite",
         department: "Administrative and Finance Division",
         amountReleased: 15000.00,
         amountLiquidated: 14500.00,
@@ -749,7 +750,7 @@ function getInitialData(): DBStructure {
       {
         id: "notif-1",
         title: "Leave Request Submitted",
-        message: "Adjudicator Andres Bonifacio has submitted an urgent Vacation Leave Request for your review.",
+        message: "Atty. Korrine Madeleine Flores - Fontanilla has submitted an urgent Vacation Leave Request for your review.",
         type: "urgent",
         isRead: false,
         timestamp: "2026-06-16T02:00:00Z",
@@ -900,8 +901,21 @@ app.post("/api/auth/login", (req, res) => {
     u.username.toLowerCase() === inputIdentifier
   );
   
-  // Accepts standard "password123" OR sandbox master password for simple user validation flow
-  const isValidPassword = password === "password123" || password === "sandbox-master-pass";
+  // Verification: PBKDF2 for hashed passwords, simple match for dev accounts
+  let isValidPassword = false;
+  if (user) {
+    if (user.passwordHash) {
+      try {
+        const [salt, hash] = user.passwordHash.split(':');
+        const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+        isValidPassword = hash === checkHash;
+      } catch (err) {
+        isValidPassword = false;
+      }
+    } else {
+      isValidPassword = password === "password123" || password === "sandbox-master-pass";
+    }
+  }
 
   if (user && isValidPassword) {
     if (user.status === "Deactivated") {
@@ -916,7 +930,8 @@ app.post("/api/auth/login", (req, res) => {
       email: user.email,
       fullName: user.fullName,
       role: user.role,
-      employeeId: user.employeeId
+      employeeId: user.employeeId,
+      requirePasswordChange: user.requirePasswordChange
     })).toString("base64");
 
     logEvent(user.id, user.username, user.role, "Login", "Successful authenticated session login via credentials.");
@@ -927,7 +942,8 @@ app.post("/api/auth/login", (req, res) => {
       email: user.email,
       fullName: user.fullName,
       role: user.role,
-      employeeId: user.employeeId
+      employeeId: user.employeeId,
+      requirePasswordChange: user.requirePasswordChange
     };
 
     res.json({
@@ -946,6 +962,47 @@ app.post("/api/auth/login", (req, res) => {
 
 app.post("/api/auth/logout", (req, res) => {
   res.json({ status: "success", message: "Session signed out successfully" });
+});
+
+app.post("/api/auth/change-password", authenticateToken, (req: any, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!newPassword || newPassword.trim().length < 6) {
+    return res.status(400).json({ status: "error", message: "New password must be at least 6 characters." });
+  }
+
+  const user = db.users.find(u => u.id === req.user.id);
+  if (!user) {
+    return res.status(404).json({ status: "error", message: "User account not found." });
+  }
+
+  // Verify current password
+  let isValid = false;
+  if (user.passwordHash) {
+    try {
+      const [salt, hash] = user.passwordHash.split(':');
+      const checkHash = crypto.pbkdf2Sync(currentPassword, salt, 1000, 64, 'sha512').toString('hex');
+      isValid = hash === checkHash;
+    } catch (e) {
+      isValid = false;
+    }
+  } else {
+    isValid = currentPassword === "password123" || currentPassword === "sandbox-master-pass";
+  }
+
+  if (!isValid) {
+    return res.status(400).json({ status: "error", message: "Current password does not match records." });
+  }
+
+  // Hash new password
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(newPassword, salt, 1000, 64, 'sha512').toString('hex');
+  user.passwordHash = `${salt}:${hash}`;
+  user.requirePasswordChange = false;
+
+  logEvent(user.id, user.username, user.role, "Change Password", "User successfully modified/updated login credentials.");
+  saveDB();
+
+  res.json({ status: "success", message: "Password updated successfully." });
 });
 
 // Middleware to verify Auth/RBAC Roles
@@ -972,7 +1029,7 @@ app.get("/api/sessions/current", authenticateToken, (req: any, res) => {
 // 2. Employee CRUD & Personnel Details
 app.get("/api/employees/me", authenticateToken, (req: any, res) => {
   const employeeId = req.user.employeeId;
-  const employee = db.employees.find(e => e.employeeId === employeeId);
+  const employee = db.employees.find(e => e.id === employeeId || e.employeeId === employeeId);
   if (!employee) {
     return res.status(404).json({ status: "error", message: "Personnel profile not found for this user account" });
   }
@@ -988,6 +1045,10 @@ app.get("/api/employees", authenticateToken, (req: any, res) => {
 
 app.post("/api/employees", authenticateToken, (req: any, res) => {
   const data = req.body;
+
+  if (!data.position || !data.position.trim()) {
+    return res.status(400).json({ status: "error", message: "Validation Error: Official Designation (Position) is mandatory." });
+  }
 
   // Enforce Roles: Admin or HR only
   if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.HR_OFFICER) {
@@ -1034,19 +1095,7 @@ app.post("/api/employees", authenticateToken, (req: any, res) => {
   };
   db.employmentHistory.push(newHist);
 
-  // Auto-generate matching portal user if none exists
-  const userExist = db.users.find(u => u.username === data.employeeId.toLowerCase());
-  if (!userExist) {
-    db.users.push({
-      id: `u-${Date.now()}`,
-      username: data.employeeId.toLowerCase(),
-      email: data.email,
-      fullName: data.fullName,
-      role: UserRole.EMPLOYEE,
-      employeeId: data.employeeId,
-      createdAt: new Date().toISOString()
-    });
-  }
+  // Removed auto-generation based on requirements: Employee accounts should not be automatically created; they require administrator onboarding.
 
   logEvent(req.user.id, req.user.username, req.user.role, "Create Employee", `Registered new personnel ${newEmployee.fullName} (${newEmployee.employeeId})`);
   saveDB();
@@ -1056,6 +1105,10 @@ app.post("/api/employees", authenticateToken, (req: any, res) => {
 app.put("/api/employees/:id", authenticateToken, (req: any, res) => {
   const { id } = req.params;
   const data = req.body;
+
+  if (data.position !== undefined && (!data.position || !data.position.trim())) {
+    return res.status(400).json({ status: "error", message: "Validation Error: Official Designation (Position) is mandatory." });
+  }
 
   if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.HR_OFFICER) {
     return res.status(403).json({ status: "error", message: "Unauthorized: Requires HR or Admin access" });
@@ -2008,8 +2061,8 @@ app.get("/api/dashboard/summary", authenticateToken, (req: any, res) => {
   const role = req.user.role;
   
   // Total stats values (general overview)
-  const totalEmployees = db.employees.length;
-  const activeEmployees = db.employees.filter(e => e.employmentStatus === "Permanent").length;
+  const activeEmployees = db.employees.filter(e => e.isActive).length;
+  const totalEmployees = activeEmployees;
   const listTrainings = db.trainings;
   const totalAssetsVal = db.assets.reduce((sum, a) => sum + a.cost, 0);
 
