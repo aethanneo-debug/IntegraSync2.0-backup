@@ -219,6 +219,16 @@
       "passwordHash": "8ff4ed150651c70862594c8ad6c1875f:251a93eed3995a058ca1b41bdffdf6d3839f4285a5332eaa46ff9c7e7cea213a0127e7ff0a1dd3894f8e08058d8d1161a9210da423860b7e9ac9922c5d0bccf6",
       "requirePasswordChange": true,
       "createdAt": "2026-06-30T06:19:26.867Z"
+    },
+    {
+      "id": "u-6",
+      "username": "employee",
+      "email": "employee@hsac.gov.ph",
+      "fullName": "Andres B. Bonifacio",
+      "role": "Personnel",
+      "employeeId": "EMP006",
+      "status": "Active",
+      "createdAt": "2026-07-02T07:12:32.840Z"
     }
   ],
   "employees": [
@@ -597,6 +607,18 @@
       "email": "ligaya.haban@hsac.gov.ph",
       "officialEmail": "ligaya.haban@hsac.gov.ph",
       "dateHired": "2010-01-01"
+    },
+    {
+      "id": "emp-6",
+      "employeeId": "EMP006",
+      "employeeType": "Plantilla",
+      "fullName": "Andres B. Bonifacio",
+      "position": "Personnel",
+      "division": "Adjudication Division",
+      "employmentStatus": "Permanent",
+      "salaryGrade": 15,
+      "officialEmail": "andres.bonifacio@hsac.gov.ph",
+      "isActive": true
     }
   ],
   "employmentHistory": [
@@ -1120,6 +1142,42 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "log-1782976264407-907",
+      "timestamp": "2026-07-02T07:11:04.407Z",
+      "userId": "u-hr",
+      "username": "hr",
+      "role": "HR Officer",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1782975002444-159",
+      "timestamp": "2026-07-02T06:50:02.444Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1782974964272-705",
+      "timestamp": "2026-07-02T06:49:24.272Z",
+      "userId": "u-hr",
+      "username": "hr",
+      "role": "HR Officer",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1782974829788-298",
+      "timestamp": "2026-07-02T06:47:09.788Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
     {
       "id": "log-1782795309183-882",
       "timestamp": "2026-06-30T04:55:09.183Z",

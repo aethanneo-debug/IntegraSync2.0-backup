@@ -2130,7 +2130,7 @@ app.get("/api/notifications", authenticateToken, (req: any, res) => {
       return roleMatches && (!n.targetEmployeeId || n.targetEmployeeId === employeeId);
     }
     return roleMatches;
-  });
+  }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   res.json({ status: "success", data: filtered });
 });
 

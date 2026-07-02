@@ -103,14 +103,6 @@ export default function Sidebar({
       visible: role === UserRole.EMPLOYEE
     },
 
-    // DIVISION CHIEF (APPROVALS OFFICE COCKPIT)
-    {
-      id: "approvals",
-      label: "Approval Office Cockpit",
-      icon: ShieldCheck,
-      visible: role === UserRole.SUPER_ADMIN
-    },
-
     // DIVISION CHIEF (USER ACCOUNT & ROLE ALLOCATION)
     {
       id: "user-accounts",

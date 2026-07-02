@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { User, AnyRequest, RequestType, RequestStatus } from "../types";
-import { apiCall } from "../utils";
+import { apiCall, getLocalTodayString } from "../utils";
 import { 
   User as UserIcon, 
   Send, 
@@ -450,6 +450,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                   <input
                     type="date"
                     required
+                    min={getLocalTodayString()}
                     value={startDate}
                     onChange={e => setStartDate(e.target.value)}
                     className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg font-mono text-slate-700"
@@ -462,6 +463,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                     <input
                       type="date"
                       required
+                      min={startDate || getLocalTodayString()}
                       value={endDate}
                       onChange={e => setEndDate(e.target.value)}
                       className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg font-mono text-slate-700"

@@ -17,7 +17,10 @@ import {
   FileCheck2,
   X
 } from "lucide-react";
-import { apiCall, formatDate, getRequestTypeColor } from "../utils";
+import { apiCall, formatDate, getRequestTypeColor, getLocalTodayString } from "../utils";
+
+import AdminUnifiedRequests from "./AdminUnifiedRequests";
+import HrUnifiedRequests from "./HrUnifiedRequests";
 
 interface RequestsViewProps {
   user: User;
@@ -240,184 +243,87 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
         </button>
       </div>
 
-      {/* PENDING APPROVALS BOARD (IF ACCOUNT ROLE HAS PRIVILEGES) */}
-      {user.role !== UserRole.EMPLOYEE && (
-        <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-          <h2 className="text-xs font-bold font-sans text-slate-800 uppercase tracking-tight flex items-center">
-            <ClipboardList size={15} className="mr-2 text-amber-500 animate-pulse" />
-            Active Regional Approvals Desk ({approvalPool.length})
-          </h2>
+      {user.role === UserRole.SUPER_ADMIN ? (
+        <AdminUnifiedRequests user={user} onRefresh={onRefresh} />
+      ) : user.role === UserRole.HR_OFFICER ? (
+        <HrUnifiedRequests user={user} onRefresh={onRefresh} />
+      ) : (
+        <>
+          {/* Detailed single request adjudication for other roles if needed, though usually empty */}
+          {user.role !== UserRole.EMPLOYEE && approvalPool.length > 0 && (
+            <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+              <h2 className="text-xs font-bold font-sans text-slate-800 uppercase tracking-tight flex items-center">
+                <ClipboardList size={15} className="mr-2 text-amber-500 animate-pulse" />
+                Active Regional Approvals Desk ({approvalPool.length})
+              </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {approvalPool.length > 0 ? (
-              approvalPool.map((req) => (
-                <div 
-                  key={req.id} 
-                  onClick={() => { setSelectedReviewReq(req); setApprovalParams({ remarks: "" }); }}
-                  className={`p-4 border border-slate-150 rounded-xl hover:shadow-md cursor-pointer transition-all flex flex-col justify-between ${
-                    selectedReviewReq?.id === req.id ? "bg-slate-50 border-amber-400 font-medium" : "bg-white"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-start">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${getRequestTypeColor(req.requestType)}`}>
-                        {req.requestType}
-                      </span>
-                      <span className="text-[9px] text-slate-400 font-mono">{formatDate(req.dateRequested)}</span>
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-bold text-slate-800">{req.employeeName}</p>
-                      
-                      {/* DYNAMIC SHORT SPECS */}
-                      {req.requestType === RequestType.LEAVE && (
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          Leave type: {(req as any).leaveType} • {(req as any).startDate} to {(req as any).endDate}
-                        </p>
-                      )}
-                      {req.requestType === RequestType.SERVICE_RECORD && (
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          Copies: {(req as any).copies} • Purpose: {(req as any).purpose}
-                        </p>
-                      )}
-                      {req.requestType === RequestType.VEHICLE && (
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          Destination: {(req as any).destination} • Needed: {(req as any).dateNeeded}
-                        </p>
-                      )}
-                      {req.requestType === RequestType.ZOOM && (
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          Title: {(req as any).meetingTitle} • Date: {(req as any).meetingDate}
-                        </p>
-                      )}
-                      {req.requestType === RequestType.SUPPLY && (
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          Supply: {(req as any).supplyName} • Qty: {(req as any).quantity}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3 text-[10px] text-slate-400 flex items-center justify-end font-semibold">
-                    <span>Examine Approval</span>
-                    <ArrowRight size={10} className="ml-1" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-slate-400 font-mono text-[10px] md:col-span-2 py-6 border border-dashed border-slate-200 rounded-xl text-center bg-slate-50/50">
-                Excellent. Your active approvals desk is cleared!
-              </p>
-            )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-100/50 border-b border-slate-200">
+                  <th className="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                  <th className="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                  <th className="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Requester</th>
+                  <th className="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Details</th>
+                  <th className="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {approvalPool.length > 0 ? (
+                  approvalPool.map((req) => (
+                    <tr 
+                      key={req.id} 
+                      onClick={() => { setSelectedReviewReq(req); setApprovalParams({ remarks: "" }); }}
+                      className={`hover:bg-slate-50 transition-colors cursor-pointer ${
+                        selectedReviewReq?.id === req.id ? "bg-amber-50/50" : ""
+                      }`}
+                    >
+                      <td className="p-3 text-[11px] text-slate-600 font-mono whitespace-nowrap">{formatDate(req.dateRequested)}</td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${getRequestTypeColor(req.requestType)}`}>
+                          {req.requestType}
+                        </span>
+                      </td>
+                      <td className="p-3 text-xs text-slate-800 font-bold">{req.employeeName}</td>
+                      <td className="p-3 text-[11px] text-slate-600">
+                        {req.requestType === RequestType.LEAVE && (
+                          <span>Leave: {(req as any).leaveType} • {(req as any).startDate} to {(req as any).endDate}</span>
+                        )}
+                        {req.requestType === RequestType.SERVICE_RECORD && (
+                          <span>Copies: {(req as any).copies} • Purpose: {(req as any).purpose}</span>
+                        )}
+                        {req.requestType === RequestType.VEHICLE && (
+                          <span>Destination: {(req as any).destination} • Needed: {(req as any).dateNeeded}</span>
+                        )}
+                        {req.requestType === RequestType.ZOOM && (
+                          <span>Title: {(req as any).meetingTitle} • Date: {(req as any).meetingDate}</span>
+                        )}
+                        {req.requestType === RequestType.SUPPLY && (
+                          <span>Supply: {(req as any).supplyName} • Qty: {(req as any).quantity}</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-right">
+                        <span className="text-[10px] text-slate-400 flex items-center justify-end font-semibold hover:text-amber-600">
+                          <span>Examine</span>
+                          <ArrowRight size={10} className="ml-1" />
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-[10px] text-slate-400 font-mono bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                      Excellent. Your active approvals desk is cleared!
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </section>
       )}
 
-      {/* HR LIQUIDATION VERIFICATION QUEUE (FOR HR OFFICER ONLY) */}
-      {user.role === UserRole.HR_OFFICER && (
-        <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-          <h2 className="text-xs font-bold font-sans text-slate-800 uppercase tracking-tight flex items-center">
-            <ClipboardList size={15} className="mr-2 text-blue-500 animate-pulse" />
-            HR Liquidation Verification Queue ({liqSubmissions.filter(s => s.status === "Pending HR Review").length})
-          </h2>
-          <p className="text-[11px] text-slate-500">Verify requested employee travel expenditures and activities relationship before forwarding to Finance validation.</p>
 
-          <div className="grid grid-cols-1 gap-4">
-            {liqSubmissions.filter(s => s.status === "Pending HR Review").length > 0 ? (
-              liqSubmissions.filter(s => s.status === "Pending HR Review").map((sub) => (
-                <div key={sub.id} className="p-4 border border-blue-100 rounded-xl bg-blue-50/10 hover:border-blue-200 transition-all flex flex-col md:flex-row justify-between gap-4">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-[10px] font-mono bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
-                        {sub.submissionNo}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono">{sub.createdAt?.split("T")[0]}</span>
-                    </div>
-
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-800">{sub.employeeName}</h3>
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        <strong>Assigned Activity Reference:</strong> {sub.activityId}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-w-md">
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase block font-mono">Released Advanced</span>
-                        <strong className="text-xs text-slate-700">₱{sub.totalReleased.toLocaleString()}</strong>
-                      </div>
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase block font-mono">Liquidated Spent</span>
-                        <strong className="text-xs text-slate-700">₱{sub.totalSpent.toLocaleString()}</strong>
-                      </div>
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase block font-mono">Remaining Balance</span>
-                        <strong className="text-xs text-slate-700">₱{sub.remainingBalance.toLocaleString()}</strong>
-                      </div>
-                    </div>
-
-                    {sub.remarks && (
-                      <p className="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-50 font-sans">
-                        "{sub.remarks}"
-                      </p>
-                    )}
-                    
-                    {sub.supportingDocs && sub.supportingDocs.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase block font-mono">Receipts / Invoices</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {sub.supportingDocs.map((doc: any, i: number) => (
-                            <span key={i} className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-mono">
-                              {doc.name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ACTION CORNER */}
-                  <div className="w-full md:w-64 border-t md:border-t-0 md:border-l border-slate-100 pt-3 md:pt-0 md:pl-4 flex flex-col justify-between">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Verification Remarks</label>
-                      <textarea
-                        placeholder="Add remarks for verification check..."
-                        value={selectedLiqSub?.id === sub.id ? liqRemarks : ""}
-                        onChange={(e) => {
-                          setSelectedLiqSub(sub);
-                          setLiqRemarks(e.target.value);
-                        }}
-                        className="w-full border border-slate-200 bg-white p-2 rounded-lg text-xs h-16 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="flex gap-2 justify-end pt-3">
-                      <button
-                        type="button"
-                        onClick={() => handleHRLiquidationAction(sub.id, "Return", selectedLiqSub?.id === sub.id ? liqRemarks : "")}
-                        className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
-                      >
-                        Return
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleHRLiquidationAction(sub.id, "Verify", selectedLiqSub?.id === sub.id ? liqRemarks : "")}
-                        className="bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold shadow shadow-blue-600/10 cursor-pointer"
-                      >
-                        Verify & Forward
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-slate-400 font-mono text-[10px] py-6 border border-dashed border-slate-200 rounded-xl text-center bg-slate-50/50">
-                No liquidation reports awaiting HR verification.
-              </p>
-            )}
-          </div>
-        </section>
-      )}
 
       {/* DETAILED ADJUDICATION WORKSPACE DRAWER FOR MANAGER ACTION */}
       {selectedReviewReq && (
@@ -586,6 +492,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
           </table>
         </div>
       </section>
+      </>)}
 
       {/* DIGITIER FORM SUBMIT MODULE MODAL */}
       {isSubmitModalOpen && (
@@ -653,6 +560,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
                       <input
                         required
                         type="date"
+                        min={getLocalTodayString()}
                         value={leaveForm.startDate}
                         onChange={(e) => setLeaveForm({ ...leaveForm, startDate: e.target.value })}
                         className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
@@ -663,6 +571,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
                       <input
                         required
                         type="date"
+                        min={leaveForm.startDate || getLocalTodayString()}
                         value={leaveForm.endDate}
                         onChange={(e) => setLeaveForm({ ...leaveForm, endDate: e.target.value })}
                         className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
@@ -731,6 +640,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
                       <input
                         required
                         type="date"
+                        min={getLocalTodayString()}
                         value={vehicleForm.dateNeeded}
                         onChange={(e) => setVehicleForm({ ...vehicleForm, dateNeeded: e.target.value })}
                         className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
@@ -782,6 +692,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
                       <input
                         required
                         type="date"
+                        min={getLocalTodayString()}
                         value={zoomForm.meetingDate}
                         onChange={(e) => setZoomForm({ ...zoomForm, meetingDate: e.target.value })}
                         className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[11px]"
