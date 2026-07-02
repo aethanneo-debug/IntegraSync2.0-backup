@@ -286,12 +286,14 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
               <h2 className="text-xs font-bold text-slate-800 capitalize">Bulk {bulkActionType === 'verify' ? 'Endorse to Chief' : 'Reject'} ({selectedIds.length} items)</h2>
             </div>
             <div className="p-5 space-y-4">
-              <textarea
-                placeholder={`Optional remarks for bulk ${bulkActionType === 'verify' ? 'endorsement/verification' : 'rejection'}...`}
-                value={remarks}
-                onChange={e => setRemarks(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 h-24 font-sans"
-              />
+              {bulkActionType !== 'verify' && (
+                <textarea
+                  placeholder={`Optional remarks for bulk ${bulkActionType === 'verify' ? 'endorsement/verification' : 'rejection'}...`}
+                  value={remarks}
+                  onChange={e => setRemarks(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 h-24 font-sans"
+                />
+              )}
               <div className="flex justify-end space-x-2">
                 <button onClick={() => setBulkActionType(null)} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
                 <button onClick={() => handleBulkAction(bulkActionType)} className={`px-4 py-1.5 text-xs font-bold text-white rounded cursor-pointer ${

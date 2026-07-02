@@ -18,7 +18,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
   const [filterCategory, setFilterCategory] = useState<string>("All");
 
   const [remarks, setRemarks] = useState("");
-  const [bulkActionType, setBulkActionType] = useState<"approve" | "return" | "reject" | null>(null);
+  const [bulkActionType, setBulkActionType] = useState<"approve" | "reject" | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -134,7 +134,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
     }
   };
 
-  async function handleBulkAction(action: "approve" | "return" | "reject") {
+  async function handleBulkAction(action: "approve" | "reject") {
     if (selectedIds.length === 0) return;
     setLoading(true);
     setError("");
@@ -149,19 +149,19 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
 
       try {
         if (item._category === "Personnel Request") {
-          const decision = action === "approve" ? "Approved" : action === "return" ? "Returned" : "Rejected";
+          const decision = action === "approve" ? "Approved" : "Rejected";
           await apiCall(`/api/requests/${item.id}/chief-decide`, {
             method: "PUT",
             body: JSON.stringify({ decision, remarks: remarks || `Bulk ${decision}` })
           });
         } else if (item._category === "Liquidation") {
-          const decision = action === "approve" ? "Approve" : action === "return" ? "Return" : "Reject";
+          const decision = action === "approve" ? "Approve" : "Reject";
           await apiCall(`/api/liquidation-submissions/${item.id}/chief-action`, {
             method: "PUT",
             body: JSON.stringify({ action: decision, remarks: remarks || `Bulk ${decision}` })
           });
         } else if (item._category === "Budget Request") {
-          const status = action === "approve" ? "Approved" : "Returned";
+          const status = action === "approve" ? "Approved" : "Rejected";
           await apiCall(`/api/budget-requests/${item.id}/approve`, {
             method: "PUT",
             body: JSON.stringify({ status, remarks: remarks || `Bulk ${status}` })
@@ -218,9 +218,6 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
         <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
           <span className="text-xs font-semibold text-blue-800">{selectedIds.length} items selected</span>
           <div className="flex items-center space-x-2">
-            <button onClick={() => setBulkActionType("return")} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded text-[11px] font-bold flex items-center cursor-pointer shadow-sm">
-              <Undo2 size={12} className="mr-1" /> Return
-            </button>
             <button onClick={() => setBulkActionType("reject")} className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded text-[11px] font-bold flex items-center cursor-pointer shadow-sm">
               <X size={12} className="mr-1" /> Reject
             </button>
@@ -314,17 +311,18 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
               <h2 className="text-xs font-bold text-slate-800 capitalize">Bulk {bulkActionType} ({selectedIds.length} items)</h2>
             </div>
             <div className="p-5 space-y-4">
-              <textarea
-                placeholder={`Optional remarks for bulk ${bulkActionType}...`}
-                value={remarks}
-                onChange={e => setRemarks(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 h-24 font-sans"
-              />
+              {bulkActionType !== "approve" && (
+                <textarea
+                  placeholder={`Optional remarks for bulk ${bulkActionType}...`}
+                  value={remarks}
+                  onChange={e => setRemarks(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 h-24 font-sans"
+                />
+              )}
               <div className="flex justify-end space-x-2">
                 <button onClick={() => setBulkActionType(null)} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
                 <button onClick={() => handleBulkAction(bulkActionType)} className={`px-4 py-1.5 text-xs font-bold text-white rounded cursor-pointer ${
-                  bulkActionType === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : 
-                  bulkActionType === "return" ? "bg-amber-600 hover:bg-amber-700" : "bg-rose-600 hover:bg-rose-700"
+                  bulkActionType === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
                 }`}>
                   Confirm {bulkActionType}
                 </button>
