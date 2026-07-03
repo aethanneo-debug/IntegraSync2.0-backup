@@ -1970,7 +1970,7 @@ app.post("/api/requests", authenticateToken, (req: any, res) => {
     employeeId,
     employeeName: fullName,
     dateRequested: new Date().toISOString().split("T")[0],
-    status: RequestStatus.PENDING
+    status: data.requestType === RequestType.VEHICLE ? RequestStatus.ENDORSED_TO_CHIEF : RequestStatus.PENDING
   };
 
   let fullReq: AnyRequest;

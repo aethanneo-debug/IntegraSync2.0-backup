@@ -16,6 +16,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
   const [allItems, setAllItems] = useState<any[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>("All");
+  const [filterStatus, setFilterStatus] = useState<string>("All");
 
   const [remarks, setRemarks] = useState("");
   const [bulkActionType, setBulkActionType] = useState<"approve" | "reject" | null>(null);
@@ -104,11 +105,21 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
   }
 
   const filteredItems = allItems.filter(item => {
-    if (filterCategory === "All") return true;
-    if (["Personnel Request", "Liquidation", "Budget Request"].includes(filterCategory)) {
-      return item._category === filterCategory;
+    let catMatch = true;
+    if (filterCategory !== "All") {
+      if (["Personnel Request", "Liquidation", "Budget Request"].includes(filterCategory)) {
+        catMatch = item._category === filterCategory;
+      } else {
+        catMatch = item.requestType === filterCategory || item.leaveType === filterCategory;
+      }
     }
-    return item.requestType === filterCategory || item.leaveType === filterCategory;
+    
+    let statMatch = true;
+    if (filterStatus !== "All") {
+      statMatch = item.status && item.status.includes(filterStatus);
+    }
+    
+    return catMatch && statMatch;
   });
 
   const isActionable = (status: string) => {
@@ -204,6 +215,19 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
             <option value="Liquidation">Liquidations</option>
             <option value="Budget Request">Budget Requests</option>
           </select>
+          
+          <select 
+            value={filterStatus} 
+            onChange={e => setFilterStatus(e.target.value)}
+            className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <option value="All">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Endorsed">Endorsed</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+
           <button onClick={fetchData} className="p-1.5 bg-slate-200 hover:bg-slate-300 rounded text-slate-600 transition-colors cursor-pointer" title="Refresh">
             <RefreshCcw size={14} className={loading ? "animate-spin" : ""} />
           </button>
