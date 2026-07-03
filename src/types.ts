@@ -14,7 +14,7 @@ export interface User {
   role: UserRole;
   employeeId?: string;
   plantillaNumber?: string;
-  status?: "Active" | "Deactivated";
+  status?: "Active" | "Deactivated" | "Archived";
   passwordHash?: string;
   requirePasswordChange?: boolean;
   createdAt: string;

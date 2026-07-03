@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { User, UserRole } from "../types";
 import { apiCall } from "../utils";
-import { Plus, Edit2, Trash2, Key, ShieldCheck, Mail, UserCheck, Search, X } from "lucide-react";
+import { Plus, Edit2, Archive, Key, ShieldCheck, Mail, UserCheck, Search, X } from "lucide-react";
 
 interface UserAccountsViewProps {
   currentUser: User;
@@ -19,7 +19,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.EMPLOYEE);
-  const [accountStatus, setAccountStatus] = useState<"Active" | "Deactivated">("Active");
+  const [accountStatus, setAccountStatus] = useState<"Active" | "Deactivated" | "Archived">("Active");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -106,18 +106,21 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Are you absolutely sure you want to permanently delete this user account credential?")) {
+    if (!window.confirm("Are you absolutely sure you want to archive this user account credential?")) {
       return;
     }
     setError("");
     try {
-      const res = await apiCall(`/api/admin/users/${id}`, { method: "DELETE" });
+      const res = await apiCall(`/api/admin/users/${id}`, { 
+        method: "PUT",
+        body: JSON.stringify({ status: "Archived" })
+      });
       if (res.status === "success") {
-        setSuccess("User account safely removed from local directory.");
+        setSuccess("User account successfully archived.");
         fetchUsers();
       }
     } catch (err: any) {
-      setError(err.message || "Could not delete user account.");
+      setError(err.message || "Could not archive user account.");
     }
   }
 
@@ -230,11 +233,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                         {usr.plantillaNumber || "None Assigned"}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold font-mono tracking-wider border ${
-                          (usr.status || "Active") === "Active"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-rose-50 text-rose-700 border-rose-200"
-                        }`}>
+                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold font-mono tracking-wider border ${usr.status === "Archived" ? "bg-slate-100 text-slate-600 border-slate-300" : (usr.status || "Active") === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"}`}>
                           {usr.status || "Active"}
                         </span>
                       </td>
@@ -244,7 +243,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                             <button
                               type="button"
                               onClick={async () => {
-                                const nextStatus = (usr.status || "Active") === "Active" ? "Deactivated" : "Active";
+                                const nextStatus = (usr.status === "Archived" || usr.status === "Deactivated") ? "Active" : "Deactivated";
                                 try {
                                   setLoading(true);
                                   const res = await apiCall(`/api/admin/users/${usr.id}`, {
@@ -260,14 +259,10 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                                   setLoading(false);
                                 }
                               }}
-                              className={`p-1 px-2.5 py-1.5 rounded text-xs flex items-center space-x-1 cursor-pointer transition-colors ${
-                                (usr.status || "Active") === "Active"
-                                  ? "hover:bg-amber-50 text-amber-600 hover:text-amber-700"
-                                  : "hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700"
-                              }`}
+                              className={`p-1 px-2.5 py-1.5 rounded text-xs flex items-center space-x-1 cursor-pointer transition-colors ${(usr.status || "Active") === "Active" ? "hover:bg-amber-50 text-amber-600 hover:text-amber-700" : "hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700"}`}
                             >
                               <UserCheck size={12} />
-                              <span>{(usr.status || "Active") === "Active" ? "Deactivate" : "Activate"}</span>
+                              <span>{usr.status === "Archived" ? "Restore" : (usr.status || "Active") === "Active" ? "Deactivate" : "Activate"}</span>
                             </button>
                           )}
 
@@ -282,10 +277,10 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                           {usr.username !== "admin" && usr.id !== currentUser.id && (
                             <button
                               onClick={() => handleDelete(usr.id)}
-                              className="p-1 px-2.5 py-1.5 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
+                              className="p-1 px-2.5 py-1.5 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-700 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
                             >
-                              <Trash2 size={12} />
-                              <span>Delete</span>
+                              <Archive size={12} />
+                              <span>Archive</span>
                             </button>
                           )}
                         </div>
@@ -385,11 +380,12 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                 <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Logon Status</label>
                 <select
                   value={accountStatus}
-                  onChange={e => setAccountStatus(e.target.value as "Active" | "Deactivated")}
+                  onChange={e => setAccountStatus(e.target.value as "Active" | "Deactivated" | "Archived")}
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
                 >
                   <option value="Active">Active</option>
                   <option value="Deactivated">Deactivated</option>
+                  <option value="Archived">Archived</option>
                 </select>
               </div>
 
