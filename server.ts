@@ -2008,7 +2008,8 @@ app.post("/api/requests", authenticateToken, (req: any, res) => {
         meetingDate: data.meetingDate,
         startTime: data.startTime,
         endTime: data.endTime,
-        alternativeHost: data.alternativeHost
+        alternativeHost: data.alternativeHost,
+        reason: data.reason
       } as any;
       break;
     case RequestType.SUPPLY:

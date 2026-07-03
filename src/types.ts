@@ -277,6 +277,7 @@ export interface VehicleRequest extends BaseRequest {
 
 export interface ZoomRequest extends BaseRequest {
   meetingTitle: string;
+  reason?: string;
   meetingDate: string;
   startTime: string;
   endTime: string;

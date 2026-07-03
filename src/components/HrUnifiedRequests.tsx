@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { User, RequestStatus } from "../types";
 import { apiCall } from "../utils";
-import { Check, Undo2, RefreshCcw } from "lucide-react";
+import { Check, Undo2, RefreshCcw, X, Info } from "lucide-react";
 
 interface HrUnifiedRequestsProps {
   user: User;
@@ -20,6 +20,9 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
 
   const [remarks, setRemarks] = useState("");
   const [bulkActionType, setBulkActionType] = useState<"verify" | "return" | null>(null);
+  const [viewItem, setViewItem] = useState<any | null>(null);
+  const [modalActionType, setModalActionType] = useState<"verify" | "return" | null>(null);
+  const [modalRemarks, setModalRemarks] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -225,6 +228,151 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
         </div>
       )}
 
+      {viewItem && (
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="font-bold text-slate-800 text-sm">Request Details</h3>
+                <p className="text-[10px] text-slate-500 font-mono mt-0.5">{viewItem._category} &bull; {viewItem._displayDate}</p>
+              </div>
+              <button onClick={() => setViewItem(null)} className="text-slate-400 hover:text-slate-600 bg-white border border-slate-200 rounded p-1">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 text-sm space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Requester</p>
+                  <p className="font-medium text-slate-700">{viewItem._requester}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Status</p>
+                  <p className="font-medium text-slate-700">{viewItem.status}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Title / Type</p>
+                <p className="text-slate-700">{viewItem._title}</p>
+              </div>
+              
+              {viewItem.purpose && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Purpose</p>
+                  <p className="text-slate-600 bg-slate-50 p-2 border border-slate-100 rounded text-xs">{viewItem.purpose}</p>
+                </div>
+              )}
+              {viewItem.reason && !viewItem.purpose && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Reason</p>
+                  <p className="text-slate-600 bg-slate-50 p-2 border border-slate-100 rounded text-xs">{viewItem.reason}</p>
+                </div>
+              )}
+              
+              {viewItem.destination && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Destination</p>
+                  <p className="text-slate-700">{viewItem.destination}</p>
+                </div>
+              )}
+              {viewItem.passengers && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Passengers</p>
+                  <p className="text-slate-700">{viewItem.passengers}</p>
+                </div>
+              )}
+              {viewItem.dateNeeded && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Date Needed</p>
+                  <p className="text-slate-700">{viewItem.dateNeeded}</p>
+                </div>
+              )}
+              {viewItem.meetingDate && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Meeting Date</p>
+                  <p className="text-slate-700">{viewItem.meetingDate}</p>
+                </div>
+              )}
+              {viewItem.meetingTitle && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Meeting Title</p>
+                  <p className="text-slate-700">{viewItem.meetingTitle}</p>
+                </div>
+              )}
+              {viewItem.quantity && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase font-mono mb-1">Quantity</p>
+                  <p className="text-slate-700">{viewItem.quantity}</p>
+                </div>
+              )}
+
+              {isActionable(viewItem.status) && (
+                <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => setModalActionType("return")} 
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors ${modalActionType === "return" ? "bg-amber-600 text-white border-amber-700 ring-2 ring-amber-600/20 shadow-inner" : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"}`}
+                    >
+                      Reject / Return
+                    </button>
+                    <button 
+                      onClick={() => setModalActionType("verify")} 
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors ${modalActionType === "verify" ? "bg-blue-600 text-white border-blue-700 ring-2 ring-blue-600/20 shadow-inner" : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"}`}
+                    >
+                      Endorse to Chief
+                    </button>
+                  </div>
+                  {modalActionType && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Remarks</label>
+                      <input 
+                        type="text" 
+                        value={modalRemarks}
+                        onChange={e => setModalRemarks(e.target.value)}
+                        placeholder="Optional remarks..."
+                        className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+                      />
+                      <button
+                        onClick={async () => {
+                          setLoading(true);
+                          try {
+                            if (viewItem._category === "Personnel Request") {
+                              const endorse = modalActionType === "verify";
+                              await apiCall(`/api/requests/${viewItem.id}/hr-endorse`, {
+                                method: "PUT",
+                                body: JSON.stringify({ endorse, remarks: modalRemarks || `HR ${endorse ? 'Endorsement' : 'Return'}` })
+                              });
+                            } else if (viewItem._category === "Liquidation") {
+                              const decision = modalActionType === "verify" ? "Verify" : "Return";
+                              await apiCall(`/api/liquidation-submissions/${viewItem.id}/hr-verify`, {
+                                method: "PUT",
+                                body: JSON.stringify({ action: decision, remarks: modalRemarks || `HR ${decision}` })
+                              });
+                            }
+                            setSuccess("Action applied successfully.");
+                            setViewItem(null);
+                            setModalActionType(null);
+                            setModalRemarks("");
+                            fetchData();
+                            onRefresh();
+                          } catch (err) {
+                            setError("Action failed.");
+                            setLoading(false);
+                          }
+                        }}
+                        className="w-full py-2 bg-slate-900 text-white font-bold text-xs rounded-lg shadow-sm hover:bg-slate-800"
+                      >
+                        Confirm {modalActionType === "verify" ? "Endorsement" : "Return"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
@@ -254,8 +402,8 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
               <tr><td colSpan={7} className="p-8 text-center text-xs text-slate-400">No records found matching criteria.</td></tr>
             ) : (
               filteredItems.map(item => (
-                <tr key={item._unifiedId} className={`hover:bg-slate-50 transition-colors ${selectedIds.includes(item._unifiedId) ? "bg-blue-50/30" : ""}`}>
-                  <td className="p-3 text-center">
+                <tr key={item._unifiedId} onClick={() => { setViewItem(item); setModalActionType(null); setModalRemarks(""); }} className={`hover:bg-slate-50 transition-colors cursor-pointer ${selectedIds.includes(item._unifiedId) ? "bg-blue-50/30" : ""}`}>
+                  <td className="p-3 text-center" onClick={e => e.stopPropagation()}>
                     {isActionable(item.status) && (
                       <input 
                         type="checkbox" 
