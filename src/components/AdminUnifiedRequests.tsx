@@ -116,7 +116,11 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
     
     let statMatch = true;
     if (filterStatus !== "All") {
-      statMatch = item.status && item.status.includes(filterStatus);
+      if (filterStatus === "Pending") {
+        statMatch = item.status && (item.status.includes("Pending") || item.status.includes("Endorsed"));
+      } else {
+        statMatch = item.status && item.status.includes(filterStatus);
+      }
     }
     
     return catMatch && statMatch;
@@ -223,7 +227,6 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
           >
             <option value="All">All Status</option>
             <option value="Pending">Pending</option>
-            <option value="Endorsed">Endorsed</option>
             <option value="Approved">Approved</option>
             <option value="Rejected">Rejected</option>
           </select>

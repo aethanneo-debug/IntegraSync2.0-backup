@@ -59,6 +59,8 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
   const [newFileName, setNewFileName] = useState("");
   const [newFileType, setNewFileType] = useState("Receipt/Invoice");
   const [resubmittingItem, setResubmittingItem] = useState<any | null>(null);
+  const [resubmitRequest, setResubmitRequest] = useState<any | null>(null);
+  const [resubmitDates, setResubmitDates] = useState({ dateRequested: "", startDate: "", endDate: "", dateNeeded: "", meetingDate: "" });
 
   useEffect(() => {
     fetchPortalData();
@@ -173,6 +175,43 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
     }
   }
 
+  async function handleRequestResubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!resubmitRequest) return;
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const payload: any = {
+        dateRequested: resubmitDates.dateRequested
+      };
+      
+      if (resubmitRequest.requestType === RequestType.LEAVE) {
+        payload.startDate = resubmitDates.startDate;
+        payload.endDate = resubmitDates.endDate;
+      } else if (resubmitRequest.requestType === RequestType.VEHICLE) {
+        payload.dateNeeded = resubmitDates.dateNeeded;
+      } else if (resubmitRequest.requestType === RequestType.ZOOM) {
+        payload.meetingDate = resubmitDates.meetingDate;
+      }
+      
+      const res = await apiCall(`/api/requests/${resubmitRequest.id}/resubmit`, {
+        method: "PUT",
+        body: JSON.stringify(payload)
+      });
+      if (res.status === "success") {
+        setSuccess("Personnel request successfully resubmitted.");
+        setResubmitRequest(null);
+        fetchPortalData();
+        onRefresh();
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to resubmit request.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Handle Liquidation submission
   async function handleLiquidationSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -284,6 +323,185 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
   }
 
   return (
+    <>
+      {resubmitRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-900 text-white">
+              <h2 className="text-sm font-bold tracking-wider font-mono">FILE {resubmitRequest.requestType.toUpperCase()} FORM</h2>
+              <button onClick={() => setResubmitRequest(null)} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+                <XCircle size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleRequestResubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Filing As</label>
+                <div className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-700 font-semibold">
+                  {user.fullName} ({user.role})
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(resubmitRequest.requestType === RequestType.VEHICLE) && (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Travel / Target Destination</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={resubmitRequest.destination || ""}
+                        className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Commissions Passengers *</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={resubmitRequest.passengers || ""}
+                        className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {(resubmitRequest.requestType === RequestType.LEAVE) && (
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Leave Category</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={resubmitRequest.leaveType || ""}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                    />
+                  </div>
+                )}
+                
+                {(resubmitRequest.requestType === RequestType.ZOOM) && (
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Meeting Title</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={resubmitRequest.meetingTitle || ""}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                    />
+                  </div>
+                )}
+                
+                {(resubmitRequest.requestType === RequestType.SERVICE_RECORD) && (
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Number of Copies</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={resubmitRequest.copies || ""}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                    />
+                  </div>
+                )}
+                
+                {(resubmitRequest.requestType === RequestType.SUPPLY) && (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Supply Item</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={resubmitRequest.supplyName || ""}
+                        className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Quantity</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={resubmitRequest.quantity || ""}
+                        className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(resubmitRequest.requestType === RequestType.LEAVE) ? (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-700 uppercase font-mono">Start Date *</label>
+                      <input
+                        type="date"
+                        required
+                        value={resubmitDates.startDate}
+                        onChange={e => setResubmitDates({...resubmitDates, startDate: e.target.value})}
+                        className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-700 uppercase font-mono">End Date *</label>
+                      <input
+                        type="date"
+                        required
+                        value={resubmitDates.endDate}
+                        onChange={e => setResubmitDates({...resubmitDates, endDate: e.target.value})}
+                        className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
+                      />
+                    </div>
+                  </>
+                ) : (resubmitRequest.requestType === RequestType.VEHICLE) ? (
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-700 uppercase font-mono">Travel Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={resubmitDates.dateNeeded}
+                      onChange={e => setResubmitDates({...resubmitDates, dateNeeded: e.target.value})}
+                      className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
+                    />
+                  </div>
+                ) : (resubmitRequest.requestType === RequestType.ZOOM) ? (
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-700 uppercase font-mono">Meeting Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={resubmitDates.meetingDate}
+                      onChange={e => setResubmitDates({...resubmitDates, meetingDate: e.target.value})}
+                      className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-1 md:col-span-2">
+                    <p className="text-xs text-slate-500 italic">No specific dates to modify for this request type. You may directly resubmit.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Purpose / Reason *</label>
+                <textarea
+                  disabled
+                  value={resubmitRequest.purpose || resubmitRequest.reason || ""}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed h-24"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-md cursor-pointer"
+                >
+                  {loading ? "Submitting..." : "Resubmit Request"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* SIDEBAR SUB-MENU CONTROL UNIT */}
       <div className="lg:col-span-1 bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-2 shrink-0">
@@ -472,15 +690,28 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                 )}
 
                 {reqType === RequestType.VEHICLE && (
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Destination Office</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Vigan, Ilocos Sur"
-                      value={destination}
-                      onChange={e => setDestination(e.target.value)}
-                      className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs"
-                    />
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Destination Office</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Vigan, Ilocos Sur"
+                        value={destination}
+                        onChange={e => setDestination(e.target.value)}
+                        className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Commissions Passengers *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Eulogio IV Esturas, Jolly Joy A. Alm"
+                        value={passengers}
+                        onChange={e => setPassengers(e.target.value)}
+                        className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -530,7 +761,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                         )}
                       </div>
 
-                      <div>
+                      <div className="flex flex-col items-end space-y-2">
                         <span className={`text-[9px] font-semibold font-mono px-2 py-0.5 rounded-full ${
                           r.status === "Approved" 
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
@@ -542,6 +773,23 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                         }`}>
                           {r.status}
                         </span>
+                        {(r.status === "Rejected" || r.status === "Returned by HR" || r.status === "Returned by Division Chief") && (
+                          <button
+                            onClick={() => {
+                              setResubmitRequest(r);
+                              setResubmitDates({
+                                dateRequested: r.dateRequested || "",
+                                startDate: r.startDate || "",
+                                endDate: r.endDate || "",
+                                dateNeeded: r.dateNeeded || "",
+                                meetingDate: r.meetingDate || ""
+                              });
+                            }}
+                            className="mt-2 px-3 py-1 bg-blue-600 text-white text-[10px] font-bold rounded hover:bg-blue-700 shadow-sm transition-colors cursor-pointer"
+                          >
+                            Resubmit
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -878,5 +1126,6 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
         )}
       </div>
     </div>
+    </>
   );
 }
