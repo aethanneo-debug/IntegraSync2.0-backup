@@ -918,6 +918,10 @@ app.post("/api/auth/login", (req, res) => {
   }
 
   if (user && isValidPassword) {
+    if (user.status === "Archived") {
+      logEvent(user.id, user.username, user.role, "Blocked Login Attempt", "A blocked login attempt was recorded for an archived account.");
+      return res.status(403).json({ status: "error", message: "Your account has been archived. Please contact an administrator for assistance." });
+    }
     if (user.status === "Deactivated") {
       logEvent(user.id, user.username, user.role, "Blocked Login Attempt", "A blocked login attempt was recorded for deactivated account credentials.");
       return res.status(403).json({ status: "error", message: "This user credentials account is Deactivated. Please consult the Division Chief / Administrator." });
@@ -2242,7 +2246,9 @@ app.put("/api/admin/users/:id", authenticateToken, (req: any, res) => {
   if (email) targetUser.email = email;
   if (role) targetUser.role = role;
   if (username) targetUser.username = username;
-  if (status) targetUser.status = status;
+  if (status) {
+    targetUser.status = (status === "Deactivated") ? "Archived" : status;
+  }
 
   logEvent(req.user.id, req.user.username, req.user.role, "Modify User Account", `Modified user details for: ${targetUser.username} (${status || targetUser.status})`);
   saveDB();
@@ -2295,6 +2301,39 @@ app.post("/api/admin/users/:id/reset-password", authenticateToken, (req: any, re
   logEvent(req.user.id, req.user.username, req.user.role, "Reset User Password", `Reset password for user: ${targetUser.username} to temporary default`);
   saveDB();
   res.json({ status: "success", message: "Password reset successfully" });
+});
+
+
+app.post("/api/admin/users/:id/archive", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Requires Administrator privileges" });
+  }
+  const { id } = req.params;
+  const targetUser = db.users.find(u => u.id === id);
+  if (!targetUser) return res.status(404).json({ status: "error", message: "User not found" });
+  if (targetUser.username === "admin" || targetUser.id === req.user.id) {
+    return res.status(400).json({ status: "error", message: "Cannot archive the seed superuser or your own account" });
+  }
+
+
+  targetUser.status = "Archived";
+  logEvent(req.user.id, req.user.username, req.user.role, "Archived", `Archived user account: ${targetUser.username}`);
+  saveDB();
+  res.json({ status: "success", message: "User account archived" });
+});
+
+app.post("/api/admin/users/:id/restore", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Requires Administrator privileges" });
+  }
+  const { id } = req.params;
+  const targetUser = db.users.find(u => u.id === id);
+  if (!targetUser) return res.status(404).json({ status: "error", message: "User not found" });
+
+  targetUser.status = "Active";
+  logEvent(req.user.id, req.user.username, req.user.role, "Restored", `Restored user account: ${targetUser.username}`);
+  saveDB();
+  res.json({ status: "success", message: "User account restored" });
 });
 
 app.delete("/api/admin/users/:id", authenticateToken, (req: any, res) => {

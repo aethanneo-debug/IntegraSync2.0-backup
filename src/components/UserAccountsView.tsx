@@ -10,6 +10,7 @@ interface UserAccountsViewProps {
 export default function UserAccountsView({ currentUser }: UserAccountsViewProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"active" | "archived">("active");
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -19,7 +20,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.EMPLOYEE);
-  const [accountStatus, setAccountStatus] = useState<"Active" | "Deactivated" | "Archived">("Active");
+  const [accountStatus, setAccountStatus] = useState<"Active" | "Archived">("Active");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -106,9 +107,6 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
   }
 
   async function handleResetPassword(id: string, username: string) {
-    if (!window.confirm(`Are you sure you want to reset the password for ${username} to the default temporary password?`)) {
-      return;
-    }
     setError("");
     try {
       setLoading(true);
@@ -124,30 +122,31 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm("Are you absolutely sure you want to archive this user account credential?")) {
-      return;
-    }
+  
+  async function handleRestoreUser(id: string) {
     setError("");
     try {
-      const res = await apiCall(`/api/admin/users/${id}`, { 
-        method: "PUT",
-        body: JSON.stringify({ status: "Archived" })
+      const res = await apiCall(`/api/admin/users/${id}/restore`, { 
+        method: "POST"
       });
       if (res.status === "success") {
-        setSuccess("User account successfully archived.");
+        setSuccess("User account successfully restored.");
         fetchUsers();
       }
     } catch (err: any) {
-      setError(err.message || "Could not archive user account.");
+      setError(err.message || "Could not restore user account.");
     }
   }
 
+  
   const filteredUsers = users.filter(u => 
-    u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-    u.username.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase()) ||
-    u.role.toLowerCase().includes(search.toLowerCase())
+    (viewMode === "archived" ? u.status === "Archived" : (u.status || "Active") !== "Archived") &&
+    (
+      u.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      u.username.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase()) ||
+      u.role.toLowerCase().includes(search.toLowerCase())
+    )
   );
 
   return (
@@ -167,7 +166,25 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
         </button>
       </div>
 
-      {search || filteredUsers.length > 0 ? (
+
+      {/* TABS */}
+      <div className="flex items-center space-x-2 border-b border-slate-200">
+        <button
+          onClick={() => setViewMode("active")}
+          className={`px-4 py-2 text-sm font-semibold transition-colors ${viewMode === "active" ? "text-blue-600 border-b-2 border-blue-600" : "text-slate-500 hover:text-slate-700"}`}
+        >
+          Active Accounts
+        </button>
+        <button
+          onClick={() => setViewMode("archived")}
+          className={`px-4 py-2 text-sm font-semibold transition-colors ${viewMode === "archived" ? "text-blue-600 border-b-2 border-blue-600" : "text-slate-500 hover:text-slate-700"}`}
+        >
+          Archived Accounts
+        </button>
+      </div>
+
+      {/* SEARCH AND CONTENT */}
+      {search || filteredUsers.length > 0 || viewMode === "archived" ? (
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           {/* SEARCH BAR */}
           <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex items-center space-x-3">
@@ -257,61 +274,64 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end items-center space-x-2">
-                          {usr.username !== "admin" && usr.id !== currentUser.id && (
+                                                                        <div className="flex justify-end items-center space-x-2">
+                          {usr.status === "Archived" ? (
                             <button
                               type="button"
-                              onClick={async () => {
-                                const nextStatus = (usr.status === "Archived" || usr.status === "Deactivated") ? "Active" : "Deactivated";
-                                try {
-                                  setLoading(true);
-                                  const res = await apiCall(`/api/admin/users/${usr.id}`, {
-                                    method: "PUT",
-                                    body: JSON.stringify({ status: nextStatus })
-                                  });
-                                  if (res.status === "success") {
-                                    fetchUsers();
-                                  }
-                                } catch (err: any) {
-                                  setError(err.message || "Failed to alter status.");
-                                } finally {
-                                  setLoading(false);
-                                }
-                              }}
-                              className={`p-1 px-2.5 py-1.5 rounded text-xs flex items-center space-x-1 cursor-pointer transition-colors ${(usr.status || "Active") === "Active" ? "hover:bg-amber-50 text-amber-600 hover:text-amber-700" : "hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700"}`}
+                              onClick={() => handleRestoreUser(usr.id)}
+                              className="p-1 px-2.5 py-1.5 hover:bg-emerald-50 rounded text-emerald-600 hover:text-emerald-700 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
                             >
                               <UserCheck size={12} />
-                              <span>{usr.status === "Archived" ? "Restore" : (usr.status || "Active") === "Active" ? "Deactivate" : "Activate"}</span>
+                              <span>Restore</span>
                             </button>
-                          )}
-
-                          {usr.username !== "admin" && (
-                            <button
-                              onClick={() => handleResetPassword(usr.id, usr.username)}
-                              className="p-1 px-2.5 py-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-blue-600 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
-                              title="Reset Password"
-                            >
-                              <Key size={12} />
-                              <span>Reset Pass</span>
-                            </button>
-                          )}
-                          
-                          <button
-                            onClick={() => openEditModal(usr)}
-                            className="p-1 px-2.5 py-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-700 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
-                          >
-                            <Edit2 size={12} />
-                            <span>Edit</span>
-                          </button>
-                          
-                          {usr.username !== "admin" && usr.id !== currentUser.id && (
-                            <button
-                              onClick={() => handleDelete(usr.id)}
-                              className="p-1 px-2.5 py-1.5 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-700 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
-                            >
-                              <Archive size={12} />
-                              <span>Archive</span>
-                            </button>
+                          ) : (
+                            <>
+                              {usr.username !== "admin" && usr.id !== currentUser.id && (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      setLoading(true);
+                                      const res = await apiCall(`/api/admin/users/${usr.id}`, {
+                                        method: "PUT",
+                                        body: JSON.stringify({ status: "Archived" })
+                                      });
+                                      if (res.status === "success") {
+                                        setSuccess("Account archived successfully.");
+                                        fetchUsers();
+                                      }
+                                    } catch (err: any) {
+                                      setError(err.message || "Failed to alter status.");
+                                    } finally {
+                                      setLoading(false);
+                                    }
+                                  }}
+                                  className="p-1 px-2.5 py-1.5 rounded text-xs flex items-center space-x-1 cursor-pointer transition-colors hover:bg-rose-50 text-rose-600 hover:text-rose-700"
+                                >
+                                  <Archive size={12} />
+                                  <span>Archive</span>
+                                </button>
+                              )}
+                              {usr.username !== "admin" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleResetPassword(usr.id, usr.username)}
+                                  className="p-1 px-2.5 py-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-blue-600 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
+                                  title="Reset Password"
+                                >
+                                  <Key size={12} />
+                                  <span>Reset Pass</span>
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(usr)}
+                                className="p-1 px-2.5 py-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-700 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
+                              >
+                                <Edit2 size={12} />
+                                <span>Edit</span>
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -410,11 +430,11 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                 <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Logon Status</label>
                 <select
                   value={accountStatus}
-                  onChange={e => setAccountStatus(e.target.value as "Active" | "Deactivated" | "Archived")}
+                  onChange={e => setAccountStatus(e.target.value as "Active" | "Archived")}
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
                 >
                   <option value="Active">Active</option>
-                  <option value="Deactivated">Deactivated</option>
+                  
                   <option value="Archived">Archived</option>
                 </select>
               </div>

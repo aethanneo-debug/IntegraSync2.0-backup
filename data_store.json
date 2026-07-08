@@ -229,6 +229,16 @@
       "employeeId": "EMP006",
       "status": "Active",
       "createdAt": "2026-07-02T07:12:32.840Z"
+    },
+    {
+      "id": "u-1783479372980",
+      "username": "test",
+      "email": "test@hsac.gov.ph",
+      "fullName": "Test User",
+      "role": "Employee / Personnel",
+      "status": "Active",
+      "employeeId": "EMP127",
+      "createdAt": "2026-07-08T02:56:12.980Z"
     }
   ],
   "employees": [
@@ -1142,6 +1152,276 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "log-1783479817580-983",
+      "timestamp": "2026-07-08T03:03:37.580Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Restored",
+      "details": "Restored user account: test"
+    },
+    {
+      "id": "log-1783479817573-144",
+      "timestamp": "2026-07-08T03:03:37.573Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: test (Deactivated)"
+    },
+    {
+      "id": "log-1783479817559-835",
+      "timestamp": "2026-07-08T03:03:37.559Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479793649-257",
+      "timestamp": "2026-07-08T03:03:13.649Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Restored",
+      "details": "Restored user account: test"
+    },
+    {
+      "id": "log-1783479793643-31",
+      "timestamp": "2026-07-08T03:03:13.643Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: test (Deactivated)"
+    },
+    {
+      "id": "log-1783479793635-557",
+      "timestamp": "2026-07-08T03:03:13.635Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479700757-277",
+      "timestamp": "2026-07-08T03:01:40.757Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Restored",
+      "details": "Restored user account: test"
+    },
+    {
+      "id": "log-1783479700748-515",
+      "timestamp": "2026-07-08T03:01:40.748Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479693967-680",
+      "timestamp": "2026-07-08T03:01:33.967Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479686893-526",
+      "timestamp": "2026-07-08T03:01:26.893Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479561298-465",
+      "timestamp": "2026-07-08T02:59:21.298Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: eulogio.esturas (Active)"
+    },
+    {
+      "id": "log-1783479504390-424",
+      "timestamp": "2026-07-08T02:58:24.390Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: eulogio.esturas (Deactivated)"
+    },
+    {
+      "id": "log-1783479372991-238",
+      "timestamp": "2026-07-08T02:56:12.991Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Archived",
+      "details": "Archived user account: test"
+    },
+    {
+      "id": "log-1783479372987-518",
+      "timestamp": "2026-07-08T02:56:12.987Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: test (Deactivated)"
+    },
+    {
+      "id": "log-1783479372980-134",
+      "timestamp": "2026-07-08T02:56:12.980Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Create User Account",
+      "details": "Created digital user: test with role Employee / Personnel"
+    },
+    {
+      "id": "log-1783479372971-717",
+      "timestamp": "2026-07-08T02:56:12.971Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479320361-518",
+      "timestamp": "2026-07-08T02:55:20.361Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783479225127-87",
+      "timestamp": "2026-07-08T02:53:45.127Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: employee (Active)"
+    },
+    {
+      "id": "log-1783479217100-490",
+      "timestamp": "2026-07-08T02:53:37.100Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: employee (Deactivated)"
+    },
+    {
+      "id": "log-1783478928259-283",
+      "timestamp": "2026-07-08T02:48:48.259Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478923169-46",
+      "timestamp": "2026-07-08T02:48:43.169Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478917372-723",
+      "timestamp": "2026-07-08T02:48:37.372Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478908052-842",
+      "timestamp": "2026-07-08T02:48:28.052Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478900434-727",
+      "timestamp": "2026-07-08T02:48:20.434Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478893153-838",
+      "timestamp": "2026-07-08T02:48:13.153Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478886042-219",
+      "timestamp": "2026-07-08T02:48:06.042Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783478671675-999",
+      "timestamp": "2026-07-08T02:44:31.675Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783477537283-46",
+      "timestamp": "2026-07-08T02:25:37.283Z",
+      "userId": "u-6",
+      "username": "employee",
+      "role": "Personnel",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783477336779-133",
+      "timestamp": "2026-07-08T02:22:16.779Z",
+      "userId": "u-6",
+      "username": "employee",
+      "role": "Personnel",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783476651893-293",
+      "timestamp": "2026-07-08T02:10:51.893Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
     {
       "id": "log-1783475547840-787",
       "timestamp": "2026-07-08T01:52:27.840Z",
