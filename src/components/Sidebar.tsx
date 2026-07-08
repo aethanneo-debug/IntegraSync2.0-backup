@@ -16,7 +16,7 @@ import {
   ChevronDown,
   ChevronRight,
   ShieldCheck,
-  Settings
+  Settings, Briefcase
 } from "lucide-react";
 import { User, UserRole } from "../types";
 import HsacLogo from "./HsacLogo";
@@ -59,6 +59,7 @@ export default function Sidebar({
       subItems: [
         { id: "pds", label: "Personal Data Sheet", icon: FileText, visible: true },
         { id: "employees", label: "Employee Records", icon: Users, visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER].includes(role) },
+        { id: "activities", label: "Activities & Assignments", icon: Briefcase, visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER].includes(role) },
         { id: "trainings_seminars", label: "Trainings and Seminar", icon: BookOpen, visible: true }
       ]
     },
@@ -107,7 +108,7 @@ export default function Sidebar({
     {
       id: "user-accounts",
       label: "User Accounts Desk",
-      icon: Settings,
+      icon: Settings, Briefcase,
       visible: role === UserRole.SUPER_ADMIN
     },
     

@@ -1143,6 +1143,69 @@
   ],
   "auditLogs": [
     {
+      "id": "log-1783475547840-787",
+      "timestamp": "2026-07-08T01:52:27.840Z",
+      "userId": "u-6",
+      "username": "employee",
+      "role": "Personnel",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783475518067-991",
+      "timestamp": "2026-07-08T01:51:58.068Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783475304252-71",
+      "timestamp": "2026-07-08T01:48:24.252Z",
+      "userId": "u-6",
+      "username": "employee",
+      "role": "Personnel",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783475287696-411",
+      "timestamp": "2026-07-08T01:48:07.696Z",
+      "userId": "u-6",
+      "username": "employee",
+      "role": "Personnel",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783475255524-636",
+      "timestamp": "2026-07-08T01:47:35.524Z",
+      "userId": "u-hr",
+      "username": "hr",
+      "role": "HR Officer",
+      "action": "Create Activity",
+      "details": "Created assigned employee activity: Aaojbsoufbu"
+    },
+    {
+      "id": "log-1783474995067-140",
+      "timestamp": "2026-07-08T01:43:15.067Z",
+      "userId": "u-hr",
+      "username": "hr",
+      "role": "HR Officer",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1783474579865-805",
+      "timestamp": "2026-07-08T01:36:19.865Z",
+      "userId": "u-6",
+      "username": "employee",
+      "role": "Personnel",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
       "id": "log-1782976264407-907",
       "timestamp": "2026-07-02T07:11:04.407Z",
       "userId": "u-hr",
@@ -1758,7 +1821,19 @@
       "targetRole": "Personnel"
     }
   ],
-  "activities": [],
+  "activities": [
+    {
+      "id": "act-1783475255524",
+      "activityNo": "ACT-2026-01",
+      "title": "Aaojbsoufbu",
+      "description": "iabsuogfuoabf",
+      "dateScheduled": "2026-07-08",
+      "allottedBudget": 20000,
+      "budgetId": "b-2",
+      "assignedEmployeeId": "EMP006",
+      "status": "Active"
+    }
+  ],
   "liquidationSubmissions": [],
   "activityBudgetLinks": [
     {

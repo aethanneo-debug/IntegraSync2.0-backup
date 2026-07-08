@@ -2363,7 +2363,9 @@ app.put("/api/requests/:id/chief-decide", authenticateToken, (req: any, res) => 
 app.get("/api/activities", authenticateToken, (req: any, res) => {
   const { role, employeeId } = req.user;
   if (role === UserRole.EMPLOYEE) {
-    const list = db.activities.filter(a => a.assignedEmployeeId === employeeId);
+    const empRecord = db.employees.find((e: any) => e.employeeId === employeeId);
+    const altId = empRecord ? empRecord.id : null;
+    const list = db.activities.filter((a: any) => a.assignedEmployeeId === employeeId || a.assignedEmployeeId === altId);
     return res.json({ status: "success", data: list });
   }
   res.json({ status: "success", data: db.activities });

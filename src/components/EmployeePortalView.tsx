@@ -435,6 +435,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                       <input
                         type="date"
                         required
+                        min={getLocalTodayString()}
                         value={resubmitDates.startDate}
                         onChange={e => setResubmitDates({...resubmitDates, startDate: e.target.value})}
                         className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
@@ -445,6 +446,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                       <input
                         type="date"
                         required
+                        min={resubmitDates.startDate || getLocalTodayString()}
                         value={resubmitDates.endDate}
                         onChange={e => setResubmitDates({...resubmitDates, endDate: e.target.value})}
                         className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
@@ -457,6 +459,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                     <input
                       type="date"
                       required
+                      min={getLocalTodayString()}
                       value={resubmitDates.dateNeeded}
                       onChange={e => setResubmitDates({...resubmitDates, dateNeeded: e.target.value})}
                       className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"
@@ -468,6 +471,7 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                     <input
                       type="date"
                       required
+                      min={getLocalTodayString()}
                       value={resubmitDates.meetingDate}
                       onChange={e => setResubmitDates({...resubmitDates, meetingDate: e.target.value})}
                       className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg bg-blue-50 text-slate-700"

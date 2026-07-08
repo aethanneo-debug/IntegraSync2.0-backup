@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import DashboardView from "./components/DashboardView";
 import EmployeesView from "./components/EmployeesView";
+import ActivitiesView from "./components/ActivitiesView";
 import FinanceView from "./components/FinanceView";
 import AssetsView from "./components/AssetsView";
 import RequestsView from "./components/RequestsView";
@@ -244,6 +245,8 @@ export default function App() {
             setActiveTab={setActiveTab}
           />
         );
+      case "activities":
+        return <ActivitiesView user={user} onRefresh={triggerRefresh} />;
       case "employees":
       case "personnel":
         return (
