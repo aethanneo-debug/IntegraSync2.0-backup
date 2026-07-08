@@ -150,7 +150,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
   );
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 overflow-y-auto p-6 space-y-6 w-full">
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 bg-white rounded-xl border border-slate-100 shadow-sm">
         <div>
@@ -159,7 +159,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
         </div>
         <button
           onClick={openCreateModal}
-          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all cursor-pointer"
+          className="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all cursor-pointer"
         >
           <Plus size={15} />
           <span>Provision New Account</span>

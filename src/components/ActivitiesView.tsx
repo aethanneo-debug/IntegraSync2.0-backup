@@ -92,7 +92,7 @@ export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps)
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 overflow-y-auto p-6 space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-xl border border-slate-100 shadow-sm">
         <div>

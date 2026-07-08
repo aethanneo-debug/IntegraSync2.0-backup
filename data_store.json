@@ -17,7 +17,7 @@
       "fullName": "Maria Clara V. Santos (Dev HR)",
       "role": "HR Officer",
       "employeeId": "DEV-HR-MOCK",
-      "status": "Active",
+      "status": "Archived",
       "createdAt": "2026-01-15T08:30:00Z"
     },
     {
@@ -1152,6 +1152,24 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "log-1783520781304-434",
+      "timestamp": "2026-07-08T14:26:21.304Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Modify User Account",
+      "details": "Modified user details for: hr (Archived)"
+    },
+    {
+      "id": "log-1783520781289-896",
+      "timestamp": "2026-07-08T14:26:21.289Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
     {
       "id": "log-1783479817580-983",
       "timestamp": "2026-07-08T03:03:37.580Z",

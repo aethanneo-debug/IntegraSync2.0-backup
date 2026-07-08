@@ -433,7 +433,7 @@ export default function App() {
 
   // Gated System Workspace layout frame
   return (
-    <div id="applet-viewport-frame" className="h-screen w-screen flex overflow-hidden bg-slate-950 text-slate-800 font-sans font-sans">
+    <div id="applet-viewport-frame" className="h-screen w-screen flex overflow-hidden bg-slate-50 text-slate-800 font-sans font-sans">
       
       {/* SIDEBAR NAVIGATION */}
       <Sidebar 
