@@ -16,7 +16,8 @@ import {
   ChevronDown,
   ChevronRight,
   ShieldCheck,
-  Settings, Briefcase
+  Settings, Briefcase,
+  Key
 } from "lucide-react";
 import { User, UserRole } from "../types";
 import HsacLogo from "./HsacLogo";
@@ -27,6 +28,7 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onLogout: () => void;
+  onChangePassword?: () => void;
   activeFinanceSubTab?: string;
   setActiveFinanceSubTab?: (tab: string) => void;
 }
@@ -35,7 +37,8 @@ export default function Sidebar({
   user, 
   activeTab, 
   setActiveTab, 
-  onLogout, 
+  onLogout,
+  onChangePassword, 
   activeFinanceSubTab = "dashboard", 
   setActiveFinanceSubTab 
 }: SidebarProps) {
@@ -267,6 +270,15 @@ export default function Sidebar({
 
       {/* FOOTER SIGNOUT ACTION */}
       <div className="p-3 border-t border-slate-800 bg-slate-950/40">
+        {onChangePassword && (
+          <button
+            onClick={onChangePassword}
+            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-blue-400 hover:bg-blue-950/20 hover:text-blue-300 transition-colors cursor-pointer mb-2"
+          >
+            <Key size={16} />
+            <span>Change My Password</span>
+          </button>
+        )}
         <button
           id="btn-signout"
           onClick={onLogout}

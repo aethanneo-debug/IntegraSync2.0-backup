@@ -105,6 +105,25 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
     }
   }
 
+  async function handleResetPassword(id: string, username: string) {
+    if (!window.confirm(`Are you sure you want to reset the password for ${username} to the default temporary password?`)) {
+      return;
+    }
+    setError("");
+    try {
+      setLoading(true);
+      const res = await apiCall(`/api/admin/users/${id}/reset-password`, { method: "POST" });
+      if (res.status === "success") {
+        setSuccess(`Password for ${username} successfully reset to temporary default.`);
+        fetchUsers();
+      }
+    } catch (err: any) {
+      setError(err.message || "Could not reset password.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!window.confirm("Are you absolutely sure you want to archive this user account credential?")) {
       return;
@@ -266,6 +285,17 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                             </button>
                           )}
 
+                          {usr.username !== "admin" && (
+                            <button
+                              onClick={() => handleResetPassword(usr.id, usr.username)}
+                              className="p-1 px-2.5 py-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-blue-600 text-xs flex items-center space-x-1 cursor-pointer transition-colors"
+                              title="Reset Password"
+                            >
+                              <Key size={12} />
+                              <span>Reset Pass</span>
+                            </button>
+                          )}
+                          
                           <button
                             onClick={() => openEditModal(usr)}
                             className="p-1 px-2.5 py-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-700 text-xs flex items-center space-x-1 cursor-pointer transition-colors"

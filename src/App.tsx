@@ -55,6 +55,7 @@ export default function App() {
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
   const [currentPasswordInput, setCurrentPasswordInput] = useState("");
   const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
   const [passwordChangeError, setPasswordChangeError] = useState("");
 
   // Retrieve current session on mount
@@ -440,6 +441,7 @@ export default function App() {
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         onLogout={handleSignOut}
+        onChangePassword={() => setShowPasswordChangeModal(true)}
         activeFinanceSubTab={activeFinanceSubTab}
         setActiveFinanceSubTab={setActiveFinanceSubTab}
       />
@@ -534,12 +536,32 @@ export default function App() {
       {showPasswordChangeModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100 flex flex-col">
-            <div className="bg-slate-900 text-white p-5 flex items-center space-x-3">
-              <Lock className="text-yellow-400 shrink-0" size={20} />
-              <div>
-                <h3 className="font-bold text-sm tracking-wide">FIRST-TIME PASSWORD CHANGE</h3>
-                <p className="text-[10px] text-slate-300">Administrative security protocol requires a new credential password.</p>
+                        <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Lock className="text-yellow-400 shrink-0" size={20} />
+                <div>
+                  <h3 className="font-bold text-sm tracking-wide">{user?.requirePasswordChange ? "FIRST-TIME PASSWORD CHANGE" : "CHANGE PASSWORD"}</h3>
+                  <p className="text-[10px] text-slate-300">{user?.requirePasswordChange ? "Administrative security protocol requires a new credential password." : "Update your credential password."}</p>
+                </div>
               </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  if (user?.requirePasswordChange) {
+                    handleSignOut();
+                  } else {
+                    setShowPasswordChangeModal(false);
+                    setCurrentPasswordInput("");
+                    setNewPasswordInput("");
+                    setConfirmPasswordInput("");
+                    setPasswordChangeError("");
+                  }
+                }} 
+                className="text-slate-400 hover:text-white p-1 cursor-pointer transition-colors"
+                title={user?.requirePasswordChange ? "Sign Out" : "Close"}
+              >
+                <X size={18} />
+              </button>
             </div>
             <div className="p-6 space-y-4">
               {passwordChangeError && (
@@ -559,14 +581,25 @@ export default function App() {
                 />
               </div>
 
-              <div className="space-y-1">
+                            <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-500 uppercase">New Password</label>
                 <input 
                   type="password" 
-                  placeholder="Minimum 6 characters" 
+                  placeholder="Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char" 
                   className="w-full border border-slate-200 p-2 text-xs rounded-lg focus:border-slate-800 outline-none font-mono" 
                   value={newPasswordInput} 
                   onChange={(e) => setNewPasswordInput(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Confirm New Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Confirm your new password" 
+                  className="w-full border border-slate-200 p-2 text-xs rounded-lg focus:border-slate-800 outline-none font-mono" 
+                  value={confirmPasswordInput} 
+                  onChange={(e) => setConfirmPasswordInput(e.target.value)}
                 />
               </div>
 
@@ -574,13 +607,40 @@ export default function App() {
                 By updating your password, your digital workspace profile will be synchronized securely under standard encrypt directives.
               </p>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end space-x-2">
+              {!user?.requirePasswordChange && (
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordChangeModal(false);
+                    setCurrentPasswordInput("");
+                    setNewPasswordInput("");
+                    setConfirmPasswordInput("");
+                    setPasswordChangeError("");
+                  }}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition-all"
+                >
+                  Cancel
+                </button>
+              )}
               <button 
                 type="button"
                 onClick={async () => {
                   setPasswordChangeError("");
-                  if (!currentPasswordInput || !newPasswordInput) {
-                    setPasswordChangeError("Both current and new passwords are required.");
+                                    if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput) {
+                    setPasswordChangeError("All password fields are required.");
+                    return;
+                  }
+                  if (newPasswordInput !== confirmPasswordInput) {
+                    setPasswordChangeError("New passwords do not match.");
+                    return;
+                  }
+                  const hasUpperCase = /[A-Z]/.test(newPasswordInput);
+                  const hasLowerCase = /[a-z]/.test(newPasswordInput);
+                  const hasNumbers = /\d/.test(newPasswordInput);
+                  const hasSpecial = /[^A-Za-z0-9]/.test(newPasswordInput);
+                  if (newPasswordInput.length < 8 || !hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecial) {
+                    setPasswordChangeError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
                     return;
                   }
                   if (newPasswordInput.length < 6) {
@@ -595,11 +655,15 @@ export default function App() {
                         newPassword: newPasswordInput
                       })
                     });
-                    if (res.status === "success") {
+                                        if (res.status === "success") {
+                      if (res.token) {
+                        localStorage.setItem("ipfms_token", res.token);
+                      }
                       alert("Password updated successfully! Welcome to your official HSAC workspace.");
                       setShowPasswordChangeModal(false);
                       setCurrentPasswordInput("");
                       setNewPasswordInput("");
+                      setConfirmPasswordInput("");
                       triggerRefresh();
                     } else {
                       setPasswordChangeError(res.message || "Failed to update password.");
@@ -608,7 +672,7 @@ export default function App() {
                     setPasswordChangeError(err.message || "An unexpected error occurred.");
                   }
                 }}
-                className="w-full px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition-all"
+                className="flex-1 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition-all text-center"
               >
                 Save and Synchronize
               </button>

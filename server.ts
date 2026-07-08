@@ -966,8 +966,18 @@ app.post("/api/auth/logout", (req, res) => {
 
 app.post("/api/auth/change-password", authenticateToken, (req: any, res) => {
   const { currentPassword, newPassword } = req.body;
-  if (!newPassword || newPassword.trim().length < 6) {
-    return res.status(400).json({ status: "error", message: "New password must be at least 6 characters." });
+  if (!newPassword) {
+    return res.status(400).json({ status: "error", message: "New password is required" });
+  }
+
+  // Validate password policy
+  const hasUpperCase = /[A-Z]/.test(newPassword);
+  const hasLowerCase = /[a-z]/.test(newPassword);
+  const hasNumbers = /\d/.test(newPassword);
+  const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+  
+  if (newPassword.length < 8 || !hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecial) {
+    return res.status(400).json({ status: "error", message: "Password does not meet complexity requirements." });
   }
 
   const user = db.users.find(u => u.id === req.user.id);
@@ -2237,6 +2247,54 @@ app.put("/api/admin/users/:id", authenticateToken, (req: any, res) => {
   logEvent(req.user.id, req.user.username, req.user.role, "Modify User Account", `Modified user details for: ${targetUser.username} (${status || targetUser.status})`);
   saveDB();
   res.json({ status: "success", data: targetUser });
+});
+
+app.post("/api/admin/employees/:id/reset-password", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Requires Administrator privileges" });
+  }
+  const { id } = req.params;
+  const targetEmployee = db.employees.find((e: any) => e.id === id);
+  if (!targetEmployee) {
+    return res.status(404).json({ status: "error", message: "Employee not found" });
+  }
+
+  // Find the associated user account
+  const targetUser = db.users.find((u: any) => u.employeeId === targetEmployee.id || u.employeeId === targetEmployee.employeeId);
+  if (!targetUser) {
+    return res.status(404).json({ status: "error", message: "No user account linked to this employee" });
+  }
+
+  // Hash "password123"
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync("password123", salt, 1000, 64, 'sha512').toString('hex');
+  targetUser.passwordHash = `${salt}:${hash}`;
+  targetUser.requirePasswordChange = true;
+
+  logEvent(req.user.id, req.user.username, req.user.role, "Reset User Password", `Reset password for employee: ${targetEmployee.fullName} (${targetUser.username}) to temporary default`);
+  saveDB();
+  res.json({ status: "success", message: "Password reset successfully for employee's account" });
+});
+
+app.post("/api/admin/users/:id/reset-password", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Requires Administrator privileges" });
+  }
+  const { id } = req.params;
+  const targetUser = db.users.find((u: any) => u.id === id);
+  if (!targetUser) {
+    return res.status(404).json({ status: "error", message: "User not found" });
+  }
+
+  // Hash "password123"
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync("password123", salt, 1000, 64, 'sha512').toString('hex');
+  targetUser.passwordHash = `${salt}:${hash}`;
+  targetUser.requirePasswordChange = true;
+
+  logEvent(req.user.id, req.user.username, req.user.role, "Reset User Password", `Reset password for user: ${targetUser.username} to temporary default`);
+  saveDB();
+  res.json({ status: "success", message: "Password reset successfully" });
 });
 
 app.delete("/api/admin/users/:id", authenticateToken, (req: any, res) => {

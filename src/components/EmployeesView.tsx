@@ -18,7 +18,8 @@ import {
   RefreshCw,
   Clock,
   X,
-  FileCheck
+  FileCheck,
+  Key
 } from "lucide-react";
 import { apiCall, formatDate } from "../utils";
 
@@ -187,6 +188,23 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
   }
 
   // Delete employee record
+
+  async function handleResetPassword(id: string, fullName: string) {
+    if (!window.confirm(`Are you sure you want to reset the password for ${fullName} to the default temporary password?`)) {
+      return;
+    }
+    try {
+      const res = await apiCall(`/api/admin/employees/${id}/reset-password`, { method: "POST" });
+      if (res.status === "success") {
+        alert(`Password for ${fullName} successfully reset to temporary default.`);
+      } else {
+        alert(res.message || "Failed to reset password.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Could not reset password.");
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!window.confirm("Danger: Deleting this personnel file will clear matching service logs. Complete?")) return;
     try {
@@ -519,8 +537,16 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
             </div>
 
             {/* ADMINISTRATION DESTRUCTIVE ACTIONS */}
-            {user.role === UserRole.SUPER_ADMIN && (
-              <div className="pt-6 border-t border-slate-100 flex gap-2">
+                        {user.role === UserRole.SUPER_ADMIN && (
+              <div className="pt-6 border-t border-slate-100 flex flex-col gap-2">
+                <button
+                  onClick={() => handleResetPassword(selectedEmp.id, selectedEmp.fullName)}
+                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1.5 rounded text-xs font-semibold flex items-center justify-center gap-1 shadow-sm transition-colors"
+                  title="Reset Password to Default"
+                >
+                  <Key size={13} />
+                  <span>Reset Employee Password</span>
+                </button>
                 <button
                   onClick={() => handleDelete(selectedEmp.id)}
                   className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-1.5 rounded text-xs font-semibold flex items-center justify-center gap-1 shadow-sm transition-colors"
