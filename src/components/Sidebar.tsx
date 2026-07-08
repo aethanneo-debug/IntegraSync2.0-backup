@@ -46,6 +46,7 @@ export default function Sidebar({
   setActiveFinanceSubTab 
 }: SidebarProps) {
   const role = user.role;
+  const [collapsedMenus, setCollapsedMenus] = React.useState<string[]>([]);
 
   // Determine which navigation links are shown based on roles
   const menuItems = [
@@ -72,10 +73,11 @@ export default function Sidebar({
     
     // FINANCE or ADMIN
     { 
-      id: "finance", 
-      label: "Financial Tracking", 
+      id: "finance",
+      label: "Financial Tracking",
       icon: FileText,
-      visible: [UserRole.SUPER_ADMIN, UserRole.FINANCE_OFFICER].includes(role)
+      visible: [UserRole.SUPER_ADMIN, UserRole.FINANCE_OFFICER].includes(role),
+      subItems: [] // Added so the arrow renders, actual items rendered conditionally
     },
 
     // BUDGET or ADMIN
@@ -182,17 +184,26 @@ export default function Sidebar({
                 <button
                   id={`btn-${item.id}`}
                   onClick={() => {
-                    // Toggle main item, or open it if it has sub items
-                    if (item.subItems) {
-                      if (!isActive) {
-                        setActiveTab(item.subItems[0].id); // default to first sub item
+                    if (item.subItems || item.id === "finance") {
+                      if (isActive) {
+                        if (collapsedMenus.includes(item.id)) {
+                          setCollapsedMenus(prev => prev.filter(id => id !== item.id));
+                        } else {
+                          setCollapsedMenus(prev => [...prev, item.id]);
+                        }
+                      } else {
+                        setCollapsedMenus(prev => prev.filter(id => id !== item.id));
+                        if (item.id === "finance") {
+                          setActiveTab("finance");
+                          if (setActiveFinanceSubTab) setActiveFinanceSubTab("dashboard");
+                        } else if (item.subItems && item.subItems.length > 0) {
+                          setActiveTab(item.subItems[0].id);
+                        } else {
+                          setActiveTab(item.id);
+                        }
                       }
                     } else {
                       setActiveTab(item.id);
-                    }
-                    
-                    if (item.id === "finance" && setActiveFinanceSubTab) {
-                      setActiveFinanceSubTab("dashboard");
                     }
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 ${
@@ -205,13 +216,13 @@ export default function Sidebar({
                     <IconComponent size={16} className={isActive ? "text-white" : "text-slate-400 group-hover:text-white"} />
                     <span>{item.label}</span>
                   </div>
-                  {item.subItems && (
-                    isActive ? <ChevronDown size={14} className="text-white shrink-0" /> : <ChevronRight size={14} className="text-slate-400 shrink-0" />
+                  {(item.subItems || item.id === "finance") && (
+                    (isActive && !collapsedMenus.includes(item.id)) ? <ChevronDown size={14} className="text-white shrink-0" /> : <ChevronRight size={14} className="text-slate-400 shrink-0" />
                   )}
                 </button>
 
                 {/* NESTED SUB-MENU */}
-                {item.subItems && isActive && (
+                {item.subItems && item.id !== "finance" && isActive && !collapsedMenus.includes(item.id) && (
                   <div className="pl-6 pr-1.5 py-1.5 flex flex-col space-y-1 border-l border-slate-705 ml-5 mt-1 bg-slate-950/20 rounded-r-lg">
                     {item.subItems.filter(s => s.visible !== false).map((subItem) => {
                       const isSubActive = activeTab === subItem.id;
@@ -237,7 +248,7 @@ export default function Sidebar({
                 )}
                 
                 {/* NESTED SUB-MENU ONLY FOR ACTIVE FINANCIAL TRACKING VIEW */}
-                {item.id === "finance" && isActive && (
+                {item.id === "finance" && isActive && !collapsedMenus.includes(item.id) && (
                   <div className="pl-6 pr-1.5 py-1.5 flex flex-col space-y-1 border-l border-slate-705 ml-5 mt-1 bg-slate-950/20 rounded-r-lg">
                     {[
                       { id: "dashboard", label: "Overview Dashboard", icon: LayoutDashboard },
