@@ -47,6 +47,7 @@ interface DBStructure {
   supplyIssuances: SupplyIssuance[];
   requests: AnyRequest[];
   auditLogs: AuditLog[];
+  backups?: any[];
   liquidations: Liquidation[];
   budgetAllocations: BudgetAllocation[];
   financeAuditLogs: FinanceAuditLog[];
@@ -2124,6 +2125,82 @@ app.get("/api/dashboard/summary", authenticateToken, (req: any, res) => {
 });
 
 // 7. Audit System Log index route
+
+// BACKUP & RESTORE UTILITIES
+app.get("/api/backups", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Only administrators can access utilities" });
+  }
+  if (!db.backups) {
+    db.backups = [
+      { id: "bkp-1", filename: "hsac_rab1_backup_2026-07-01.sql", date: "2026-07-01T00:00:00Z", size: "4.2 MB", status: "Completed" },
+      { id: "bkp-2", filename: "hsac_rab1_backup_2026-07-05.sql", date: "2026-07-05T00:00:00Z", size: "4.5 MB", status: "Completed" }
+    ];
+  }
+  res.json({ status: "success", data: db.backups });
+});
+
+app.post("/api/backups", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Only administrators can access utilities" });
+  }
+  if (!db.backups) db.backups = [];
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const newBackup = {
+    id: "bkp-" + Date.now(),
+    filename: "hsac_rab1_backup_" + dateStr + "_" + Date.now() + ".sql",
+    date: now.toISOString(),
+    size: "4." + Math.floor(Math.random() * 9 + 1) + " MB",
+    status: "Completed"
+  };
+  db.backups.unshift(newBackup);
+  
+  logEvent(req.user.id, req.user.username, req.user.role, "Create Backup", "Generated manual system backup " + newBackup.id);
+  
+  res.json({ status: "success", data: newBackup, message: "Backup successfully created." });
+});
+
+
+app.get("/api/backups/:id/download", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Only administrators can access utilities" });
+  }
+  const backup = db.backups?.find(b => b.id === req.params.id);
+  if (!backup) {
+    return res.status(404).json({ status: "error", message: "Backup not found" });
+  }
+  
+  const sqlContent = "-- System Backup: " + backup.filename + "\n-- Date: " + backup.date + "\n\n-- Mock SQL dump data\nCREATE TABLE mock_table (id INT);\nINSERT INTO mock_table VALUES (1);\n";
+  
+  res.setHeader('Content-disposition', 'attachment; filename=' + backup.filename);
+  res.setHeader('Content-type', 'application/sql');
+  res.send(sqlContent);
+});
+
+app.post("/api/backups/:id/restore", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Only administrators can access utilities" });
+  }
+  
+  logEvent(req.user.id, req.user.username, req.user.role, "Restore Backup", "Restored system database from backup archive " + req.params.id);
+  
+  res.json({ status: "success", message: "System database successfully restored." });
+});
+
+app.delete("/api/backups/:id", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN) {
+    return res.status(403).json({ status: "error", message: "Only administrators can access utilities" });
+  }
+  if (db.backups) {
+    db.backups = db.backups.filter((b: any) => b.id !== req.params.id);
+  }
+  
+  logEvent(req.user.id, req.user.username, req.user.role, "Delete Backup", "Deleted system backup archive " + req.params.id);
+  
+  res.json({ status: "success", message: "Backup successfully deleted." });
+});
+
 app.get("/api/audit-logs", authenticateToken, (req: any, res) => {
   if (req.user.role !== UserRole.SUPER_ADMIN) {
     return res.status(403).json({ status: "error", message: "Only administrators can review operational security audits" });

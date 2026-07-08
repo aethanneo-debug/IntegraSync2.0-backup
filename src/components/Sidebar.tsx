@@ -17,7 +17,10 @@ import {
   ChevronRight,
   ShieldCheck,
   Settings, Briefcase,
-  Key
+  Key,
+  Database,
+  Download,
+  Upload
 } from "lucide-react";
 import { User, UserRole } from "../types";
 import HsacLogo from "./HsacLogo";
@@ -123,12 +126,16 @@ export default function Sidebar({
       visible: role !== UserRole.EMPLOYEE 
     },
     
-    // ADMIN ONLY (AUDIT TRAIL)
+    // ADMIN ONLY (UTILITIES)
     { 
-      id: "audit", 
-      label: "Security Audit Logs", 
-      icon: ShieldAlert,
-      visible: role === UserRole.SUPER_ADMIN 
+      id: "utilities", 
+      label: "Utilities", 
+      icon: Database,
+      visible: role === UserRole.SUPER_ADMIN,
+      subItems: [
+        { id: "backup-restore", label: "Backup & Restore", icon: Download, visible: true },
+        { id: "audit", label: "Security Audit Logs", icon: ShieldAlert, visible: true }
+      ]
     }
   ];
 

@@ -10,6 +10,7 @@ import FinanceView from "./components/FinanceView";
 import AssetsView from "./components/AssetsView";
 import RequestsView from "./components/RequestsView";
 import AuditView from "./components/AuditView";
+import BackupRestoreView from "./components/BackupRestoreView";
 import ReportsView from "./components/ReportsView";
 import HsacLogo from "./components/HsacLogo";
 import UserAccountsView from "./components/UserAccountsView";
@@ -325,6 +326,11 @@ export default function App() {
             onRefresh={triggerRefresh}
           />
         );
+      case "backup-restore":
+        if (user.role !== UserRole.SUPER_ADMIN) {
+          return <div id="access-denied" className="p-6 text-xs text-rose-500 font-mono font-bold">Unauthenticated credentials path error [RA 10173 Security Block].</div>;
+        }
+        return <BackupRestoreView user={user} />;
       case "audit":
         if (user.role !== UserRole.SUPER_ADMIN) {
           return <div id="access-denied" className="p-6 text-xs text-rose-500 font-mono font-bold">Unauthenticated credentials path error [RA 10173 Security Block].</div>;
