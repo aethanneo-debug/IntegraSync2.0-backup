@@ -1538,6 +1538,25 @@ app.post("/api/finance/activity-budget-links", authenticateToken, (req: any, res
   if (!db.activityBudgetLinks) db.activityBudgetLinks = [];
   db.activityBudgetLinks.unshift(newLink);
   
+  // Deduct the budget via refund (Released - Spent)
+  const budget = db.budgetAllocations.find((b: any) => b.id === budgetId);
+  const sub = db.liquidationSubmissions?.find((s: any) => s.submissionNo === liquidationNo);
+  let refund = 0;
+  if (sub) {
+    const released = Number(sub.totalReleased || 0);
+    const spent = Number(sub.totalSpent || 0);
+    refund = released - spent;
+  } else {
+    // Fallback if no submission found, subtract 0
+    refund = 0;
+  }
+  
+  if (budget) {
+    budget.budgetUtilized -= refund;
+    budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
+    budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+  }
+  
   logFinanceAudit(req.user.fullName, "Map Activity To Budget", "Budget Linking", "None", `${liquidationNo} linked to ${budgetId}`);
   logEvent(req.user.id, req.user.username, req.user.role, "Map Activity Budget", `Linked activity ${liquidationNo} to budget total`);
   saveDB();
@@ -2769,6 +2788,7 @@ app.put("/api/liquidation-submissions/:id/finance-action", authenticateToken, (r
   if (req.user.role !== UserRole.FINANCE_OFFICER) {
     return res.status(403).json({ status: "error", message: "Access restricted to Financial Officer validations" });
   }
+
   const { id } = req.params;
   const { action, remarks } = req.body; // action: "Validate" | "Return"
 
@@ -2776,21 +2796,80 @@ app.put("/api/liquidation-submissions/:id/finance-action", authenticateToken, (r
   if (!sub) return res.status(404).json({ status: "error", message: "Submission records not found" });
 
   if (action === "Validate") {
-    sub.financeStatus = "Validated & Endorsed";
-    sub.financeRemarks = remarks || "Financial documentations, vouchers, and ledger matching validated.";
+    sub.financeStatus = "Validated & Approved";
+    sub.financeRemarks = remarks || "Financial documentations, vouchers, and ledger matching validated and finalized.";
     sub.financeValidatedBy = req.user.fullName;
     sub.financeValidatedAt = new Date().toISOString();
-    sub.status = "Validated & Endorsed";
+    
+    // Bypass Chief - Finalize Record
+    sub.divisionChiefStatus = "Bypassed (Auto-Approved by Finance)";
+    sub.divisionChiefRemarks = "Validation finalized at Finance level.";
+    sub.divisionChiefApprovedBy = "System";
+    sub.divisionChiefApprovedAt = new Date().toISOString();
+    sub.status = "Completed";
+
+    const act = db.activities.find(a => a.id === sub.activityId);
+    if (act) {
+      const budget = db.budgetAllocations.find(b => b.id === act.budgetId || b.department === act.title);
+      if (budget) {
+        const released = Number(sub.totalReleased || 0);
+        const spent = Number(sub.totalSpent || 0);
+        const refund = released - spent;
+        
+        budget.budgetUtilized -= refund;
+        budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
+        budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+        
+        // Auto-link to activityBudgetLinks
+        if (!db.activityBudgetLinks) db.activityBudgetLinks = [];
+        db.activityBudgetLinks.unshift({
+          id: `bl-${Date.now()}`,
+          liquidationNo: sub.submissionNo,
+          employee: sub.employeeName,
+          department: budget.department,
+          amount: spent,
+          budgetId: budget.id,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    db.financialTransactions.push({
+      id: `tx-${Date.now()}`,
+      transactionId: `TX-LIQ-${Date.now().toString().slice(-4)}`,
+      transactionDate: new Date().toISOString().split("T")[0],
+      supplier: "Regional Expenses",
+      amount: sub.totalSpent,
+      description: `Official travel liquidation for activity: ${act ? act.title : sub.submissionNo}`,
+      status: TransactionStatus.LIQUIDATED,
+      supportingDocuments: sub.supportingDocs.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        type: d.type,
+        filename: d.filename,
+        uploadedAt: d.uploadedAt,
+        validationStatus: "Validated"
+      })),
+      history: [
+        { id: `his-${Date.now()}`, status: TransactionStatus.LIQUIDATED, changedBy: req.user.fullName, changedAt: new Date().toISOString(), remarks: "Approved and finalized by Finance" }
+      ],
+      employeeRef: sub.employeeId,
+      department: "Administrative and Finance Division",
+      category: "Travel",
+      createdBy: sub.employeeName,
+      dateCreated: new Date().toISOString()
+    });
 
     if (!db.notifications) db.notifications = [];
     db.notifications.push({
       id: `notif-${Date.now()}`,
-      title: "Finance Validation Completed",
-      message: `Liquidation submission ${sub.submissionNo} validated and endorsed. Chief final seal pending.`,
+      title: "Liquidation APPROVED & FINALIZED",
+      message: `Your liquidation report ${sub.submissionNo} has been validated and finalized by Finance.`,
       isRead: false,
       type: "success",
       timestamp: new Date().toISOString(),
-      targetRole: UserRole.SUPER_ADMIN
+      targetRole: UserRole.EMPLOYEE,
+      targetEmployeeId: sub.employeeId
     });
   } else {
     sub.financeStatus = "Returned by Finance";
@@ -2814,7 +2893,6 @@ app.put("/api/liquidation-submissions/:id/finance-action", authenticateToken, (r
   saveDB();
   res.json({ status: "success", data: sub });
 });
-
 app.put("/api/liquidation-submissions/:id/chief-action", authenticateToken, (req: any, res) => {
   if (req.user.role !== UserRole.SUPER_ADMIN) {
     return res.status(403).json({ status: "error", message: "Only Division Chief can give the final seal" });
@@ -2836,7 +2914,11 @@ app.put("/api/liquidation-submissions/:id/chief-action", authenticateToken, (req
     if (act) {
       const budget = db.budgetAllocations.find(b => b.id === act.budgetId || b.department === act.title);
       if (budget) {
-        budget.budgetUtilized += sub.totalSpent;
+        const released = Number(sub.totalReleased || 0);
+        const spent = Number(sub.totalSpent || 0);
+        const refund = released - spent;
+        
+        budget.budgetUtilized -= refund;
         budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
         budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
       }

@@ -11,6 +11,7 @@ interface ActivitiesViewProps {
 export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps) {
   const [activities, setActivities] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -22,7 +23,7 @@ export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps)
     description: "",
     dateScheduled: "",
     allottedBudget: "",
-    budgetId: "b-2",
+    budgetId: "",
     assignedEmployeeId: ""
   });
 
@@ -33,12 +34,14 @@ export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps)
   async function fetchData() {
     setLoading(true);
     try {
-      const [actRes, empRes] = await Promise.all([
+      const [actRes, empRes, budRes] = await Promise.all([
         apiCall("/api/activities"),
-        apiCall("/api/employees")
+        apiCall("/api/employees"),
+        apiCall("/api/finance/budgets")
       ]);
       if (actRes.status === "success") setActivities(actRes.data);
       if (empRes.status === "success") setEmployees(empRes.data);
+      if (budRes.status === "success") setBudgets(budRes.data);
     } catch (err: any) {
       setError("Failed to fetch activities and employees data");
     } finally {
@@ -48,8 +51,8 @@ export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.title || !formData.allottedBudget || !formData.assignedEmployeeId) {
-      setError("Please fill in all required fields (Title, Budget, Assigned Employee).");
+    if (!formData.title || !formData.allottedBudget || !formData.budgetId || !formData.assignedEmployeeId) {
+      setError("Please fill in all required fields (Title, Budget, Division Budget, Assigned Employee).");
       return;
     }
     setError("");
@@ -68,7 +71,7 @@ export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps)
           description: "",
           dateScheduled: "",
           allottedBudget: "",
-          budgetId: "b-2",
+          budgetId: "",
           assignedEmployeeId: ""
         });
         fetchData();
@@ -243,6 +246,21 @@ export default function ActivitiesView({ user, onRefresh }: ActivitiesViewProps)
                     placeholder="0.00"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Division Budget Allocation *</label>
+                <select
+                  required
+                  value={formData.budgetId}
+                  onChange={e => setFormData({...formData, budgetId: e.target.value})}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white mb-4"
+                >
+                  <option value="" disabled>-- Select Division Budget --</option>
+                  {budgets.map(bud => (
+                    <option key={bud.id} value={bud.id}>{bud.department} (Available: ₱{Number(bud.remainingBudget).toLocaleString()})</option>
+                  ))}
+                </select>
               </div>
 
               <div>

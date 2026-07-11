@@ -152,7 +152,7 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
           });
         } else if (item._category === "Liquidation") {
           const decision = action === "verify" ? "Verify" : "Return";
-          await apiCall(`/api/liquidation-submissions/${item.id}/hr-verify`, {
+          await apiCall(`/api/liquidation-submissions/${item.id}/hr-action`, {
             method: "PUT",
             body: JSON.stringify({ action: decision, remarks: remarks || `Bulk HR ${decision}` })
           });
@@ -222,7 +222,7 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
               <Undo2 size={12} className="mr-1" /> Reject
             </button>
             <button onClick={() => setBulkActionType("verify")} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-bold flex items-center cursor-pointer shadow-sm">
-              <Check size={12} className="mr-1" /> Endorse to Chief
+              <Check size={12} className="mr-1" /> {viewItem?._category === "Liquidation" ? "Endorse to Finance" : "Endorse to Chief"}
             </button>
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
                       onClick={() => setModalActionType("verify")} 
                       className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors ${modalActionType === "verify" ? "bg-blue-600 text-white border-blue-700 ring-2 ring-blue-600/20 shadow-inner" : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"}`}
                     >
-                      Endorse to Chief
+                      Endorse (Chief/Finance)
                     </button>
                   </div>
                   {modalActionType && (
@@ -344,7 +344,7 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
                               });
                             } else if (viewItem._category === "Liquidation") {
                               const decision = modalActionType === "verify" ? "Verify" : "Return";
-                              await apiCall(`/api/liquidation-submissions/${viewItem.id}/hr-verify`, {
+                              await apiCall(`/api/liquidation-submissions/${viewItem.id}/hr-action`, {
                                 method: "PUT",
                                 body: JSON.stringify({ action: decision, remarks: modalRemarks || `HR ${decision}` })
                               });
@@ -453,7 +453,7 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
         <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl border border-slate-100 max-w-sm w-full overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/70">
-              <h2 className="text-xs font-bold text-slate-800 capitalize">Bulk {bulkActionType === 'verify' ? 'Endorse to Chief' : 'Reject'} ({selectedIds.length} items)</h2>
+              <h2 className="text-xs font-bold text-slate-800 capitalize">Bulk {bulkActionType === 'verify' ? 'Endorse (Chief/Finance)' : 'Reject'} ({selectedIds.length} items)</h2>
             </div>
             <div className="p-5 space-y-4">
               {bulkActionType !== 'verify' && (
@@ -470,7 +470,7 @@ export default function HrUnifiedRequests({ user, onRefresh }: HrUnifiedRequests
                   bulkActionType === "verify" ? "bg-blue-600 hover:bg-blue-700" : 
                   "bg-amber-600 hover:bg-amber-700"
                 }`}>
-                  Confirm {bulkActionType === 'verify' ? 'Endorse to Chief' : 'Reject'}
+                  Confirm {bulkActionType === 'verify' ? 'Endorse (Chief/Finance)' : 'Reject'}
                 </button>
               </div>
             </div>

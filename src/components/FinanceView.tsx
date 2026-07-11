@@ -40,7 +40,7 @@ import {
   Activity,
   ArrowRight
 } from "lucide-react";
-import { apiCall, formatCurrency, formatDate } from "../utils";
+import { apiCall, formatCurrency, formatDate, downloadCSV } from "../utils";
 
 interface FinanceViewProps {
   user: User;
@@ -210,6 +210,19 @@ export default function FinanceView({
     }
   }
 
+  
+  const downloadBase64File = (name: string, content: string) => {
+    if (!content) {
+      alert("No printable file attachments scanned for this mock metadata row.");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = content;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   // Load backend arrays on mount and updates
   useEffect(() => {
     setTxnList(transactions);
@@ -390,10 +403,10 @@ export default function FinanceView({
     try {
       const res = await apiCall(`/api/liquidation-submissions/${subId}/finance-action`, {
         method: "PUT",
-        body: JSON.stringify({ action, remarks: remarks || "Financial documentations validated & endorsed." })
+        body: JSON.stringify({ action, remarks: remarks || "Financial documentations validated & finalized." })
       });
       if (res.status === "success") {
-        alert(action === "Validate" ? "Dossier validated and endorsed successfully!" : "Dossier returned to employee with remarks.");
+        alert(action === "Validate" ? "Dossier validated and finalized successfully!" : "Dossier returned to employee with remarks.");
         setSelectedSub(null);
         setSubRemarks("");
         fetchFinanceAddons();
@@ -517,13 +530,13 @@ export default function FinanceView({
     },
     liquidations: () => {
       const headers = ["Liquidation Number", "Reference Request", "Employee", "Department", "Allocated Released", "Liquidated Amount", "Remaining Balance Return", "Status", "Close Date"];
-      const rows = yearFilteredLiquidations.map(l => [
-        l.liquidationNo,
-        l.requestRef,
-        l.employee,
-        l.department,
-        l.amountReleased.toString(),
-        l.amountLiquidated.toString(),
+      const rows = yearFilteredSubmissions.map(l => [
+        l.submissionNo,
+        l.activityId,
+        l.employeeName,
+        "N/A",
+        l.totalReleased.toString(),
+        l.totalSpent.toString(),
         l.remainingBalance.toString(),
         l.status,
         l.liquidationDate
@@ -545,7 +558,7 @@ export default function FinanceView({
 
   // Live filter matching for Transactions
   const yearFilteredTxns = txnList.filter(tx => tx.transactionDate.startsWith(activeFiscalYear));
-  const yearFilteredLiquidations = liquidations.filter(l => (l.liquidationDate && l.liquidationDate.startsWith(activeFiscalYear)) || (l.createdAt && l.createdAt.startsWith(activeFiscalYear)));
+  const yearFilteredSubmissions = submissions.filter(s => s.createdAt && s.createdAt.startsWith(activeFiscalYear));
 
   const filteredTxns = yearFilteredTxns.filter((tx) => {
     const matchesSearch = 
@@ -573,9 +586,9 @@ export default function FinanceView({
   const validatedTxCount = yearFilteredTxns.filter(tx => tx.status === TransactionStatus.VALIDATED).length;
   const pendingTxCount = yearFilteredTxns.filter(tx => tx.status === TransactionStatus.PENDING_VALIDATION).length;
   
-  const pendingLiqCount = yearFilteredLiquidations.filter(l => l.status !== "Completed").length;
-  const completedLiqCount = yearFilteredLiquidations.filter(l => l.status === "Completed").length;
-  const totalApprovedLiqAmount = yearFilteredLiquidations.filter(l => l.status === "Completed").reduce((acc, l) => acc + l.amountLiquidated, 0);
+  const pendingLiqCount = yearFilteredSubmissions.filter(s => s.status !== "Completed").length;
+  const completedLiqCount = yearFilteredSubmissions.filter(s => s.status === "Completed").length;
+  const totalApprovedLiqAmount = yearFilteredSubmissions.filter(s => s.status === "Completed").reduce((acc, s) => acc + s.totalSpent, 0);
 
   const totalBudgetAllocationSum = budgets.reduce((acc, b) => acc + b.budgetAllocation, 0);
   const totalBudgetUtilizedSum = budgets.reduce((acc, b) => acc + b.budgetUtilized, 0);
@@ -1073,7 +1086,16 @@ export default function FinanceView({
                           <span className="font-semibold text-slate-700">Official Receipt (Primary)</span>
                         </div>
                         <button 
-                          onClick={() => alert(`Reviewing Scanned PNG/PDF proof: ${selectedTx.receiptFilename}`)}
+                          onClick={() => {
+                            const dummyText = `RECEIPT PROOF\n\nFilename: ${selectedTx.receiptFilename}\nTransaction Ref: ${selectedTx.transactionId}\nAmount: ${formatCurrency(selectedTx.amount)}\n\n[END OF FILE]`;
+                            const blob = new Blob([dummyText], { type: "text/plain" });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = selectedTx.receiptFilename + ".txt";
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
                           className="text-[10px] text-slate-500 hover:underline font-bold truncate max-w-[120px]"
                         >
                           {selectedTx.receiptFilename}
@@ -1096,7 +1118,16 @@ export default function FinanceView({
                               )}
                             </div>
                             <button 
-                              onClick={() => alert(`Simulating Secure PDF download for: ${doc.filename}. Version: V${doc.versions?.length || 1} certified.`)}
+                              onClick={() => {
+                                const dummyText = `DOCUMENT REPLICA\n\nFilename: ${doc.filename}\nType: ${doc.type}\nUploaded by: ${doc.uploadedBy}\nDate: ${doc.uploadedAt}\nVersion: V${doc.versions?.length || 1}\n\n[END OF FILE]`;
+                                const blob = new Blob([dummyText], { type: "text/plain" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = doc.filename + ".txt";
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              }}
                               className="text-slate-500 hover:text-slate-800 p-1 rounded hover:bg-slate-200"
                               title="Download document replica"
                             >
@@ -1270,15 +1301,7 @@ export default function FinanceView({
                   <span>Report Excel</span>
                 </button>
 
-                {isFinanceOrAdmin && (
-                  <button
-                    onClick={() => setIsLiqModalOpen(true)}
-                    className="bg-slate-900 border border-slate-850 hover:bg-slate-800 text-white px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center shadow-sm cursor-pointer"
-                  >
-                    <Plus size={14} className="mr-1.5 animate-bounce" />
-                    <span>Initiate Liquidation Advance</span>
-                  </button>
-                )}
+                
               </div>
             </div>
 
@@ -1303,7 +1326,7 @@ export default function FinanceView({
                   <Clock size={15} className="mr-2 text-emerald-600 animate-pulse" />
                   Finance Liquidation Validation Queue ({submissions.filter(s => s.status === "Verified & Forwarded").length})
                 </h2>
-                <p className="text-[11px] text-slate-500">Validate receipts, invoices, and ledger documents approved by HR. Execute final verification before forwarding to Division Chief endorsement.</p>
+                <p className="text-[11px] text-slate-500">Validate receipts, invoices, and ledger documents approved by HR. Execute final validation to generate the Financial Transaction and update the budget.</p>
 
                 <div className="grid grid-cols-1 gap-4">
                   {submissions.filter(s => s.status === "Verified & Forwarded").length > 0 ? (
@@ -1357,7 +1380,7 @@ export default function FinanceView({
                               <span className="text-[9px] text-slate-400 font-bold uppercase block font-mono tracking-wider">Receipts & Slips File Vouchers</span>
                               <div className="flex flex-wrap gap-1.5">
                                 {sub.supportingDocs.map((doc: any, i: number) => (
-                                  <div key={i} className="flex items-center space-x-1 py-1 px-2.5 bg-white border border-slate-150 rounded text-[10px] text-slate-600 font-mono">
+                                  <div key={i} onClick={() => downloadBase64File(doc.name || doc.filename, doc.content)} className="flex items-center space-x-1 py-1 px-2.5 bg-white border border-slate-150 rounded text-[10px] text-slate-600 font-mono cursor-pointer hover:bg-slate-50 hover:border-slate-300 transition-colors" title="Click to view/download attachment">
                                     <FileText size={10} className="text-slate-405" />
                                     <span>{doc.name}</span>
                                   </div>
@@ -1395,7 +1418,7 @@ export default function FinanceView({
                               onClick={() => handleFinanceLiquidationAction(sub.id, "Validate", selectedSub?.id === sub.id ? subRemarks : "")}
                               className="bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600 px-3 py-1.5 rounded-lg text-xs font-semibold shadow shadow-emerald-600/10 cursor-pointer"
                             >
-                              Validate & Endorse
+                              Validate & Finalize
                             </button>
                           </div>
                         </div>
@@ -1423,18 +1446,18 @@ export default function FinanceView({
                     <th className="p-4 text-right">Liquidated Spends</th>
                     <th className="p-4 text-right">Refund / Balance</th>
                     <th className="p-4 text-center">Status Loop</th>
-                    {isFinanceOrAdmin && <th className="p-4 text-center">Actions</th>}
+                    
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {yearFilteredLiquidations.map((liq) => (
+                  {yearFilteredSubmissions.map((liq) => (
                     <tr key={liq.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 font-mono font-black text-slate-700">{liq.liquidationNo}</td>
-                      <td className="p-4 font-mono text-slate-400">{liq.requestRef}</td>
-                      <td className="p-4 font-bold text-slate-850">{liq.employee}</td>
-                      <td className="p-4 text-slate-500 truncate max-w-[120px]" title={liq.department}>{liq.department}</td>
-                      <td className="p-4 text-right font-mono font-medium text-slate-600">{formatCurrency(liq.amountReleased)}</td>
-                      <td className="p-4 text-right font-mono font-bold text-slate-700">{formatCurrency(liq.amountLiquidated)}</td>
+                      <td className="p-4 font-mono font-black text-slate-700">{liq.submissionNo}</td>
+                      <td className="p-4 font-mono text-slate-400">{liq.activityId}</td>
+                      <td className="p-4 font-bold text-slate-850">{liq.employeeName}</td>
+                      <td className="p-4 text-slate-500 truncate max-w-[120px]" title="N/A">N/A</td>
+                      <td className="p-4 text-right font-mono font-medium text-slate-600">{formatCurrency(liq.totalReleased)}</td>
+                      <td className="p-4 text-right font-mono font-bold text-slate-700">{formatCurrency(liq.totalSpent)}</td>
                       <td className="p-4 text-right font-mono font-black text-amber-700">
                         {formatCurrency(liq.remainingBalance)}
                       </td>
@@ -1451,29 +1474,12 @@ export default function FinanceView({
                           {liq.status}
                         </span>
                       </td>
-                      {isFinanceOrAdmin && (
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() => {
-                              setSelectedLiq(liq);
-                              setLiqActionData({
-                                status: liq.status as any,
-                                notes: liq.notes || "",
-                                amountLiquidated: liq.amountLiquidated > 0 ? String(liq.amountLiquidated) : ""
-                              });
-                              setIsLiqActionModalOpen(true);
-                            }}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-mono text-[9px] px-2 py-1 rounded"
-                          >
-                            Triage Loop
-                          </button>
-                        </td>
-                      )}
+                      
                     </tr>
                   ))}
-                  {yearFilteredLiquidations.length === 0 && (
+                  {yearFilteredSubmissions.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="text-center py-12 text-slate-400 font-mono italic">No liquidation advances currently monitored.</td>
+                      <td colSpan={8} className="text-center py-12 text-slate-400 font-mono italic">No liquidation advances currently monitored.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1919,9 +1925,9 @@ export default function FinanceView({
                         className="w-full border p-2 text-xs bg-white rounded-lg font-bold"
                       >
                         <option value="">-- Choose Active Submission --</option>
-                        {liquidations.map((l) => (
+                        {submissions.filter(s => s.status === "Completed").map((l) => (
                           <option key={l.id} value={l.id}>
-                            {l.liquidationNo} - {l.employee} ({formatCurrency(l.amountReleased || l.amountLiquidated)} released)
+                            {l.submissionNo} - {l.employeeName} ({formatCurrency(l.totalReleased)} released)
                           </option>
                         ))}
                       </select>
@@ -1949,16 +1955,16 @@ export default function FinanceView({
                           if (!selectedLinkingLiqId || !selectedLinkingBudgetId) {
                             return alert("Please select both a Liquidation advance and a Budget record");
                           }
-                          const liq = liquidations.find(l => l.id === selectedLinkingLiqId);
+                          const liq = submissions.find(l => l.id === selectedLinkingLiqId);
                           const bud = budgets.find(b => b.id === selectedLinkingBudgetId);
                           if (liq && bud) {
                             try {
-                              const amountVal = liq.amountReleased || liq.amountLiquidated || 15000.00;
+                              const amountVal = liq.totalSpent || 0;
                               const res = await apiCall("/api/finance/activity-budget-links", {
                                 method: "POST",
                                 body: JSON.stringify({
-                                  liquidationNo: liq.liquidationNo,
-                                  employee: liq.employee,
+                                  liquidationNo: liq.submissionNo,
+                                  employee: liq.employeeName,
                                   department: bud.department,
                                   amount: amountVal,
                                   budgetId: bud.id
@@ -1966,9 +1972,24 @@ export default function FinanceView({
                               });
                               if (res.status === "success") {
                                 setBudgetLinks([res.data, ...budgetLinks]);
+                                setBudgets(budgets.map(b => {
+                                  if (b.id === bud.id) {
+                                    const released = Number(liq.totalReleased || 0);
+                                    const spent = Number(liq.totalSpent || 0);
+                                    const refund = released - spent;
+                                    const utilized = b.budgetUtilized - refund;
+                                    return {
+                                      ...b,
+                                      budgetUtilized: utilized,
+                                      remainingBudget: b.budgetAllocation - utilized,
+                                      budgetPercentageUsed: Math.round((utilized / b.budgetAllocation) * 100)
+                                    };
+                                  }
+                                  return b;
+                                }));
                                 setSelectedLinkingLiqId("");
                                 setSelectedLinkingBudgetId("");
-                                alert(`Activity ${liq.liquidationNo} successfully mapped to budget ${bud.department}!`);
+                                alert(`Activity ${liq.submissionNo} successfully mapped to budget ${bud.department}!`);
                               } else {
                                 alert("Failed to establish link: " + (res.message || "Unknown error"));
                               }
@@ -2089,7 +2110,14 @@ export default function FinanceView({
 
                       <button
                         onClick={() => {
-                          alert(`Validated data successfully consolidated for ${consolidationValue}! Prepared for downstream reports output.`);
+                          const csvContent = "Consolidation Report," + consolidationValue + "\n\nCategory,Amount\nTotal Income,0.00\nTotal Expenses,0.00\nBalance,0.00\n";
+                          const blob = new Blob([csvContent], { type: "text/csv" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = "Consolidation_" + consolidationValue + ".csv";
+                          a.click();
+                          URL.revokeObjectURL(url);
                         }}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg cursor-pointer"
                       >
@@ -2235,7 +2263,6 @@ export default function FinanceView({
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
-                          alert("Initializing browser printing dialogue... Document exported to spool.");
                           window.print();
                         }}
                         className="bg-slate-900 hover:bg-slate-800 text-white font-mono text-xs font-bold px-4 py-2 rounded-lg cursor-pointer"
@@ -2244,7 +2271,16 @@ export default function FinanceView({
                       </button>
                       <button
                         onClick={() => {
-                          alert(`FAR Form 1 & 1A consolidated as a report inside system scope downloads. Filename: HSAC_FAR1_CONSOLIDATED_${consolidationValue}.csv`);
+                          {
+                            const data = budgets.map(b => ({
+                                "UACS Code": b.uacsCode || "N/A",
+                                "Department": b.department,
+                                "Total Allocation": b.totalAllocation,
+                                "Obligations Incurred": b.budgetUtilized,
+                                "Unobligated Balance": b.totalAllocation - b.budgetUtilized
+                            }));
+                            downloadCSV(data, ["UACS Code", "Department", "Total Allocation", "Obligations Incurred", "Unobligated Balance"], "HSAC_FAR1_CONSOLIDATED_" + consolidationValue + ".csv");
+                          }
                         }}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-mono text-xs font-bold px-4 py-2 rounded-lg cursor-pointer"
                       >
@@ -2586,98 +2622,7 @@ export default function FinanceView({
         </div>
       )}
 
-      {/* CREATE NEW LIQUIDATION DISCOVERY MODAL */}
-      {isLiqModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-100">
-            <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
-              <h3 className="font-bold text-xs uppercase tracking-wider font-mono">Initiate Liquidation Advance</h3>
-              <button onClick={() => setIsLiqModalOpen(false)} className="text-slate-400 hover:text-white p-1">
-                <X size={18} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleCreateLiq} className="p-5 space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Employee Recipient Name *</label>
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. Andres B. Bonifacio"
-                  value={liqFormData.employee}
-                  onChange={(e) => setLiqFormData({ ...liqFormData, employee: e.target.value })}
-                  className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-xs"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Department Division *</label>
-                <select
-                  value={liqFormData.department}
-                  onChange={(e) => setLiqFormData({ ...liqFormData, department: e.target.value })}
-                  className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-xs"
-                >
-                  <option value="Adjudication Division">Adjudication Division</option>
-                  <option value="Administrative and Finance Division">Administrative and Finance Division</option>
-                  <option value="Legal Division">Legal Division</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Cash Advance Released *</label>
-                  <input
-                    required
-                    type="number"
-                    min="1"
-                    placeholder="10000.00"
-                    value={liqFormData.amountReleased}
-                    onChange={(e) => setLiqFormData({ ...liqFormData, amountReleased: e.target.value })}
-                    className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-xs font-mono font-bold"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block text-slate-400">Reference Request ID</label>
-                  <input
-                    type="text"
-                    placeholder="REQ-TRV-9921"
-                    value={liqFormData.requestRef}
-                    onChange={(e) => setLiqFormData({ ...liqFormData, requestRef: e.target.value })}
-                    className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-xs font-mono font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Initiative Notes</label>
-                <textarea
-                  placeholder="e.g. Travel cash allocation for dispute mediation fieldwork site visit..."
-                  value={liqFormData.notes}
-                  onChange={(e) => setLiqFormData({ ...liqFormData, notes: e.target.value })}
-                  className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-xs h-16 h-20"
-                />
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsLiqModalOpen(false)}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-slate-900 border border-slate-850 text-white hover:bg-slate-800 font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm cursor-pointer"
-                >
-                  Register Advance
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
 
       {/* LIQUIDATION TRIAGE ACTION MODAL */}
       {isLiqActionModalOpen && selectedLiq && (

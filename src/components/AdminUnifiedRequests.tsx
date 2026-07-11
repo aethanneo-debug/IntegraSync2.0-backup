@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { User, AnyRequest, RequestStatus } from "../types";
 import { apiCall, formatDate } from "../utils";
-import { Check, X, Undo2, Filter, RefreshCcw, Info } from "lucide-react";
+import { Check, X, Undo2, Filter, RefreshCcw, Info, PieChart as PieChartIcon, BarChart3 } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
 interface AdminUnifiedRequestsProps {
   user: User;
@@ -17,6 +18,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>("All");
   const [filterStatus, setFilterStatus] = useState<string>("All");
+  const [filterDivision, setFilterDivision] = useState<string>("All");
 
   const [remarks, setRemarks] = useState("");
   const [bulkActionType, setBulkActionType] = useState<"approve" | "reject" | null>(null);
@@ -32,11 +34,19 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
     setLoading(true);
     setError("");
     try {
-      const [reqRes, subRes, budgetRes] = await Promise.all([
+      const [reqRes, subRes, budgetRes, empRes] = await Promise.all([
         apiCall("/api/requests"),
         apiCall("/api/liquidation-submissions"),
-        apiCall("/api/budget-requests")
+        apiCall("/api/budget-requests"),
+        apiCall("/api/employees")
       ]);
+      
+      const employees = empRes.status === "success" ? empRes.data : [];
+      const getDivision = (empId, dept) => {
+        if (dept) return dept;
+        const emp = employees.find(e => e.employeeId === empId || e.id === empId);
+        return emp ? emp.division : "Unknown Division";
+      };
 
       const combined: any[] = [];
 
@@ -55,6 +65,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
             _displayDate: r.dateRequested || r.createdAt,
             _title: r.leaveType ? `${r.requestType} (${r.leaveType})` : r.requestType,
             _requester: r.employeeName,
+            _division: getDivision(r.employeeId, null),
             _amount: null,
             _sequence: seq++
           });
@@ -71,6 +82,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
             _displayDate: s.createdAt,
             _title: `Liquidation ${s.submissionNo}`,
             _requester: s.employeeName,
+            _division: getDivision(s.employeeId, null),
             _amount: s.totalSpent,
             _sequence: seq++
           });
@@ -87,6 +99,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
             _displayDate: b.createdAt,
             _title: `${b.requestType} Request`,
             _requester: b.department,
+            _division: b.department,
             _amount: b.amountRequested,
             _sequence: seq++
           });
@@ -107,6 +120,8 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
     }
   }
 
+  // Calculate Summary & Analytics
+
   const filteredItems = allItems.filter(item => {
     let catMatch = true;
     if (filterCategory !== "All") {
@@ -116,18 +131,53 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
         catMatch = item.requestType === filterCategory || item.leaveType === filterCategory;
       }
     }
+    if (filterDivision !== "All" && item._division !== filterDivision) return false;
     
-    let statMatch = true;
-    if (filterStatus !== "All") {
-      if (filterStatus === "Pending") {
-        statMatch = item.status && (item.status.includes("Pending") || item.status.includes("Endorsed"));
-      } else {
-        statMatch = item.status && item.status.includes(filterStatus);
-      }
-    }
+    // Map status for unified filtering
+    let stat = item.status;
+    if (stat === "Endorsed to Chief") stat = "Pending";
+    if (stat === "Under Review") stat = "Pending";
+    if (stat === "Pending Submission") stat = "Pending";
+    if (stat === "Submitted") stat = "Pending";
+    if (stat === "Completed") stat = "Approved";
+    if (stat === "Returned") stat = "Rejected";
+
+    let statMatch = filterStatus === "All" || stat === filterStatus;
     
     return catMatch && statMatch;
   });
+
+  const totalRequests = filteredItems.length;
+  
+  const getUnifiedStatus = (item) => {
+    let stat = item.status;
+    if (stat === "Endorsed to Chief") stat = "Pending";
+    if (stat === "Under Review") stat = "Pending";
+    if (stat === "Pending Submission") stat = "Pending";
+    if (stat === "Submitted") stat = "Pending";
+    if (stat === "Completed") stat = "Approved";
+    if (stat === "Returned") stat = "Rejected";
+    return stat;
+  };
+  
+  const pendingRequests = filteredItems.filter(i => getUnifiedStatus(i) === "Pending").length;
+  const approvedRequests = filteredItems.filter(i => getUnifiedStatus(i) === "Approved").length;
+  const rejectedRequests = filteredItems.filter(i => getUnifiedStatus(i) === "Rejected").length;
+
+  const divisionCounts = filteredItems.reduce((acc, item) => {
+    const div = item._division || "Unknown Division";
+    acc[div] = (acc[div] || 0) + 1;
+    return acc;
+  }, {});
+  
+  const allDivisions = Array.from(new Set(allItems.map(i => i._division || "Unknown Division"))).sort();
+  const chartData = Object.keys(divisionCounts).map((key, i) => ({
+    name: key,
+    value: divisionCounts[key],
+    color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316'][i % 7]
+  }));
+  
+  
 
   const isActionable = (status: string) => {
     if (!status) return false;
@@ -199,7 +249,88 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+
+    <div className="space-y-6">
+      {/* Analytics Dashboard */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Summary Cards */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Total Requests</p>
+              <p className="text-2xl font-black text-slate-800">{totalRequests}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Pending</p>
+              <p className="text-2xl font-black text-amber-500">{pendingRequests}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Approved</p>
+              <p className="text-2xl font-black text-emerald-500">{approvedRequests}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Rejected</p>
+              <p className="text-2xl font-black text-rose-500">{rejectedRequests}</p>
+            </div>
+          </div>
+          
+          {/* Division List */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <h3 className="text-xs font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Requests per Division</h3>
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              {chartData.map(d => (
+                <div key={d.name} className="flex justify-between items-center text-xs">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }}></div>
+                    <span className="text-slate-600 truncate max-w-[120px]">{d.name}</span>
+                  </div>
+                  <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-full">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Division Distribution Chart */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col">
+          <h3 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <PieChartIcon size={14} className="text-blue-500" />
+            Division-Based Request Analytics
+          </h3>
+          <div className="flex-1 min-h-[250px] w-full">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value, name) => [`${value} Requests`, name]}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                No request data available
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between bg-slate-50 gap-4">
         <div>
           <h2 className="text-sm font-bold text-slate-800">Unified Request Management & Approvals</h2>
@@ -223,6 +354,16 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
             <option value="Budget Request">Budget Requests</option>
           </select>
           
+          <select 
+            value={filterDivision} 
+            onChange={e => setFilterDivision(e.target.value)}
+            className="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <option value="All">All Divisions</option>
+            {allDivisions.map(d => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
           <select 
             value={filterStatus} 
             onChange={e => setFilterStatus(e.target.value)}
@@ -519,6 +660,7 @@ export default function AdminUnifiedRequests({ user, onRefresh }: AdminUnifiedRe
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

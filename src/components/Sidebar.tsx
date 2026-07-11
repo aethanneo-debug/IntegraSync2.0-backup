@@ -65,8 +65,8 @@ export default function Sidebar({
       visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER, UserRole.EMPLOYEE].includes(role),
       subItems: [
         { id: "pds", label: "Personal Data Sheet", icon: FileText, visible: true },
-        { id: "employees", label: "Employee Records", icon: Users, visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER].includes(role) },
-        { id: "activities", label: "Activities & Assignments", icon: Briefcase, visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER].includes(role) },
+        { id: "employees", label: "Employee Records", icon: Users, visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER, UserRole.FINANCE_OFFICER].includes(role) },
+        { id: "activities", label: "Activities & Assignments", icon: Briefcase, visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER, UserRole.FINANCE_OFFICER].includes(role) },
         { id: "trainings_seminars", label: "Trainings and Seminar", icon: BookOpen, visible: true }
       ]
     },
@@ -101,7 +101,7 @@ export default function Sidebar({
       id: "requests", 
       label: "Request Management", 
       icon: Clock,
-      visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER].includes(role)
+      visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER, UserRole.FINANCE_OFFICER].includes(role)
     },
     
     // EMPLOYEE DESK PORTAL (EMPLOYEE ONLY)
