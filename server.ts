@@ -57,6 +57,8 @@ interface DBStructure {
   liquidationSubmissions: any[];
   activityBudgetLinks: any[];
   pds: PDS[];
+  fiscalYears: any[];
+  hsacBudgets: any[];
 }
 
 // Check and seed DB on server launch
@@ -347,6 +349,22 @@ function getInitialData(): DBStructure {
         loaded.activityBudgetLinks = [
           { id: "bl-1", liquidationNo: "LIQ-2026-001", employee: "Andres B. Bonifacio", department: "Adjudication Division", amount: 12000.00, budgetId: "b-1", timestamp: "2026-06-14T10:00:00Z" },
           { id: "bl-2", liquidationNo: "LIQ-2026-002", employee: "Apolinario M. Mabini", department: "Legal Division", amount: 25000.00, budgetId: "b-3", timestamp: "2026-06-15T11:30:00Z" }
+        ];
+        changed = true;
+      }
+      if (!loaded.fiscalYears) {
+        loaded.fiscalYears = [
+          { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
+          { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
+          { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
+          { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
+        ];
+        changed = true;
+      }
+      if (!loaded.hsacBudgets) {
+        loaded.hsacBudgets = [
+          { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 2500000.00, carryOverBudget: 450000.00, totalUtilized: 655500.00 },
+          { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 2200000.00, carryOverBudget: 350000.00, totalUtilized: 2100000.00 }
         ];
         changed = true;
       }
@@ -809,7 +827,17 @@ function getInitialData(): DBStructure {
       { id: "bl-1", liquidationNo: "LIQ-2026-001", employee: "Andres B. Bonifacio", department: "Adjudication Division", amount: 12000.00, budgetId: "b-1", timestamp: "2026-06-14T10:00:00Z" },
       { id: "bl-2", liquidationNo: "LIQ-2026-002", employee: "Apolinario M. Mabini", department: "Legal Division", amount: 25000.00, budgetId: "b-3", timestamp: "2026-06-15T11:30:00Z" }
     ],
-    pds: []
+    pds: [],
+    fiscalYears: [
+      { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
+      { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
+      { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
+      { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
+    ],
+    hsacBudgets: [
+      { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 2500000.00, carryOverBudget: 450000.00, totalUtilized: 655500.00 },
+      { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 2200000.00, carryOverBudget: 350000.00, totalUtilized: 2100000.00 }
+    ]
   };
 
   // Write initial setup
@@ -841,21 +869,95 @@ function logEvent(userId: string, username: string, role: string, action: string
 }
 
 app.get("/api/fiscal-years", authenticateToken, (req, res) => {
-  const fyData = [
-    { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
-    { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
-    { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
-    { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
-  ];
-  res.json(fyData);
+  res.json(db.fiscalYears || []);
 });
 
 app.get("/api/fiscal-years/active", authenticateToken, (req, res) => {
-  res.json({ id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" });
+  const active = (db.fiscalYears || []).find((f: any) => f.status === "Active");
+  res.json(active || { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" });
 });
+
+app.post("/api/fiscal-years", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.BUDGET_OFFICER) {
+    return res.status(403).json({ status: "error", message: "Unauthorized" });
+  }
+  
+  const { label, start_date, end_date } = req.body;
+  const newFy = {
+    id: `fy-${Date.now()}`,
+    label,
+    start_date,
+    end_date,
+    status: "Active",
+    rollover_policy: "Standard"
+  };
+
+  // Close other fiscal years and calculate carryover
+  let carryOver = 0;
+  const activeFy = db.fiscalYears.find((f: any) => f.status === "Active");
+  if (activeFy) {
+    activeFy.status = "Closed";
+    const activeHb = db.hsacBudgets.find((hb: any) => hb.fiscalYearId === activeFy.id);
+    if (activeHb) {
+      carryOver = activeHb.approvedBudget + (activeHb.carryOverBudget || 0) - (activeHb.totalUtilized || 0);
+      if (carryOver < 0) carryOver = 0; // Prevent negative carryover
+    }
+  }
+
+  db.fiscalYears.unshift(newFy);
+
+  const newHb = {
+    id: `hb-${Date.now()}`,
+    fiscalYearId: newFy.id,
+    approvedBudget: 0,
+    carryOverBudget: carryOver,
+    totalUtilized: 0
+  };
+  db.hsacBudgets.unshift(newHb);
+
+  saveDB();
+  res.json({ status: "success", data: newFy, hsacBudget: newHb });
+});
+
+app.get("/api/hsac-budgets", authenticateToken, (req, res) => {
+  res.json({ status: "success", data: db.hsacBudgets || [] });
+});
+
+app.put("/api/hsac-budgets/:id", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.BUDGET_OFFICER) {
+    return res.status(403).json({ status: "error", message: "Unauthorized" });
+  }
+  const hb = db.hsacBudgets.find((b: any) => b.id === req.params.id);
+  if (hb) {
+    if (req.body.approvedBudget !== undefined) hb.approvedBudget = Number(req.body.approvedBudget);
+    saveDB();
+    res.json({ status: "success", data: hb });
+  } else {
+    res.status(404).json({ status: "error", message: "Budget not found" });
+  }
+});
+
 
 app.get("/api/budgets", authenticateToken, (req, res) => {
   res.json({ status: "success", data: db.budgetAllocations || [] });
+});
+
+app.put("/api/budgets/:id", authenticateToken, (req: any, res) => {
+  if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.BUDGET_OFFICER) {
+    return res.status(403).json({ status: "error", message: "Unauthorized" });
+  }
+  const budget = db.budgetAllocations.find((b: any) => b.id === req.params.id);
+  if (budget) {
+    if (req.body.budgetAllocation !== undefined) {
+      budget.budgetAllocation = Number(req.body.budgetAllocation);
+      budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
+      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+    }
+    saveDB();
+    res.json({ status: "success", data: budget });
+  } else {
+    res.status(404).json({ status: "error", message: "Budget not found" });
+  }
 });
 
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { 
   FinancialTransaction, 
   User, 
@@ -68,6 +69,7 @@ export default function FinanceView({
   const [txnList, setTxnList] = useState<FinancialTransaction[]>(transactions);
   const [liquidations, setLiquidations] = useState<Liquidation[]>([]);
   const [budgets, setBudgets] = useState<BudgetAllocation[]>([]);
+  const [hsacBudgets, setHsacBudgets] = useState<any[]>([]);
   const [budgetRequests, setBudgetRequests] = useState<BudgetRequestItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<FinanceAuditLog[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -115,6 +117,12 @@ export default function FinanceView({
   // For budget edit
   const [editingBudget, setEditingBudget] = useState<BudgetAllocation | null>(null);
   const [newAllocationVal, setNewAllocationVal] = useState("");
+  const [editingHsacBudgetId, setEditingHsacBudgetId] = useState<string | null>(null);
+  const [newHsacApprVal, setNewHsacApprVal] = useState("");
+  const [editingBudgetCapId, setEditingBudgetCapId] = useState<string | null>(null);
+  const [newBudgetCapVal, setNewBudgetCapVal] = useState("");
+  const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   // Document replacement & versioning modals
   const [selectedVaultDoc, setSelectedVaultDoc] = useState<SupportingDocument | null>(null);
@@ -186,6 +194,11 @@ export default function FinanceView({
         setBudgets(resBud); // Assuming endpoint returns array
       } else if (resBud.status === "success") {
         setBudgets(resBud.data);
+      }
+
+      const resHb = await apiCall("/api/hsac-budgets").catch(() => ({ status: "error", data: [] }));
+      if (resHb.status === "success") {
+        setHsacBudgets(resHb.data);
       }
       const resBudReq = await apiCall("/api/finance/budget-requests").catch(() => ({ status: "error", data: [] }));
       if (resBudReq.status === "success") {
@@ -783,6 +796,68 @@ export default function FinanceView({
                           <span>Spent: {formatCurrency(b.budgetUtilized)}</span>
                           <span>Allocation: {formatCurrency(b.budgetAllocation)}</span>
                         </div>
+                        {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) && (
+                          <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                            {editingBudgetCapId === b.id ? (
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="number"
+                                  value={newBudgetCapVal}
+                                  onChange={(e) => setNewBudgetCapVal(e.target.value)}
+                                  className="w-32 text-xs font-mono p-1 border rounded"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => {
+                                    const val = Number(newBudgetCapVal);
+                                    if (!isNaN(val)) {
+                                      const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
+                                      const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
+                                      const approved = hb ? hb.approvedBudget : 0;
+                                      
+                                      const otherBudgetsSum = budgets.filter(bg => bg.id !== b.id).reduce((sum, bg) => sum + bg.budgetAllocation, 0);
+                                      if (val + otherBudgetsSum > approved) {
+                                        alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ".");
+                                        return;
+                                      }
+                                      
+                                      apiCall("/api/budgets/" + b.id, {
+                                        method: "PUT",
+                                        body: JSON.stringify({ budgetAllocation: val })
+                                      }).then(res => {
+                                        if (res.status === "success") {
+                                          setBudgets(budgets.map(bg => bg.id === b.id ? res.data : bg));
+                                        }
+                                        setEditingBudgetCapId(null);
+                                      });
+                                    } else {
+                                      setEditingBudgetCapId(null);
+                                    }
+                                  }}
+                                  className="text-[10px] uppercase font-bold text-white bg-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-900"
+                                >
+                                  Save Cap
+                                </button>
+                                <button
+                                  onClick={() => setEditingBudgetCapId(null)}
+                                  className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingBudgetCapId(b.id);
+                                  setNewBudgetCapVal(b.budgetAllocation.toString());
+                                }}
+                                className="text-[10px] uppercase font-mono tracking-wider text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 cursor-pointer font-bold border"
+                              >
+                                Set Budget Fund Pool Cap
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1578,6 +1653,127 @@ export default function FinanceView({
             {/* TAB 1 CONTENT: BUDGET ALLOCATION & UTILIZATION TRACKING */}
             {innerBudgetTab === "allocations" && (
               <div className="space-y-6">
+                {(() => {
+                  const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
+                  const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
+                  const approved = hb ? hb.approvedBudget : 0;
+                  const carry = hb ? (hb.carryOverBudget || 0) : 0;
+                  const totalAvail = approved + carry;
+                  const util = budgets.reduce((acc, b) => acc + (b.budgetUtilized || 0), 0);
+                  const remaining = totalAvail - util;
+                  const utilPct = totalAvail > 0 ? (util / totalAvail) * 100 : 0;
+
+                  return (
+                    <div className="bg-white border rounded-2xl p-5 shadow-sm mb-6 flex flex-col md:flex-row gap-6">
+                      <div className="flex-1 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-sm font-extrabold uppercase text-slate-800 font-mono tracking-wider">HSAC Total Budget ({activeFiscalYear})</h3>
+                          {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) && hb && (
+                            editingHsacBudgetId === hb.id ? (
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="number"
+                                  value={newHsacApprVal}
+                                  onChange={(e) => setNewHsacApprVal(e.target.value)}
+                                  className="w-24 text-xs font-mono p-1 border rounded"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => {
+                                    const val = Number(newHsacApprVal);
+                                    if (!isNaN(val)) {
+                                      apiCall("/api/hsac-budgets/" + hb.id, {
+                                        method: "PUT",
+                                        body: JSON.stringify({ approvedBudget: val })
+                                      }).then(res => {
+                                        if (res.status === "success") {
+                                          setHsacBudgets(hsacBudgets.map(b => b.id === hb.id ? res.data : b));
+                                          fetchFinanceAddons();
+                                        }
+                                        setEditingHsacBudgetId(null);
+                                      });
+                                    } else {
+                                      setEditingHsacBudgetId(null);
+                                    }
+                                  }}
+                                  className="text-[10px] uppercase font-bold text-white bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => setEditingHsacBudgetId(null)}
+                                  className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingHsacBudgetId(hb.id);
+                                  setNewHsacApprVal(approved.toString());
+                                }}
+                                className="text-[10px] uppercase font-mono tracking-wider text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 cursor-pointer"
+                              >
+                                Edit Budget
+                              </button>
+                            )
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-slate-50 border rounded-xl p-4">
+                            <p className="text-[10px] uppercase font-mono text-slate-500 font-bold mb-1">Total Approved</p>
+                            <p className="text-lg font-black text-slate-800">{formatCurrency(approved)}</p>
+                          </div>
+                          <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                            <p className="text-[10px] uppercase font-mono text-amber-700 font-bold mb-1">Carryover</p>
+                            <p className="text-lg font-black text-amber-900">{formatCurrency(carry)}</p>
+                          </div>
+                          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                            <p className="text-[10px] uppercase font-mono text-blue-700 font-bold mb-1">Total Available</p>
+                            <p className="text-lg font-black text-blue-900">{formatCurrency(totalAvail)}</p>
+                          </div>
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                            <p className="text-[10px] uppercase font-mono text-emerald-700 font-bold mb-1">Total Utilized</p>
+                            <p className="text-lg font-black text-emerald-900">{formatCurrency(util)}</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-100 rounded-full h-3 overflow-hidden border">
+                          <div className="bg-blue-600 h-full" style={{ width: `${Math.min(utilPct, 100)}%` }}></div>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">
+                          <span>{utilPct.toFixed(1)}% Used</span>
+                          <span className="text-blue-700">Remaining: {formatCurrency(remaining)}</span>
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/3 h-48">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Carryover (Prev FY)', value: carry },
+                                  { name: 'Approved (Current FY)', value: approved }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={40}
+                                outerRadius={70}
+                                paddingAngle={2}
+                                dataKey="value"
+                              >
+                                <Cell fill="#f59e0b" />
+                                <Cell fill="#3b82f6" />
+                              </Pie>
+                              <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                      </div>
+                    </div>
+                  );
+                })()}
                 
                 {/* INLINE SQUEEZED FORM TO CREATE AN ALLOCATION */}
                 {isAddBudgetOpen ? (
@@ -1617,8 +1813,20 @@ export default function FinanceView({
                     <button
                       onClick={() => {
                         if (!addBudgetForm.budgetAllocation) return alert("Allocation amount is required");
-                        handleCreateBudget(addBudgetForm.department, Number(addBudgetForm.budgetAllocation));
-                        setIsAddBudgetOpen(false);
+                        const val = Number(addBudgetForm.budgetAllocation);
+                        if (!isNaN(val)) {
+                          const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
+                          const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
+                          const approved = hb ? hb.approvedBudget : 0;
+                          
+                          const otherBudgetsSum = budgets.reduce((sum, bg) => sum + bg.budgetAllocation, 0);
+                          if (val + otherBudgetsSum > approved) {
+                            alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ".");
+                            return;
+                          }
+                          handleCreateBudget(addBudgetForm.department, val);
+                          setIsAddBudgetOpen(false);
+                        }
                       }}
                       className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-mono text-xs px-4 py-2 font-bold shadow-sm"
                     >
@@ -1698,7 +1906,7 @@ export default function FinanceView({
 
                         <div className="pt-3 border-t border-slate-100 space-y-2">
                           <div className="flex justify-between items-center text-[11px]">
-                            <span className="font-semibold text-slate-500">Fund-Utilization Status:</span>
+                                                        <span className="font-semibold text-slate-500">Fund-Utilization Status:</span>
                             <span className="font-black text-slate-800">{b.budgetPercentageUsed}% spent</span>
                           </div>
                           
@@ -1708,8 +1916,68 @@ export default function FinanceView({
                               style={{ width: `${Math.min(b.budgetPercentageUsed, 100)}%` }}
                             />
                           </div>
-
-
+                          {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) && (
+                            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                              {editingBudgetCapId === b.id ? (
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="number"
+                                    value={newBudgetCapVal}
+                                    onChange={(e) => setNewBudgetCapVal(e.target.value)}
+                                    className="w-32 text-xs font-mono p-1 border rounded"
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const val = Number(newBudgetCapVal);
+                                      if (!isNaN(val)) {
+                                        const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
+                                        const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
+                                        const approved = hb ? hb.approvedBudget : 0;
+                                        
+                                        const otherBudgetsSum = budgets.filter(bg => bg.id !== b.id).reduce((sum, bg) => sum + bg.budgetAllocation, 0);
+                                        if (val + otherBudgetsSum > approved) {
+                                          alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ".");
+                                          return;
+                                        }
+                                        
+                                        apiCall("/api/budgets/" + b.id, {
+                                          method: "PUT",
+                                          body: JSON.stringify({ budgetAllocation: val })
+                                        }).then(res => {
+                                          if (res.status === "success") {
+                                            setBudgets(budgets.map(bg => bg.id === b.id ? res.data : bg));
+                                          }
+                                          setEditingBudgetCapId(null);
+                                        });
+                                      } else {
+                                        setEditingBudgetCapId(null);
+                                      }
+                                    }}
+                                    className="text-[10px] uppercase font-bold text-white bg-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-900"
+                                  >
+                                    Save Cap
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingBudgetCapId(null)}
+                                    className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setEditingBudgetCapId(b.id);
+                                    setNewBudgetCapVal(b.budgetAllocation.toString());
+                                  }}
+                                  className="text-[10px] uppercase font-mono tracking-wider text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 cursor-pointer font-bold border"
+                                >
+                                  Set Budget Fund Pool Cap
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -1854,23 +2122,59 @@ export default function FinanceView({
                           <td className="p-4 text-center">
                             {req.status === "Pending" ? (
                               user.role === UserRole.SUPER_ADMIN ? (
-                                <div className="flex gap-1.5 justify-center">
-                                  <button
-                                    onClick={() => handleActionBudgetRequest(req.id, "Approved")}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer"
-                                  >
-                                    Approve & Allot
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      const rem = prompt("State reasons for return / realignment rejection:");
-                                      if (rem !== null) handleActionBudgetRequest(req.id, "Returned", rem);
-                                    }}
-                                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer"
-                                  >
-                                    Return & Reject
-                                  </button>
-                                </div>
+                                rejectingRequestId === req.id ? (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <input
+                                      type="text"
+                                      placeholder="Reason..."
+                                      value={rejectReason}
+                                      onChange={(e) => setRejectReason(e.target.value)}
+                                      className="w-24 text-[10px] font-mono p-1 border border-rose-300 rounded"
+                                      autoFocus
+                                    />
+                                    <div className="flex gap-1">
+                                      <button
+                                        onClick={() => {
+                                          if (rejectReason.trim()) {
+                                            handleActionBudgetRequest(req.id, "Returned", rejectReason.trim());
+                                            setRejectingRequestId(null);
+                                            setRejectReason("");
+                                          }
+                                        }}
+                                        className="bg-rose-600 text-white text-[9px] px-1.5 py-0.5 rounded cursor-pointer"
+                                      >
+                                        Confirm
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setRejectingRequestId(null);
+                                          setRejectReason("");
+                                        }}
+                                        className="bg-slate-200 text-slate-700 text-[9px] px-1.5 py-0.5 rounded cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex gap-1.5 justify-center">
+                                    <button
+                                      onClick={() => handleActionBudgetRequest(req.id, "Approved")}
+                                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer"
+                                    >
+                                      Approve & Allot
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setRejectingRequestId(req.id);
+                                        setRejectReason("");
+                                      }}
+                                      className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer"
+                                    >
+                                      Return & Reject
+                                    </button>
+                                  </div>
+                                )
                               ) : (
                                 <span className="text-[10px] text-slate-500 font-mono italic">
                                   Awaiting Division Chief Concurrence
