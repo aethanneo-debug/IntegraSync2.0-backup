@@ -337,6 +337,7 @@ export default function FinanceView({
         setIsAuditModalOpen(false);
         onRefresh();
         fetchSummary();
+        fetchFinanceAddons();
       }
     } catch (err: any) {
       alert(err.message);
@@ -1645,8 +1646,8 @@ export default function FinanceView({
                     const isOverspent = b.budgetUtilized >= b.budgetAllocation;
                     
                     // DERIVING DETAILED OBLIGATIONS METRICS FOR DETAILED TRACKING requirements
-                    const obligations = b.budgetUtilized * 0.92; // Commitments
-                    const disbursements = b.budgetUtilized * 0.81; // Actual payouts released
+                    const obligations = b.budgetUtilized;
+                    const disbursements = b.budgetUtilized;
                     const unpaidObligations = obligations - disbursements; 
                     const availableBalance = b.budgetAllocation - obligations;
                     
@@ -1708,19 +1709,7 @@ export default function FinanceView({
                             />
                           </div>
 
-                          {isBudgetOrAdmin && (
-                            <button
-                              onClick={() => {
-                                setEditingBudget(b);
-                                setNewAllocationVal(String(b.budgetAllocation));
-                                setIsBudgetModalOpen(true);
-                              }}
-                              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-mono text-[10px] py-1.5 font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
-                            >
-                              <Edit2 size={10} className="text-slate-500" />
-                              <span>Re-Adjust Fund Pool Cap</span>
-                            </button>
-                          )}
+
                         </div>
                       </div>
                     );
@@ -1792,17 +1781,20 @@ export default function FinanceView({
                     </div>
 
                     <button
-                      onClick={() => {
+                      type="button"
+                      onClick={async (e) => {
+                        e.preventDefault();
                         if (!addBudgetRequestForm.amountRequested || !addBudgetRequestForm.purpose) {
                           return alert("Please fill amount and purpose basis.");
                         }
-                        handleCreateBudgetRequest(
+                        await handleCreateBudgetRequest(
                           addBudgetRequestForm.department,
                           Number(addBudgetRequestForm.amountRequested),
                           addBudgetRequestForm.requestType,
                           addBudgetRequestForm.purpose
                         );
                         setIsAddBudgetRequestOpen(false);
+                        setAddBudgetRequestForm({ department: "Adjudication Division", amountRequested: "", requestType: "Augmentation", purpose: "" });
                       }}
                       className="bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-mono text-xs px-4 py-2 font-bold shadow-sm cursor-pointer"
                     >
@@ -1925,7 +1917,7 @@ export default function FinanceView({
                         className="w-full border p-2 text-xs bg-white rounded-lg font-bold"
                       >
                         <option value="">-- Choose Active Submission --</option>
-                        {submissions.filter(s => s.status === "Completed").map((l) => (
+                        {submissions.filter(s => s.status === "Completed" && !budgetLinks.some(bl => bl.liquidationNo === s.submissionNo)).map((l) => (
                           <option key={l.id} value={l.id}>
                             {l.submissionNo} - {l.employeeName} ({formatCurrency(l.totalReleased)} released)
                           </option>
@@ -1974,14 +1966,14 @@ export default function FinanceView({
                                 setBudgetLinks([res.data, ...budgetLinks]);
                                 setBudgets(budgets.map(b => {
                                   if (b.id === bud.id) {
-                                    const released = Number(liq.totalReleased || 0);
                                     const spent = Number(liq.totalSpent || 0);
-                                    const refund = released - spent;
-                                    const utilized = b.budgetUtilized - refund;
+                                    const utilized = b.budgetUtilized + spent;
+                                    const unliquidated = (b.unliquidatedAdvances || 0);
                                     return {
                                       ...b,
                                       budgetUtilized: utilized,
-                                      remainingBudget: b.budgetAllocation - utilized,
+                                      unliquidatedAdvances: unliquidated,
+                                      remainingBudget: b.budgetAllocation - utilized - unliquidated,
                                       budgetPercentageUsed: Math.round((utilized / b.budgetAllocation) * 100)
                                     };
                                   }
@@ -2153,8 +2145,8 @@ export default function FinanceView({
                          .filter(t => t.status === "Liquidated")
                          .reduce((sum, t) => sum + t.amount, 0);
 
-                       const obligations = txObligations > 0 ? txObligations : b.budgetUtilized * 0.92;
-                       const disbursements = txDisbursements > 0 ? txDisbursements : b.budgetUtilized * 0.81;
+                       const obligations = b.budgetUtilized;
+                       const disbursements = b.budgetUtilized;
 
                        totals.allotment += b.budgetAllocation;
                        totals.obligations += obligations;
@@ -2227,11 +2219,12 @@ export default function FinanceView({
                                    .filter(t => t.status === "Liquidated")
                                    .reduce((sum, t) => sum + t.amount, 0);
 
-                                 const obligations = txObligations > 0 ? txObligations : b.budgetUtilized * 0.92;
-                                 const disbursements = txDisbursements > 0 ? txDisbursements : b.budgetUtilized * 0.81;
+                                 const obligations = b.budgetUtilized;
+                                 const disbursements = b.budgetUtilized;
+                                 const unliquidated = b.unliquidatedAdvances || 0;
 
                                  const unpaidObs = obligations - disbursements;
-                                 const remAllotment = b.budgetAllocation - obligations;
+                                 const remAllotment = b.budgetAllocation - obligations - unliquidated;
                                  return (
                                    <tr key={b.id} className="hover:bg-slate-50/50">
                                      <td className="p-3 font-sans font-bold text-slate-800">{b.department}</td>
@@ -2696,52 +2689,6 @@ export default function FinanceView({
         </div>
       )}
 
-      {/* EDIT BUDGET MODAL */}
-      {isBudgetModalOpen && editingBudget && (
-        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-100">
-            <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
-              <h3 className="font-bold text-xs uppercase tracking-wider font-mono">Adjust Treasury Cap</h3>
-              <button onClick={() => setIsBudgetModalOpen(false)} className="text-slate-400 hover:text-white p-1">
-                <X size={18} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleUpdateBudget} className="p-5 space-y-4">
-              <p className="text-[11px] text-slate-500 leading-tight">
-                Modifying allocation cap of <strong className="text-slate-700 font-mono text-xs">{editingBudget.department}</strong>.
-              </p>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block font-bold text-slate-800">New Budget Allocation Limit (PHP) *</label>
-                <input
-                  required
-                  type="number"
-                  value={newAllocationVal}
-                  onChange={(e) => setNewAllocationVal(e.target.value)}
-                  className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-xs font-mono font-bold"
-                />
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsBudgetModalOpen(false)}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-slate-900 border border-slate-850 text-white hover:bg-slate-800 font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm cursor-pointer"
-                >
-                  Save Treasury Cap
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* VERSION HISTORY ARCHIVE MODAL */}
       {isVersionHistoryModalOpen && selectedVaultDoc && selectedVaultTx && (

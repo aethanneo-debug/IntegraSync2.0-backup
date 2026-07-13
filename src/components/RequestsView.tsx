@@ -243,7 +243,7 @@ export default function RequestsView({ user, requests, supplies, fetchSummary, o
         </button>
       </div>
 
-      {[UserRole.SUPER_ADMIN, UserRole.FINANCE_OFFICER].includes(user.role) ? (
+      {user.role === UserRole.SUPER_ADMIN ? (
         <AdminUnifiedRequests user={user} onRefresh={onRefresh} />
       ) : user.role === UserRole.HR_OFFICER ? (
         <HrUnifiedRequests user={user} onRefresh={onRefresh} />

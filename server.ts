@@ -1551,9 +1551,11 @@ app.post("/api/finance/activity-budget-links", authenticateToken, (req: any, res
     refund = 0;
   }
   
+  // Add actual spent amount to utilized budget when Integration Link is established
   if (budget) {
-    budget.budgetUtilized -= refund;
-    budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
+    const spentAmount = sub ? Number(sub.totalSpent || 0) : Number(amount || 0);
+    budget.budgetUtilized += spentAmount;
+    budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
     budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
   }
   
@@ -2815,22 +2817,9 @@ app.put("/api/liquidation-submissions/:id/finance-action", authenticateToken, (r
         const released = Number(sub.totalReleased || 0);
         const spent = Number(sub.totalSpent || 0);
         const refund = released - spent;
+        // Budget deduction is now strictly handled by manual "Establish Integration Link" feature per user governance
         
-        budget.budgetUtilized -= refund;
-        budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
-        budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
-        
-        // Auto-link to activityBudgetLinks
-        if (!db.activityBudgetLinks) db.activityBudgetLinks = [];
-        db.activityBudgetLinks.unshift({
-          id: `bl-${Date.now()}`,
-          liquidationNo: sub.submissionNo,
-          employee: sub.employeeName,
-          department: budget.department,
-          amount: spent,
-          budgetId: budget.id,
-          timestamp: new Date().toISOString()
-        });
+        // Budget deduction and linking is now strictly handled manually in "Establish Integration Link" frontend
       }
     }
 
@@ -2917,10 +2906,7 @@ app.put("/api/liquidation-submissions/:id/chief-action", authenticateToken, (req
         const released = Number(sub.totalReleased || 0);
         const spent = Number(sub.totalSpent || 0);
         const refund = released - spent;
-        
-        budget.budgetUtilized -= refund;
-        budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
-        budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+        // Budget deduction is now strictly handled by manual "Establish Integration Link" feature per user governance
       }
     }
 

@@ -910,7 +910,13 @@ export default function EmployeePortalView({ user, fetchSummary, onRefresh }: Em
                     className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-700 font-semibold"
                   >
                     <option value="">-- Choose Assigned Activity --</option>
-                    {activities.map(a => (
+                    {activities
+                      .filter(a => {
+                        const isLinked = submissions.some(sub => sub.activityId === a.id);
+                        if (resubmittingItem && resubmittingItem.activityId === a.id) return true;
+                        return !isLinked;
+                      })
+                      .map(a => (
                       <option key={a.id} value={a.id}>{a.activityNo} - {a.title}</option>
                     ))}
                   </select>

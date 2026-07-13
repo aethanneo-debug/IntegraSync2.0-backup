@@ -101,7 +101,7 @@ export default function Sidebar({
       id: "requests", 
       label: "Request Management", 
       icon: Clock,
-      visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER, UserRole.FINANCE_OFFICER].includes(role)
+      visible: [UserRole.SUPER_ADMIN, UserRole.HR_OFFICER].includes(role)
     },
     
     // EMPLOYEE DESK PORTAL (EMPLOYEE ONLY)

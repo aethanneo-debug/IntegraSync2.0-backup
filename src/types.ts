@@ -148,6 +148,7 @@ export interface BudgetAllocation {
   budgetUtilized: number;
   remainingBudget: number;
   budgetPercentageUsed: number;
+  unliquidatedAdvances?: number;
 }
 
 export interface BudgetRequestItem {
