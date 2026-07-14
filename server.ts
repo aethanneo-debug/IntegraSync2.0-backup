@@ -152,9 +152,12 @@ function getInitialData(): DBStructure {
       }
       if (!loaded.budgetAllocations) {
         loaded.budgetAllocations = [
-          { id: "b-1", department: "Adjudication Division", budgetAllocation: 500000.00, budgetUtilized: 120000.00, remainingBudget: 380000.00, budgetPercentageUsed: 24 },
-          { id: "b-2", department: "Administrative and Finance Division", budgetAllocation: 1000000.00, budgetUtilized: 450000.00, remainingBudget: 550000.00, budgetPercentageUsed: 45 },
-          { id: "b-3", department: "Legal Division", budgetAllocation: 400000.00, budgetUtilized: 85500.00, remainingBudget: 314500.00, budgetPercentageUsed: 21 }
+          { id: "b-1", fiscalYearId: "fy-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 },
+          { id: "b-1-old", fiscalYearId: "fy-2", department: "Adjudication Division", budgetAllocation: 2400000.00, carryOver: 0, budgetUtilized: 1500000.00, remainingBudget: 900000.00, budgetPercentageUsed: 0 },
+          { id: "b-2", fiscalYearId: "fy-1", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 },
+          { id: "b-2-old", fiscalYearId: "fy-2", department: "Administrative and Finance Division", budgetAllocation: 800000.00, carryOver: 0, budgetUtilized: 700000.00, remainingBudget: 100000.00, budgetPercentageUsed: 0 },
+          { id: "b-3", fiscalYearId: "fy-1", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 },
+          { id: "b-3-old", fiscalYearId: "fy-2", department: "Legal Division", budgetAllocation: 1800000.00, carryOver: 0, budgetUtilized: 1600000.00, remainingBudget: 200000.00, budgetPercentageUsed: 0 }
         ];
         changed = true;
       }
@@ -355,16 +358,14 @@ function getInitialData(): DBStructure {
       if (!loaded.fiscalYears) {
         loaded.fiscalYears = [
           { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
-          { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
-          { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
-          { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
+          { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" }
         ];
         changed = true;
       }
       if (!loaded.hsacBudgets) {
         loaded.hsacBudgets = [
-          { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 2500000.00, carryOverBudget: 450000.00, totalUtilized: 655500.00 },
-          { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 2200000.00, carryOverBudget: 350000.00, totalUtilized: 2100000.00 }
+          { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 4400000.00, carryOverBudget: 600000.00, totalUtilized: 0 },
+          { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 5000000.00, carryOverBudget: 300000.00, totalUtilized: 3800000.00 }
         ];
         changed = true;
       }
@@ -753,9 +754,12 @@ function getInitialData(): DBStructure {
       }
     ],
         budgetAllocations: [
-      { id: "b-1", department: "Adjudication Division", budgetAllocation: 500000.00, budgetUtilized: 120000.00, remainingBudget: 380000.00, budgetPercentageUsed: 24 },
-      { id: "b-2", department: "Administrative and Finance Division", budgetAllocation: 1000000.00, budgetUtilized: 450000.00, remainingBudget: 550000.00, budgetPercentageUsed: 45 },
-      { id: "b-3", department: "Legal Division", budgetAllocation: 400000.00, budgetUtilized: 85500.00, remainingBudget: 314500.00, budgetPercentageUsed: 21 }
+      { id: "b-1", fiscalYearId: "fy-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 },
+      { id: "b-1-old", fiscalYearId: "fy-2", department: "Adjudication Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 1500000.00, remainingBudget: 1000000.00, budgetPercentageUsed: 0 },
+      { id: "b-2", fiscalYearId: "fy-1", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 },
+      { id: "b-2-old", fiscalYearId: "fy-2", department: "Administrative and Finance Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 700000.00, remainingBudget: 300000.00, budgetPercentageUsed: 0 },
+      { id: "b-3", fiscalYearId: "fy-1", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 },
+      { id: "b-3-old", fiscalYearId: "fy-2", department: "Legal Division", budgetAllocation: 1800000.00, carryOver: 0, budgetUtilized: 1600000.00, remainingBudget: 200000.00, budgetPercentageUsed: 0 }
     ],
     financeAuditLogs: [
       { id: "fl-1", user: "Juan dela Cruz", action: "Validate Transaction", module: "Financial Transactions", timestamp: "2026-05-13T09:30:00Z", previousValue: "Under Review", newValue: "Validated" },
@@ -830,13 +834,11 @@ function getInitialData(): DBStructure {
     pds: [],
     fiscalYears: [
       { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
-      { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
-      { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
-      { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
+      { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" }
     ],
     hsacBudgets: [
-      { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 2500000.00, carryOverBudget: 450000.00, totalUtilized: 655500.00 },
-      { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 2200000.00, carryOverBudget: 350000.00, totalUtilized: 2100000.00 }
+      { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 4400000.00, carryOverBudget: 600000.00, totalUtilized: 0 },
+      { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 5000000.00, carryOverBudget: 300000.00, totalUtilized: 3800000.00 }
     ]
   };
 
@@ -894,13 +896,33 @@ app.post("/api/fiscal-years", authenticateToken, (req: any, res) => {
 
   // Close other fiscal years and calculate carryover
   let carryOver = 0;
+  let totalApproved = 0;
   const activeFy = db.fiscalYears.find((f: any) => f.status === "Active");
   if (activeFy) {
     activeFy.status = "Closed";
     const activeHb = db.hsacBudgets.find((hb: any) => hb.fiscalYearId === activeFy.id);
     if (activeHb) {
-      carryOver = activeHb.approvedBudget + (activeHb.carryOverBudget || 0) - (activeHb.totalUtilized || 0);
-      if (carryOver < 0) carryOver = 0; // Prevent negative carryover
+      // Calculate division budgets based on actual spending and carryovers
+      const oldAllocations = (db.budgetAllocations || []).filter((b: any) => b.fiscalYearId === activeFy.id);
+      const newAllocations = oldAllocations.map((b: any) => {
+        const spentLastYear = b.budgetUtilized || 0;
+        const leftover = Math.max(0, (b.budgetAllocation || 0) + (b.carryOver || 0) - (b.budgetUtilized || 0));
+        
+        totalApproved += spentLastYear;
+        carryOver += leftover;
+        
+        return {
+          ...b,
+          id: `b-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          fiscalYearId: newFy.id,
+          budgetAllocation: spentLastYear,
+          carryOver: leftover,
+          budgetUtilized: 0,
+          remainingBudget: spentLastYear + leftover,
+          budgetPercentageUsed: 0
+        };
+      });
+      db.budgetAllocations = [...(db.budgetAllocations || []), ...newAllocations];
     }
   }
 
@@ -909,7 +931,9 @@ app.post("/api/fiscal-years", authenticateToken, (req: any, res) => {
   const newHb = {
     id: `hb-${Date.now()}`,
     fiscalYearId: newFy.id,
-    approvedBudget: 0,
+    // If it's a new year and we calculated from previous, the total approved is the sum of all division's spent last year.
+    // If there is no previous year, we set to 0.
+    approvedBudget: totalApproved,
     carryOverBudget: carryOver,
     totalUtilized: 0
   };
@@ -939,7 +963,14 @@ app.put("/api/hsac-budgets/:id", authenticateToken, (req: any, res) => {
 
 
 app.get("/api/budgets", authenticateToken, (req, res) => {
-  res.json({ status: "success", data: db.budgetAllocations || [] });
+  let allocations = db.budgetAllocations || [];
+  if (req.query.fiscalYearLabel) {
+    const fy = (db.fiscalYears || []).find((f: any) => f.label === req.query.fiscalYearLabel);
+    if (fy) {
+      allocations = allocations.filter((b: any) => b.fiscalYearId === fy.id);
+    }
+  }
+  res.json({ status: "success", data: allocations });
 });
 
 app.put("/api/budgets/:id", authenticateToken, (req: any, res) => {
@@ -950,8 +981,8 @@ app.put("/api/budgets/:id", authenticateToken, (req: any, res) => {
   if (budget) {
     if (req.body.budgetAllocation !== undefined) {
       budget.budgetAllocation = Number(req.body.budgetAllocation);
-      budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
-      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+      budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
+      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
     }
     saveDB();
     res.json({ status: "success", data: budget });
@@ -1657,8 +1688,8 @@ app.post("/api/finance/activity-budget-links", authenticateToken, (req: any, res
   if (budget) {
     const spentAmount = sub ? Number(sub.totalSpent || 0) : Number(amount || 0);
     budget.budgetUtilized += spentAmount;
-    budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
-    budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+    budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
+    budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
   }
   
   logFinanceAudit(req.user.fullName, "Map Activity To Budget", "Budget Linking", "None", `${liquidationNo} linked to ${budgetId}`);
@@ -1701,8 +1732,10 @@ app.post("/api/finance/budgets", authenticateToken, (req: any, res) => {
     return res.status(400).json({ status: "error", message: "Allocation for department already exists. Please edit instead." });
   }
 
+  const activeFy = (db.fiscalYears || []).find((f: any) => f.status === "Active");
   const newBudget: BudgetAllocation = {
     id: `b-${Date.now()}`,
+    fiscalYearId: activeFy?.id || "fy-1",
     department,
     budgetAllocation: Number(budgetAllocation),
     budgetUtilized: 0,
@@ -1750,8 +1783,8 @@ app.put("/api/finance/budgets/:id", authenticateToken, (req: any, res) => {
   }
 
   budget.budgetAllocation = targetAmount;
-  budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
-  budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+  budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized;
+  budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
 
   logFinanceAudit(req.user.fullName, "Adjust Budget Allocation", "Budget Monitoring", `${oldAllocation}`, `${budgetAllocation}`);
   logEvent(req.user.id, req.user.username, req.user.role, "Adjust Budget", `Adjusted budget allocation for ${budget.department} to PHP ${budgetAllocation}`);
@@ -1805,12 +1838,14 @@ app.post("/api/finance/budget-requests/:id/action", authenticateToken, (req: any
     if (budget) {
       const oldAllocation = budget.budgetAllocation;
       budget.budgetAllocation += reqItem.amountRequested;
-      budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
-      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+      budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized;
+      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
       logFinanceAudit(req.user.fullName, `Augment Budget Allocation via request ${reqItem.id}`, "Budget Monitoring", `${oldAllocation}`, `${budget.budgetAllocation}`);
     } else {
+      const activeFy = (db.fiscalYears || []).find((f: any) => f.status === "Active");
       db.budgetAllocations.push({
         id: `b-${Date.now()}`,
+        fiscalYearId: activeFy?.id || "fy-1",
         department: reqItem.department,
         budgetAllocation: reqItem.amountRequested,
         budgetUtilized: 0,
@@ -1851,12 +1886,14 @@ app.put("/api/budget-requests/:id/approve", authenticateToken, (req: any, res) =
     if (budget) {
       const oldAllocation = budget.budgetAllocation;
       budget.budgetAllocation += reqItem.amountRequested;
-      budget.remainingBudget = budget.budgetAllocation - budget.budgetUtilized;
-      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / budget.budgetAllocation) * 100);
+      budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized;
+      budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
       logFinanceAudit(req.user.fullName, `Augment Budget Allocation (Chief Concurrence) ${reqItem.id}`, "Budget Monitoring", `${oldAllocation}`, `${budget.budgetAllocation}`);
     } else {
+      const activeFy = (db.fiscalYears || []).find((f: any) => f.status === "Active");
       db.budgetAllocations.push({
         id: `b-${Date.now()}`,
+        fiscalYearId: activeFy?.id || "fy-1",
         department: reqItem.department,
         budgetAllocation: reqItem.amountRequested,
         budgetUtilized: 0,

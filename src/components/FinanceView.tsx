@@ -96,6 +96,7 @@ export default function FinanceView({
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [innerBudgetTab, setInnerBudgetTab] = useState<"allocations" | "requests" | "linking" | "reporting">("allocations");
   const [isAddBudgetOpen, setIsAddBudgetOpen] = useState(false);
+  const [selectedDivisionFilter, setSelectedDivisionFilter] = useState("All Divisions");
   const [isAddBudgetRequestOpen, setIsAddBudgetRequestOpen] = useState(false);
   
   const [addBudgetForm, setAddBudgetForm] = useState({ department: "Adjudication Division", budgetAllocation: "" });
@@ -113,6 +114,7 @@ export default function FinanceView({
   const [activeFiscalYear, setActiveFiscalYear] = useState<string>("2026");
   const [fiscalYears, setFiscalYears] = useState<any[]>([]);
   const [isFiscalYearModalOpen, setIsFiscalYearModalOpen] = useState(false);
+  const [isConfirmingNewFy, setIsConfirmingNewFy] = useState(false);
 
   // For budget edit
   const [editingBudget, setEditingBudget] = useState<BudgetAllocation | null>(null);
@@ -189,7 +191,7 @@ export default function FinanceView({
       if (resLiq.status === "success") {
         setLiquidations(resLiq.data);
       }
-      const resBud = await apiCall("/api/budgets").catch(() => ({ status: "error", data: [] }));
+      const resBud = await apiCall(`/api/budgets?fiscalYearLabel=${activeFiscalYear || ""}`).catch(() => ({ status: "error", data: [] }));
       if (Array.isArray(resBud)) {
         setBudgets(resBud); // Assuming endpoint returns array
       } else if (resBud.status === "success") {
@@ -279,7 +281,7 @@ export default function FinanceView({
 
   useEffect(() => {
     fetchFinanceAddons();
-  }, [activeSubTab]);
+  }, [activeSubTab, activeFiscalYear]);
 
   // Submit expense record
   async function handleCreateTx(e: React.FormEvent) {
@@ -559,13 +561,17 @@ export default function FinanceView({
     },
     budgets: () => {
       const headers = ["Department Module", "Budget Allocation (PHP)", "Utilized Treasury", "Remaining Reserve", "Utilization Percent"];
-      const rows = budgets.map(b => [
-        b.department,
-        b.budgetAllocation.toString(),
-        b.budgetUtilized.toString(),
-        b.remainingBudget.toString(),
-        `${b.budgetPercentageUsed}%`
-      ]);
+      const rows = budgets.map(b => {
+        const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
+        const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+        return [
+          b.department,
+          (b.budgetAllocation + (b.carryOver || 0)).toString(),
+          obligations.toString(),
+          (b.budgetAllocation + (b.carryOver || 0) - obligations).toString(),
+          `${Math.round((obligations / Math.max(1, b.budgetAllocation + (b.carryOver || 0))) * 100)}%`
+        ];
+      });
       generateFinancialReport("Departmental Budget Allocation Balances", headers, rows, "HSAC_Budget_Utilization_Summary");
     }
   };
@@ -605,8 +611,33 @@ export default function FinanceView({
   const totalApprovedLiqAmount = yearFilteredSubmissions.filter(s => s.status === "Completed").reduce((acc, s) => acc + s.totalSpent, 0);
 
   const totalBudgetAllocationSum = budgets.reduce((acc, b) => acc + b.budgetAllocation, 0);
-  const totalBudgetUtilizedSum = budgets.reduce((acc, b) => acc + b.budgetUtilized, 0);
+  const totalBudgetUtilizedSum = yearFilteredTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
   const overallUtilizationPercent = totalBudgetAllocationSum > 0 ? Math.round((totalBudgetUtilizedSum / totalBudgetAllocationSum) * 100) : 0;
+
+  const handleStartNewFiscalYear = async () => {
+    const nextYear = String(Number(activeFiscalYear) + 1);
+    
+    try {
+      const res = await apiCall('/api/fiscal-years', {
+        method: 'POST',
+        body: JSON.stringify({
+          label: nextYear,
+          start_date: `${nextYear}-01-01`,
+          end_date: `${nextYear}-12-31`
+        })
+      });
+      if (res.status === 'success') {
+        alert(`Successfully started Fiscal Year ${nextYear}`);
+        await fetchFinanceAddons();
+        setActiveFiscalYear(nextYear);
+      } else {
+        alert(res.message || "Failed to create new fiscal year");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred");
+    }
+  };
 
   return (
     <div id="finance-workstation-container" className="flex-1 flex flex-col overflow-hidden bg-slate-50">
@@ -774,26 +805,29 @@ export default function FinanceView({
 
                 <div className="space-y-4 pt-1">
                   {budgets.map((b) => {
-                    const isOverspent = b.budgetUtilized >= b.budgetAllocation;
+                    const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
+                    const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const isOverspent = obligations >= (b.budgetAllocation + (b.carryOver || 0));
+                    const percentageUsed = Math.round((obligations / Math.max(1, b.budgetAllocation + (b.carryOver || 0))) * 100);
                     return (
                       <div key={b.id} className="space-y-1.5 p-3 rounded-lg border border-slate-100 bg-slate-50/50">
                         <div className="flex justify-between items-center text-[11px]">
                           <span className="font-bold text-slate-800">{b.department}</span>
                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${isOverspent ? "bg-rose-100 text-rose-800 outline outline-1 outline-rose-200 animate-pulse" : "bg-slate-150 text-slate-700"}`}>
-                            {isOverspent ? "OVERSPENT ALERT" : `${b.budgetPercentageUsed}% USED`}
+                            {isOverspent ? "OVERSPENT ALERT" : `${percentageUsed}% USED`}
                           </span>
                         </div>
                         
                         {/* Progressive Bar */}
                         <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                           <div 
-                            className={`h-full rounded-full transition-all duration-500 ${isOverspent ? "bg-rose-500" : b.budgetPercentageUsed > 75 ? "bg-amber-500" : "bg-emerald-500"}`}
-                            style={{ width: `${Math.min(b.budgetPercentageUsed, 100)}%` }}
+                            className={`h-full rounded-full transition-all duration-500 ${isOverspent ? "bg-rose-500" : percentageUsed > 75 ? "bg-amber-500" : "bg-emerald-500"}`}
+                            style={{ width: `${Math.min(percentageUsed, 100)}%` }}
                           />
                         </div>
 
                         <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
-                          <span>Spent: {formatCurrency(b.budgetUtilized)}</span>
+                          <span>Spent: {formatCurrency(obligations)}</span>
                           <span>Allocation: {formatCurrency(b.budgetAllocation)}</span>
                         </div>
                         {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) && (
@@ -1583,7 +1617,23 @@ export default function FinanceView({
                 </p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setIsFiscalYearModalOpen(true)}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-[10px] font-bold py-2 px-3 uppercase tracking-wider rounded-lg border flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+                >
+                  <Calendar size={13} />
+                  <span>FY {activeFiscalYear} ACTIVE</span>
+                </button>
+                {isBudgetOrAdmin && (
+                  <button 
+                    onClick={() => setIsConfirmingNewFy(true)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-[10px] font-bold py-2 px-3 uppercase tracking-wider rounded-lg border flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+                  >
+                    <Plus size={13} />
+                    <span>Start New Fiscal Year</span>
+                  </button>
+                )}
                 <button
                   onClick={exportMethods.budgets}
                   className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-lg text-xs font-semibold flex items-center shadow-sm cursor-pointer"
@@ -1659,7 +1709,7 @@ export default function FinanceView({
                   const approved = hb ? hb.approvedBudget : 0;
                   const carry = hb ? (hb.carryOverBudget || 0) : 0;
                   const totalAvail = approved + carry;
-                  const util = budgets.reduce((acc, b) => acc + (b.budgetUtilized || 0), 0);
+                  const util = yearFilteredTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
                   const remaining = totalAvail - util;
                   const utilPct = totalAvail > 0 ? (util / totalAvail) * 100 : 0;
 
@@ -1774,7 +1824,25 @@ export default function FinanceView({
                     </div>
                   );
                 })()}
-                
+
+                {/* DIVISION FILTER BUTTONS - Styled pill layout for division selection */}
+                <div className="flex flex-wrap gap-2 mb-4 p-1.5 bg-slate-50/80 rounded-2xl border border-slate-200/60 shadow-sm">
+                  {["All Divisions", "Adjudication Division", "Administrative and Finance Division", "Legal Division"].map((div) => (
+                    <button
+                      key={div}
+                      onClick={() => setSelectedDivisionFilter(div)}
+                      className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center space-x-2 cursor-pointer border shadow-xs ${
+                        selectedDivisionFilter === div
+                          ? "bg-slate-900 text-white border-slate-900 ring-4 ring-slate-900/10 shadow-lg"
+                          : "bg-white text-slate-500 border-slate-200 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30"
+                      }`}
+                    >
+                      {div === "All Divisions" ? <Layers size={14} /> : <Building2 size={14} />}
+                      <span>{div === "All Divisions" ? "All Programs" : div}</span>
+                    </button>
+                  ))}
+                </div>
+
                 {/* INLINE SQUEEZED FORM TO CREATE AN ALLOCATION */}
                 {isAddBudgetOpen ? (
                   <div className="bg-white border border-blue-200 rounded-2xl p-5 shadow-sm space-y-4">
@@ -1836,28 +1904,21 @@ export default function FinanceView({
                 ) : (
                   <div className="flex justify-between items-center">
                     <p className="text-xs text-slate-500 italic">Review division fund caps and real-time obligation burns.</p>
-                    {isBudgetOrAdmin && (
-                      <button
-                        onClick={() => setIsAddBudgetOpen(true)}
-                        className="bg-slate-900 hover:bg-slate-800 text-white font-mono text-[11px] px-3 py-1.5 rounded-lg flex items-center space-x-1 font-bold shadow-sm cursor-pointer"
-                      >
-                        <Plus size={13} />
-                        <span>Add New Budget Program</span>
-                      </button>
-                    )}
                   </div>
                 )}
 
                 {/* DETAILED MONITORING CARDS - tracking allotments, expenditures, obligations, disbursements, unpaid obligations, available balances, and fund-utilization status */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {budgets.map((b) => {
-                    const isOverspent = b.budgetUtilized >= b.budgetAllocation;
-                    
+                  {budgets
+                    .filter(b => selectedDivisionFilter === "All Divisions" || b.department === selectedDivisionFilter)
+                    .map((b) => {
                     // DERIVING DETAILED OBLIGATIONS METRICS FOR DETAILED TRACKING requirements
-                    const obligations = b.budgetUtilized;
-                    const disbursements = b.budgetUtilized;
+                    const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
+                    const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const isOverspent = obligations >= (b.budgetAllocation + (b.carryOver || 0));
+                    const disbursements = deptYearTxns.filter(t => t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
                     const unpaidObligations = obligations - disbursements; 
-                    const availableBalance = b.budgetAllocation - obligations;
+                    const availableBalance = b.budgetAllocation + (b.carryOver || 0) - obligations;
                     
                     return (
                       <div key={b.id} className="bg-white border border-slate-200 hover:border-blue-400 transition-all rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between">
@@ -1876,12 +1937,20 @@ export default function FinanceView({
 
                           <div className="pt-4 space-y-2 border-t mt-3 border-slate-100">
                             <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                              <span>Allotment / Cap:</span>
+                              <span>Base Allotment:</span>
                               <span className="font-bold text-slate-900">{formatCurrency(b.budgetAllocation)}</span>
                             </div>
                             <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                              <span>Retained Carryover:</span>
+                              <span className="font-bold text-teal-700">{formatCurrency(b.carryOver || 0)}</span>
+                            </div>
+                            <div className="flex justify-between text-[11px] font-mono text-slate-800 bg-slate-50 p-1 rounded">
+                              <span className="font-bold">Total Active Cap:</span>
+                              <span className="font-black text-blue-700">{formatCurrency(b.budgetAllocation + (b.carryOver || 0))}</span>
+                            </div>
+                            <div className="flex justify-between text-[11px] font-mono text-slate-500">
                               <span>Total Expenditures:</span>
-                              <span className="font-semibold text-slate-700">{formatCurrency(b.budgetUtilized)}</span>
+                              <span className="font-semibold text-slate-700">{formatCurrency(obligations)}</span>
                             </div>
                             <div className="flex justify-between text-[11px] font-mono text-slate-500">
                               <span>Obligations (Committed):</span>
@@ -2277,8 +2346,8 @@ export default function FinanceView({
                                       ...b,
                                       budgetUtilized: utilized,
                                       unliquidatedAdvances: unliquidated,
-                                      remainingBudget: b.budgetAllocation - utilized - unliquidated,
-                                      budgetPercentageUsed: Math.round((utilized / b.budgetAllocation) * 100)
+                                      remainingBudget: b.budgetAllocation + (b.carryOver || 0) - utilized - unliquidated,
+                                      budgetPercentageUsed: Math.round((utilized / (b.budgetAllocation + (b.carryOver || 0))) * 100)
                                     };
                                   }
                                   return b;
@@ -2439,7 +2508,7 @@ export default function FinanceView({
                    
                    {(() => {
                      const SAAODBTotals = budgets.reduce((totals, b) => {
-                       const deptTxns = (transactions || []).filter(t => t.department.toLowerCase() === b.department.toLowerCase());
+                       const deptTxns = (yearFilteredTxns || []).filter(t => t.department.toLowerCase() === b.department.toLowerCase());
                        
                        const txObligations = deptTxns
                          .filter(t => t.status === "Validated" || t.status === "Liquidated")
@@ -2449,8 +2518,8 @@ export default function FinanceView({
                          .filter(t => t.status === "Liquidated")
                          .reduce((sum, t) => sum + t.amount, 0);
 
-                       const obligations = b.budgetUtilized;
-                       const disbursements = b.budgetUtilized;
+                       const obligations = txObligations;
+                       const disbursements = txDisbursements;
 
                        totals.allotment += b.budgetAllocation;
                        totals.obligations += obligations;
@@ -2503,7 +2572,9 @@ export default function FinanceView({
                              <thead>
                                <tr className="bg-slate-900 text-white font-mono uppercase text-[9px] tracking-wide border-b">
                                  <th className="p-3">Accrued Program (PAP) Class</th>
-                                 <th className="p-3 text-right">Approved Allotment</th>
+                                 <th className="p-3 text-right">Approved Base Allotment</th>
+                                 <th className="p-3 text-right">Retained Surplus (Carryover)</th>
+                                 <th className="p-3 text-right">Total Active Allotment</th>
                                  <th className="p-3 text-right">Registered Obligations</th>
                                  <th className="p-3 text-right">Actual Disbursements</th>
                                  <th className="p-3 text-right">Unpaid Obligations</th>
@@ -2513,7 +2584,7 @@ export default function FinanceView({
                              </thead>
                              <tbody className="divide-y font-mono text-[10px]">
                                {budgets.map((b) => {
-                                 const deptTxns = (transactions || []).filter(t => t.department.toLowerCase() === b.department.toLowerCase());
+                                 const deptTxns = (yearFilteredTxns || []).filter(t => t.department.toLowerCase() === b.department.toLowerCase());
                                  
                                  const txObligations = deptTxns
                                    .filter(t => t.status === "Validated" || t.status === "Liquidated")
@@ -2523,23 +2594,25 @@ export default function FinanceView({
                                    .filter(t => t.status === "Liquidated")
                                    .reduce((sum, t) => sum + t.amount, 0);
 
-                                 const obligations = b.budgetUtilized;
-                                 const disbursements = b.budgetUtilized;
+                                 const obligations = txObligations;
+                                 const disbursements = txDisbursements;
                                  const unliquidated = b.unliquidatedAdvances || 0;
 
                                  const unpaidObs = obligations - disbursements;
-                                 const remAllotment = b.budgetAllocation - obligations - unliquidated;
+                                 const remAllotment = b.budgetAllocation + (b.carryOver || 0) - obligations - unliquidated;
                                  return (
                                    <tr key={b.id} className="hover:bg-slate-50/50">
                                      <td className="p-3 font-sans font-bold text-slate-800">{b.department}</td>
                                      <td className="p-3 text-right font-bold">{formatCurrency(b.budgetAllocation)}</td>
+                                     <td className="p-3 text-right font-semibold text-teal-700">{formatCurrency(b.carryOver || 0)}</td>
+                                     <td className="p-3 text-right font-bold text-blue-700">{formatCurrency(b.budgetAllocation + (b.carryOver || 0))}</td>
                                      <td className="p-3 text-right text-indigo-700 font-semibold">{formatCurrency(obligations)}</td>
                                      <td className="p-3 text-right text-emerald-700 font-semibold">{formatCurrency(disbursements)}</td>
                                      <td className="p-3 text-right text-slate-600">{formatCurrency(unpaidObs)}</td>
                                      <td className="p-3 text-right font-black text-rose-750">{formatCurrency(remAllotment)}</td>
                                      <td className="p-3 text-center">
                                        <span className="bg-blue-50 text-blue-900 rounded font-bold px-1 py-0.5 text-[9px]">
-                                         {Math.round((obligations / b.budgetAllocation) * 100)}% utilized
+                                         {Math.round((obligations / (b.budgetAllocation + (b.carryOver || 0))) * 100)}% utilized
                                        </span>
                                      </td>
                                    </tr>
@@ -2569,13 +2642,17 @@ export default function FinanceView({
                       <button
                         onClick={() => {
                           {
-                            const data = budgets.map(b => ({
+                            const data = budgets.map(b => {
+                              const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
+                              const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                              return {
                                 "UACS Code": b.uacsCode || "N/A",
                                 "Department": b.department,
-                                "Total Allocation": b.totalAllocation,
-                                "Obligations Incurred": b.budgetUtilized,
-                                "Unobligated Balance": b.totalAllocation - b.budgetUtilized
-                            }));
+                                "Total Allocation": b.budgetAllocation + (b.carryOver || 0),
+                                "Obligations Incurred": obligations,
+                                "Unobligated Balance": b.budgetAllocation + (b.carryOver || 0) - obligations
+                              };
+                            });
                             downloadCSV(data, ["UACS Code", "Department", "Total Allocation", "Obligations Incurred", "Unobligated Balance"], "HSAC_FAR1_CONSOLIDATED_" + consolidationValue + ".csv");
                           }
                         }}
@@ -3144,6 +3221,50 @@ export default function FinanceView({
       )}
 
       {/* FISCAL YEAR MODAL */}
+      {isConfirmingNewFy && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-5 py-4 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+              <h3 className="font-semibold text-sm tracking-tight text-amber-800 flex items-center gap-2">
+                <AlertTriangle size={16} />
+                Confirm New Fiscal Year
+              </h3>
+              <button 
+                onClick={() => setIsConfirmingNewFy(false)}
+                className="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-600">
+                Are you sure you want to start Fiscal Year <span className="font-bold">{String(Number(activeFiscalYear) + 1)}</span>? 
+              </p>
+              <p className="text-xs text-slate-500">
+                This will automatically close {activeFiscalYear} and calculate carryover balances for all active division funds. This action cannot be easily reversed.
+              </p>
+              <div className="flex gap-3 pt-2">
+                <button 
+                  onClick={() => setIsConfirmingNewFy(false)}
+                  className="flex-1 bg-white border border-slate-300 text-slate-700 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsConfirmingNewFy(false);
+                    handleStartNewFiscalYear();
+                  }}
+                  className="flex-1 bg-amber-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-amber-700 transition-colors"
+                >
+                  Confirm & Start
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {isFiscalYearModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl border border-slate-200 w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
@@ -3182,8 +3303,7 @@ export default function FinanceView({
                       <>
                         <option value="2026">Fiscal Year 2026</option>
                         <option value="2025">Fiscal Year 2025</option>
-                        <option value="2024">Fiscal Year 2024</option>
-                        <option value="2023">Fiscal Year 2023</option>
+                        
                       </>
                     )}
                   </select>

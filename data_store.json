@@ -1,640 +1,174 @@
 {
   "users": [
     {
-      "id": "u-admin",
+      "id": "u-1",
       "username": "admin",
       "email": "admin@hsac.gov.ph",
-      "fullName": "Hon. Romeo M. Alcantara (Dev Admin)",
+      "fullName": "Hon. Romeo M. Alcantara",
       "role": "Administrator / Division Chief",
-      "employeeId": "DEV-ADMIN-MOCK",
+      "employeeId": "EMP001",
       "status": "Active",
       "createdAt": "2026-01-15T08:00:00Z"
     },
     {
-      "id": "u-hr",
+      "id": "u-2",
       "username": "hr",
       "email": "clara.santos@hsac.gov.ph",
-      "fullName": "Maria Clara V. Santos (Dev HR)",
+      "fullName": "Maria Clara V. Santos",
       "role": "HR Officer",
-      "employeeId": "DEV-HR-MOCK",
-      "status": "Archived",
+      "employeeId": "EMP002",
+      "status": "Active",
       "createdAt": "2026-01-15T08:30:00Z"
     },
     {
-      "id": "u-finance",
+      "id": "u-3",
       "username": "finance",
       "email": "juan.delacruz@hsac.gov.ph",
-      "fullName": "Juan dela Cruz (Dev Finance)",
+      "fullName": "Juan dela Cruz",
       "role": "Financial Officer",
-      "employeeId": "DEV-FINANCE-MOCK",
+      "employeeId": "EMP003",
       "status": "Active",
       "createdAt": "2026-01-15T09:00:00Z"
     },
     {
-      "id": "u-budget",
-      "username": "budget",
-      "email": "budget@hsac.gov.ph",
-      "fullName": "Francisco Balagtas (Dev Budget)",
-      "role": "Budget Officer",
-      "employeeId": "DEV-BUDGET-MOCK",
+      "id": "u-6",
+      "username": "employee",
+      "email": "andres.bonifacio@hsac.gov.ph",
+      "fullName": "Andres B. Bonifacio",
+      "role": "Personnel",
+      "employeeId": "EMP006",
       "status": "Active",
       "createdAt": "2026-01-15T10:00:00Z"
     },
     {
-      "id": "u-25193670-55dc-4e58-a1ce-0e525afe00d1",
-      "username": "eulogio.esturas",
-      "email": "eulogio.esturas@hsac.gov.ph",
-      "fullName": "Eulogio IV Esturas",
-      "role": "Personnel",
-      "employeeId": "9a7af2cd-ccde-42f5-bb04-9bef94340af7",
+      "id": "u-7",
+      "username": "budget",
+      "email": "budget@hsac.gov.ph",
+      "fullName": "Francisco F. Balagtas",
+      "role": "Budget Officer",
+      "employeeId": "EMP007",
       "status": "Active",
-      "passwordHash": "4c3882cd8689ddfccb7db43665c017e7:8b32e1ef140bf0ef85d3cdb3eee8ad55f678f7634e0d70003558a2de3fd46a34a64dfce58c4111368f1eaa20b10cf669ef56369971556f4103c277d5b8fd55b2",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.852Z"
-    },
-    {
-      "id": "u-8067ff8b-baff-4ff7-b19b-4826eb564c86",
-      "username": "jolly.almoite",
-      "email": "jolly.almoite@hsac.gov.ph",
-      "fullName": "Jolly Joy A. Almoite",
-      "role": "Personnel",
-      "employeeId": "be715b94-9ea4-465f-be90-d37717d812f3",
-      "status": "Active",
-      "passwordHash": "68288e342538d8b8422e6714e3663b1b:19289b6f7baa44b73a6c4c33058c78995c8c3c7e3035170ee299158cff56c9c1db2b7d40a0e815762d96fb2e994f5b0c8a471f419ba05ad3dba6c559ece112b6",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.853Z"
-    },
-    {
-      "id": "u-0c90ddf5-fefd-4286-9fbd-34de0d1d8978",
-      "username": "froilan.estepa",
-      "email": "froilan.estepa@hsac.gov.ph",
-      "fullName": "Froilan J. Estepa",
-      "role": "Personnel",
-      "employeeId": "bac27c32-0964-474f-8f8b-201151c3f01d",
-      "status": "Active",
-      "passwordHash": "75b3de2cd64639062421976b6b95c529:616ce05616c4389b1bb0242f68b086771db16f04789cd75b54c1dc8ed76b961643ddc1a74da8849279751c4ea95b120c428420b31fa7df585f9ea1159a844aa3",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.854Z"
-    },
-    {
-      "id": "u-25163c73-2baf-4134-b0a7-2be786963d59",
-      "username": "korrine.fontanilla",
-      "email": "korrine.fontanilla@hsac.gov.ph",
-      "fullName": "Atty. Korrine Madeleine Flores - Fontanilla",
-      "role": "Personnel",
-      "employeeId": "667dc61f-3f48-47be-83e6-7a78a09902f8",
-      "status": "Active",
-      "passwordHash": "cc1413288d746d2be87ebe8e72fa0bc0:e2830583d9ac78a3ca11de6d7af9f453ee1bdd9d6cb236f8559e221357f6b77d2325b1b96e80a74872b24c20cc48cb86d3e7b417088b0ebed45c105729d7459c",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.855Z"
-    },
-    {
-      "id": "u-03c97ab8-6e63-4eeb-9601-47d3342cd6cc",
-      "username": "alyssa.dumlao",
-      "email": "alyssa.dumlao@hsac.gov.ph",
-      "fullName": "Atty. Alyssa Ronalyn C. Dumlao",
-      "role": "Personnel",
-      "employeeId": "5e26ab59-af8b-4ab0-b128-f5b14699a82c",
-      "status": "Active",
-      "passwordHash": "f63ecbfaa00abe88e43fd65ed39ec541:88d1f7d9597e5d2da75c9eaa76de2987781a59daa4497da5835831781ba3415c40d177d3dd5040c3977ecfc3d39e4f91cc97cafb04b9f31a2ea28582ab5c543e",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.857Z"
-    },
-    {
-      "id": "u-46fff513-7950-433b-8350-cee9717798b3",
-      "username": "paolo.macalino",
-      "email": "paolo.macalino@hsac.gov.ph",
-      "fullName": "Paolo Antonio M. Macalino",
-      "role": "Personnel",
-      "employeeId": "baceab04-c8f5-4819-9893-285adbf11e5b",
-      "status": "Active",
-      "passwordHash": "2ed5dae12ec8821a6b51474a79e58d73:82109ad9433ea365f24e4109e09e2f95c658507b96cb46dc4c9f1279b7bc7db3107f95d23f458774ebcbdaff155a90683f277b5a3628d4e73af9f62c1bfa6633",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.858Z"
-    },
-    {
-      "id": "u-11215019-deee-48a1-a24e-7eebd758f39f",
-      "username": "christine.juan",
-      "email": "christine.juan@hsac.gov.ph",
-      "fullName": "Christine Reyes - Juan",
-      "role": "Personnel",
-      "employeeId": "8349950e-2ec6-4a44-b5b2-931a185fcbf8",
-      "status": "Active",
-      "passwordHash": "c7972ce64374233fb2176787c2ca84ec:369789a57c48ab5f2a8b72fa33bf3975b8ad96f1d788960fb0b03e8088da2b9bc3bb3a714800a70e2c14b8bbded17319ac5885673134e7c3fcf718db49cdfb11",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.859Z"
-    },
-    {
-      "id": "u-e738a8d4-7bbc-4e08-98dd-e4363884b501",
-      "username": "samantha.bernardo",
-      "email": "samantha.bernardo@hsac.gov.ph",
-      "fullName": "Samantha C. Bernardo",
-      "role": "Personnel",
-      "employeeId": "1be6eede-2a97-44e1-bebe-ef1490b973d9",
-      "status": "Active",
-      "passwordHash": "08375be2371a350053a54503b5cb4068:3158472f9f2ab0e15fb2bedb246c7f3da719dd2d77918ebe75409b3d92519195b4f7073e8f2eddd49908ed85d46cc3ff7ab772968c00d0a894bc668b6ad84453",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.860Z"
-    },
-    {
-      "id": "u-ad4546d8-5c71-42c3-8cc3-e0dc4991ae0c",
-      "username": "nino.saavedra",
-      "email": "nino.saavedra@hsac.gov.ph",
-      "fullName": "Niño Romyr H. Saavedra",
-      "role": "Personnel",
-      "employeeId": "b6534354-eb47-4bb4-a142-83413d84fbcd",
-      "status": "Active",
-      "passwordHash": "ef4bc8b03ab4fdbc646f92e910d8732f:15f9d2feebfe6151c0c554a4c561126427f41121eb2cdc304d0cb67c6907c9952dfa39ee5d8767f59f34fbb508eb3a44e910f02d0ce3e9692297c8c4fefb84a3",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.861Z"
-    },
-    {
-      "id": "u-d3108038-024a-40f5-9527-995f401122b5",
-      "username": "lalaine.lucido",
-      "email": "lalaine.lucido@hsac.gov.ph",
-      "fullName": "Lalaine S. Lucido",
-      "role": "Personnel",
-      "employeeId": "84967893-955e-4a0e-9b1a-717164942c24",
-      "status": "Active",
-      "passwordHash": "fda664ac4b2832720980bc20d285863d:c7a7921426bd9da202e83f46513df66f0049aa915043306ee0fa8297e7c88a3268b3a8b79a0960be510af50ff15a900a5070d95830afabe37a63e534d40b60bd",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.862Z"
-    },
-    {
-      "id": "u-9c6eddce-c35b-41b2-9dd3-1e3a6efee08b",
-      "username": "vanessa.ginez",
-      "email": "vanessa.ginez@hsac.gov.ph",
-      "fullName": "Vanessa Joy P. Ginez",
-      "role": "Personnel",
-      "employeeId": "15a1d320-86c6-47a7-99db-4f57cf02116b",
-      "status": "Active",
-      "passwordHash": "31d5910105e86e5caf10d4cccbe2b716:b087792de2a0d7bb4bdd0e81cad3710228f3cc2c2021f04a3ab06942eda9d2624723cf6ccb353bc48e6578c51a29855bd77fed0ae73607963a654cd4b8ba1b71",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.863Z"
-    },
-    {
-      "id": "u-0dc5c816-a057-4f99-a375-0a299bdd10b5",
-      "username": "terelyn.corpuz",
-      "email": "terelyn.corpuz@hsac.gov.ph",
-      "fullName": "Terelyn F. Corpuz",
-      "role": "Personnel",
-      "employeeId": "f62e0ea9-e0a2-4418-93a7-cf4fb3aed709",
-      "status": "Active",
-      "passwordHash": "efb5df1f0470307f5bd44024d4ddb234:8d88e5038f7f06057d94a58acc9c5a50005d5a1f518ac73a3cbd3429992d59a0b0c7411aa3441e6a0e104e71ab1ac731325579750896511bb1f692eeae9c7d54",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.864Z"
-    },
-    {
-      "id": "u-332b7d0b-3293-4a0c-8ca3-4c0f7d90d16b",
-      "username": "ronald.liclican",
-      "email": "ronald.liclican@hsac.gov.ph",
-      "fullName": "Ronald G. Liclican",
-      "role": "Personnel",
-      "employeeId": "609057b4-4e07-4303-a492-d547fa28f511",
-      "status": "Active",
-      "passwordHash": "bfa17bb0f954bb45e000f20f3e5668f9:95368c38438553ff6d92c3cc4e3b17cf2348d6934b868172e9818d2e05339320f04de077885a36b3c157460b6b59f461d05a1fdd4b979c6bba5ec6b44c6891eb",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.865Z"
-    },
-    {
-      "id": "u-1ba113cb-2fd6-40e0-8e4e-10ee61ab6ba7",
-      "username": "jody.asuncion",
-      "email": "jody.asuncion@hsac.gov.ph",
-      "fullName": "Jody Anne A. Asuncion",
-      "role": "Personnel",
-      "employeeId": "2e731c6d-fa07-49c1-a9a4-6e87930e6a16",
-      "status": "Active",
-      "passwordHash": "90108911aacd38a47428d663829af213:fc3852c0aadc8a45d262ad9a847d11f345c4fe62fb6c6694aa84d037b710a11eba56383ea69ffbb99799a24624c948ffcefccd2a37d06e82188970dc63a3ca8c",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.866Z"
-    },
-    {
-      "id": "u-cc7187fc-43f0-4c54-adf5-ca0ecc18abbc",
-      "username": "krisiha.ancheta",
-      "email": "krisiha.ancheta@hsac.gov.ph",
-      "fullName": "Krisiha Mae P. Ancheta",
-      "role": "Personnel",
-      "employeeId": "e6487596-d089-429b-812b-d4033c82684e",
-      "status": "Active",
-      "passwordHash": "8ff4ed150651c70862594c8ad6c1875f:251a93eed3995a058ca1b41bdffdf6d3839f4285a5332eaa46ff9c7e7cea213a0127e7ff0a1dd3894f8e08058d8d1161a9210da423860b7e9ac9922c5d0bccf6",
-      "requirePasswordChange": true,
-      "createdAt": "2026-06-30T06:19:26.867Z"
-    },
-    {
-      "id": "u-6",
-      "username": "employee",
-      "email": "employee@hsac.gov.ph",
-      "fullName": "Andres B. Bonifacio",
-      "role": "Personnel",
-      "employeeId": "EMP006",
-      "status": "Active",
-      "createdAt": "2026-07-02T07:12:32.840Z"
-    },
-    {
-      "id": "u-1783479372980",
-      "username": "test",
-      "email": "test@hsac.gov.ph",
-      "fullName": "Test User",
-      "role": "Employee / Personnel",
-      "status": "Active",
-      "employeeId": "EMP127",
-      "createdAt": "2026-07-08T02:56:12.980Z"
+      "createdAt": "2026-01-15T10:15:00Z"
     }
   ],
   "employees": [
     {
-      "id": "9a7af2cd-ccde-42f5-bb04-9bef94340af7",
-      "employeeId": "9a7af2cd-ccde-42f5-bb04-9bef94340af7",
-      "plantillaNumber": "HSACB-LEA2-12-2019",
-      "employeeType": "Plantilla",
+      "id": "emp-1",
+      "employeeId": "EMP001",
+      "fullName": "Hon. Romeo M. Alcantara",
+      "position": "Regional Executive Adjudicator",
+      "division": "Adjudication Division",
+      "employmentStatus": "Permanent",
+      "email": "admin@hsac.gov.ph",
+      "address": "La Union, Philippines",
+      "dateHired": "2020-03-01",
+      "contactNumber": "09171234567",
+      "emergencyContactName": "Leonor Rivera",
+      "emergencyContactPhone": "09177654321",
+      "pdsFieldName": "EMP001_PDS_Signed.pdf",
+      "pdsUploadedAt": "2026-02-01T09:00:00Z"
+    },
+    {
+      "id": "emp-2",
+      "employeeId": "EMP002",
+      "fullName": "Maria Clara V. Santos",
+      "position": "Administrative Officer IV (HR)",
+      "division": "Administrative and Finance Division",
+      "employmentStatus": "Permanent",
+      "email": "clara.santos@hsac.gov.ph",
+      "address": "San Fernando City, La Union",
+      "dateHired": "2021-06-15",
+      "contactNumber": "09182345678",
+      "emergencyContactName": "Crisostomo Ibarra",
+      "emergencyContactPhone": "091887654321",
+      "pdsFieldName": "EMP002_PDS.pdf",
+      "pdsUploadedAt": "2026-02-10T10:30:00Z"
+    },
+    {
+      "id": "emp-3",
+      "employeeId": "EMP003",
+      "fullName": "Juan dela Cruz",
+      "position": "Financial Analyst II",
+      "division": "Administrative and Finance Division",
+      "employmentStatus": "Permanent",
+      "email": "juan.delacruz@hsac.gov.ph",
+      "address": "Bauang, La Union",
+      "dateHired": "2022-01-10",
+      "contactNumber": "09193456789",
+      "emergencyContactName": "Juana dela Cruz",
+      "emergencyContactPhone": "09199876543",
+      "pdsFieldName": "EMP003_PDS.pdf",
+      "pdsUploadedAt": "2026-02-11T14:22:00Z"
+    },
+    {
+      "id": "emp-4",
+      "employeeId": "EMP004",
       "fullName": "Eulogio IV Esturas",
-      "surname": "Esturas",
-      "firstName": "Eulogio IV",
-      "nameExtension": "IV",
-      "position": "Legal Assistant II",
-      "division": "Adjudication Division",
+      "position": "Property Custodian / AO II",
+      "division": "Administrative and Finance Division",
       "employmentStatus": "Permanent",
-      "salaryGrade": 12,
-      "step": 2,
       "email": "eulogio.esturas@hsac.gov.ph",
-      "officialEmail": "eulogio.esturas@hsac.gov.ph",
-      "dateHired": "2022-09-01",
-      "isActive": true,
-      "contactNumber": "0917-555-8606",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
+      "address": "San Juan, La Union",
+      "dateHired": "2021-09-01",
+      "contactNumber": "09204567890",
+      "emergencyContactName": "Maria Makiling",
+      "emergencyContactPhone": "09201234567",
+      "pdsFieldName": "EMP004_PDS.pdf",
+      "pdsUploadedAt": "2026-02-12T11:15:00Z"
     },
     {
-      "id": "be715b94-9ea4-465f-be90-d37717d812f3",
-      "employeeId": "be715b94-9ea4-465f-be90-d37717d812f3",
-      "plantillaNumber": "HSACB-LEA2-10-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Jolly Joy A. Almoite",
-      "surname": "Almoite",
-      "firstName": "Jolly Joy",
-      "middleName": "A.",
-      "position": "Legal Assistant II",
-      "division": "Adjudication Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 12,
-      "step": 1,
-      "email": "jolly.almoite@hsac.gov.ph",
-      "officialEmail": "jolly.almoite@hsac.gov.ph",
-      "dateHired": "2022-10-03",
-      "isActive": true,
-      "contactNumber": "0917-555-5727",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "bac27c32-0964-474f-8f8b-201151c3f01d",
-      "employeeId": "bac27c32-0964-474f-8f8b-201151c3f01d",
-      "plantillaNumber": null,
-      "employeeType": "Non-Plantilla",
+      "id": "emp-5",
+      "employeeId": "EMP005",
       "fullName": "Froilan J. Estepa",
-      "surname": "Estepa",
-      "firstName": "Froilan J.",
-      "position": "Administrative Aide IV",
-      "division": "Adjudication Division",
-      "employmentStatus": "Contractual",
-      "salaryGrade": 4,
-      "step": 1,
+      "position": "Legal Officer IV",
+      "division": "Legal Division",
+      "employmentStatus": "Permanent",
       "email": "froilan.estepa@hsac.gov.ph",
-      "officialEmail": "froilan.estepa@hsac.gov.ph",
-      "dateHired": "2025-06-26",
-      "isActive": true,
-      "contactNumber": "0917-555-2132",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "667dc61f-3f48-47be-83e6-7a78a09902f8",
-      "employeeId": "667dc61f-3f48-47be-83e6-7a78a09902f8",
-      "plantillaNumber": "HSACB-ATY5-8-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Atty. Korrine Madeleine Flores - Fontanilla",
-      "surname": "Fontanilla",
-      "firstName": "Korrine Madeleine Flores -",
-      "position": "Attorney V",
-      "division": "Legal Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 25,
-      "step": 1,
-      "email": "korrine.fontanilla@hsac.gov.ph",
-      "officialEmail": "korrine.fontanilla@hsac.gov.ph",
-      "dateHired": "2026-02-24",
-      "isActive": true,
-      "contactNumber": "0917-555-7517",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "5e26ab59-af8b-4ab0-b128-f5b14699a82c",
-      "employeeId": "5e26ab59-af8b-4ab0-b128-f5b14699a82c",
-      "plantillaNumber": "HSACB-ATY4-7-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Atty. Alyssa Ronalyn C. Dumlao",
-      "surname": "Dumlao",
-      "firstName": "Alyssa Ronalyn",
-      "middleName": "C.",
-      "position": "Attorney IV",
-      "division": "Legal Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 23,
-      "step": 1,
-      "email": "alyssa.dumlao@hsac.gov.ph",
-      "officialEmail": "alyssa.dumlao@hsac.gov.ph",
-      "dateHired": "2022-01-03",
-      "isActive": true,
-      "contactNumber": "0917-555-1925",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "baceab04-c8f5-4819-9893-285adbf11e5b",
-      "employeeId": "baceab04-c8f5-4819-9893-285adbf11e5b",
-      "plantillaNumber": "HSACB-HHRO3-6-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Paolo Antonio M. Macalino",
-      "surname": "Macalino",
-      "firstName": "Paolo Antonio M.",
-      "position": "Housing and Homesite Regulation Officer III",
-      "division": "Legal Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 16,
-      "step": 2,
-      "email": "paolo.macalino@hsac.gov.ph",
-      "officialEmail": "paolo.macalino@hsac.gov.ph",
-      "dateHired": "2021-05-17",
-      "isActive": true,
-      "contactNumber": "0917-555-3590",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "8349950e-2ec6-4a44-b5b2-931a185fcbf8",
-      "employeeId": "8349950e-2ec6-4a44-b5b2-931a185fcbf8",
-      "plantillaNumber": "HSACB-HHRO1-4-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Christine Reyes - Juan",
-      "surname": "Juan",
-      "firstName": "Christine Reyes -",
-      "position": "Housing and Homesite Regulation Officer I",
-      "division": "Legal Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 11,
-      "step": 2,
-      "email": "christine.juan@hsac.gov.ph",
-      "officialEmail": "christine.juan@hsac.gov.ph",
-      "dateHired": "2022-10-03",
-      "isActive": true,
-      "contactNumber": "0917-555-7931",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "1be6eede-2a97-44e1-bebe-ef1490b973d9",
-      "employeeId": "1be6eede-2a97-44e1-bebe-ef1490b973d9",
-      "plantillaNumber": "HSACB-SHE2-3-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Samantha C. Bernardo",
-      "surname": "Bernardo",
-      "firstName": "Samantha",
-      "middleName": "C.",
-      "position": "Sheriff II",
-      "division": "Legal Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 7,
-      "step": 1,
-      "email": "samantha.bernardo@hsac.gov.ph",
-      "officialEmail": "samantha.bernardo@hsac.gov.ph",
-      "dateHired": "2024-05-02",
-      "isActive": true,
-      "contactNumber": "0917-555-8393",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "b6534354-eb47-4bb4-a142-83413d84fbcd",
-      "employeeId": "b6534354-eb47-4bb4-a142-83413d84fbcd",
-      "plantillaNumber": "HSACB-CADOF-9-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Niño Romyr H. Saavedra",
-      "surname": "Saavedra",
-      "firstName": "Niño Romyr",
-      "middleName": "H.",
-      "position": "Chief Administrative Officer",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 24,
-      "step": 2,
-      "email": "nino.saavedra@hsac.gov.ph",
-      "officialEmail": "nino.saavedra@hsac.gov.ph",
-      "dateHired": "2021-07-16",
-      "isActive": true,
-      "contactNumber": "0917-555-8822",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "84967893-955e-4a0e-9b1a-717164942c24",
-      "employeeId": "84967893-955e-4a0e-9b1a-717164942c24",
-      "plantillaNumber": "HSACB-SADOF-8-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Lalaine S. Lucido",
-      "surname": "Lucido",
-      "firstName": "Lalaine",
-      "middleName": "S.",
-      "position": "Supervising Administrative Officer",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 22,
-      "step": 2,
-      "email": "lalaine.lucido@hsac.gov.ph",
-      "officialEmail": "lalaine.lucido@hsac.gov.ph",
-      "dateHired": "2021-04-05",
-      "isActive": true,
-      "contactNumber": "0917-555-4861",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "15a1d320-86c6-47a7-99db-4f57cf02116b",
-      "employeeId": "15a1d320-86c6-47a7-99db-4f57cf02116b",
-      "plantillaNumber": "HSACB-A3-7-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Vanessa Joy P. Ginez",
-      "surname": "Ginez",
-      "firstName": "Vanessa Joy",
-      "middleName": "P.",
-      "position": "Accountant III",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 19,
-      "step": 2,
-      "email": "vanessa.ginez@hsac.gov.ph",
-      "officialEmail": "vanessa.ginez@hsac.gov.ph",
-      "dateHired": "2021-07-01",
-      "isActive": true,
-      "contactNumber": "0917-555-7747",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "f62e0ea9-e0a2-4418-93a7-cf4fb3aed709",
-      "employeeId": "f62e0ea9-e0a2-4418-93a7-cf4fb3aed709",
-      "plantillaNumber": "HSACB-ADOF5-6-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Terelyn F. Corpuz",
-      "surname": "Corpuz",
-      "firstName": "Terelyn",
-      "middleName": "F.",
-      "position": "Administrative Officer V",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 18,
-      "step": 2,
-      "email": "terelyn.corpuz@hsac.gov.ph",
-      "officialEmail": "terelyn.corpuz@hsac.gov.ph",
-      "dateHired": "2021-06-01",
-      "isActive": true,
-      "contactNumber": "0917-555-8957",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "609057b4-4e07-4303-a492-d547fa28f511",
-      "employeeId": "609057b4-4e07-4303-a492-d547fa28f511",
-      "plantillaNumber": "HSACB-ADOF4-5-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Ronald G. Liclican",
-      "surname": "Liclican",
-      "firstName": "Ronald",
-      "middleName": "G.",
-      "position": "Administrative Officer IV",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 15,
-      "step": 2,
-      "email": "ronald.liclican@hsac.gov.ph",
-      "officialEmail": "ronald.liclican@hsac.gov.ph",
-      "dateHired": "2021-04-27",
-      "isActive": true,
-      "contactNumber": "0917-555-6332",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "2e731c6d-fa07-49c1-a9a4-6e87930e6a16",
-      "employeeId": "2e731c6d-fa07-49c1-a9a4-6e87930e6a16",
-      "plantillaNumber": "HSACB-ADOF3-4-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Jody Anne A. Asuncion",
-      "surname": "Asuncion",
-      "firstName": "Jody Anne",
-      "middleName": "A.",
-      "position": "Administrative Officer III",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 14,
-      "step": 2,
-      "email": "jody.asuncion@hsac.gov.ph",
-      "officialEmail": "jody.asuncion@hsac.gov.ph",
-      "dateHired": "2021-07-16",
-      "isActive": true,
-      "contactNumber": "0917-555-8525",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "e6487596-d089-429b-812b-d4033c82684e",
-      "employeeId": "e6487596-d089-429b-812b-d4033c82684e",
-      "plantillaNumber": "HSACB-ADOF1-3-2019",
-      "employeeType": "Plantilla",
-      "fullName": "Krisiha Mae P. Ancheta",
-      "surname": "Ancheta",
-      "firstName": "Krisiha Mae",
-      "middleName": "P.",
-      "position": "Administrative Officer I",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Permanent",
-      "salaryGrade": 10,
-      "step": 1,
-      "email": "krisiha.ancheta@hsac.gov.ph",
-      "officialEmail": "krisiha.ancheta@hsac.gov.ph",
-      "dateHired": "2023-07-03",
-      "isActive": true,
-      "contactNumber": "0917-555-8792",
-      "address": "Baguio City, Benguet, Region 1",
-      "emergencyContactName": "Emergency Contact",
-      "emergencyContactPhone": "0917-888-0000"
-    },
-    {
-      "id": "867b077a-e8ad-48a7-a02f-ce8bbd95ee41",
-      "employeeId": "867b077a-e8ad-48a7-a02f-ce8bbd95ee41",
-      "plantillaNumber": null,
-      "employeeType": "Non-Plantilla",
-      "fullName": "Terrence Hector Q. Casuga",
-      "surname": "Casuga",
-      "firstName": "Terrence Hector",
-      "middleName": "Q.",
-      "position": "Administrative Assistant",
-      "division": "Administrative and Finance Division",
-      "employmentStatus": "Separated",
-      "isActive": false,
-      "archivedAt": "2026-06-30T06:19:26.867Z",
-      "email": "terrence.casuga@hsac.gov.ph",
-      "officialEmail": "terrence.casuga@hsac.gov.ph",
-      "dateHired": "2022-05-01"
-    },
-    {
-      "id": "fd206fe2-e5ed-4d10-a5bc-2fdddbd0c953",
-      "employeeId": "fd206fe2-e5ed-4d10-a5bc-2fdddbd0c953",
-      "plantillaNumber": "HSAC-RAB1-DIR-01",
-      "employeeType": "Executive",
-      "fullName": "Atty. Ligaya G. Liclican - Haban",
-      "surname": "Liclican - Haban",
-      "firstName": "Ligaya",
-      "middleName": "G.",
-      "position": "Director III",
-      "division": "Executive Division",
-      "employmentStatus": "Attached",
-      "isActive": false,
-      "email": "ligaya.haban@hsac.gov.ph",
-      "officialEmail": "ligaya.haban@hsac.gov.ph",
-      "dateHired": "2010-01-01"
+      "address": "San Fernando City, La Union",
+      "dateHired": "2019-11-20",
+      "contactNumber": "09159998888",
+      "emergencyContactName": "Teresita Estepa",
+      "emergencyContactPhone": "09151112222",
+      "pdsFieldName": "EMP005_PDS_Official.pdf",
+      "pdsUploadedAt": "2026-02-05T08:45:00Z"
     },
     {
       "id": "emp-6",
       "employeeId": "EMP006",
-      "employeeType": "Plantilla",
-      "fullName": "Andres B. Bonifacio",
-      "position": "Personnel",
+      "fullName": "Jolly Joy A. Almoite",
+      "position": "Adjudication Assistant",
       "division": "Adjudication Division",
+      "employmentStatus": "Contractual",
+      "email": "jolly.almoite@hsac.gov.ph",
+      "address": "Agoo, La Union",
+      "dateHired": "2023-01-16",
+      "contactNumber": "09162223333",
+      "emergencyContactName": "Juan Almoite",
+      "emergencyContactPhone": "09164445555",
+      "pdsFieldName": "EMP006_PDS.pdf",
+      "pdsUploadedAt": "2026-03-01T15:00:00Z"
+    },
+    {
+      "id": "emp-7",
+      "employeeId": "EMP007",
+      "fullName": "Francisco F. Balagtas",
+      "position": "Administrative Officer IV (Budget)",
+      "division": "Administrative and Finance Division",
       "employmentStatus": "Permanent",
-      "salaryGrade": 15,
-      "officialEmail": "andres.bonifacio@hsac.gov.ph",
-      "isActive": true
+      "email": "budget@hsac.gov.ph",
+      "address": "San Fernando City, La Union",
+      "dateHired": "2022-04-18",
+      "contactNumber": "09175551234",
+      "emergencyContactName": "Juana Tiambeng",
+      "emergencyContactPhone": "09175554321",
+      "pdsFieldName": "EMP007_PDS.pdf",
+      "pdsUploadedAt": "2026-04-01T10:00:00Z"
     }
   ],
   "employmentHistory": [
     {
       "id": "h-1",
-      "employeeId": "a8ed7741-385f-4075-8dc9-ffde6df28782",
+      "employeeId": "EMP001",
       "action": "Designation",
       "previousDetails": "Attorney V",
       "newDetails": "Regional Executive Adjudicator",
@@ -643,7 +177,7 @@
     },
     {
       "id": "h-2",
-      "employeeId": "dae1c7a3-f1ea-4f0c-8c53-9d726b9dcc55",
+      "employeeId": "EMP006",
       "action": "Service Record Update",
       "previousDetails": "Contract Started",
       "newDetails": "Contract Renewed for FY 2026",
@@ -652,7 +186,7 @@
     },
     {
       "id": "h-3",
-      "employeeId": "a8ed7741-385f-4075-8dc9-ffde6df28782",
+      "employeeId": "EMP002",
       "action": "Promotion",
       "previousDetails": "Administrative Officer III",
       "newDetails": "Administrative Officer IV (HR)",
@@ -663,7 +197,7 @@
   "trainings": [
     {
       "id": "t-1",
-      "employeeId": "84967893-955e-4a0e-9b1a-717164942c24",
+      "employeeId": "EMP001",
       "title": "Advanced Legal Writing & Case Adjudication",
       "organizer": "Supreme Court / PhilJA",
       "dateConducted": "2025-05-12",
@@ -672,7 +206,7 @@
     },
     {
       "id": "t-2",
-      "employeeId": "609057b4-4e07-4303-a492-d547fa28f511",
+      "employeeId": "EMP005",
       "title": "Housing and Land Use Adjudication Rules",
       "organizer": "HSAC Central Office",
       "dateConducted": "2025-07-20",
@@ -681,7 +215,7 @@
     },
     {
       "id": "t-3",
-      "employeeId": "baceab04-c8f5-4819-9893-285adbf11e5b",
+      "employeeId": "EMP002",
       "title": "Strategic HR Management in the Public Sector",
       "organizer": "Civil Service Commission",
       "dateConducted": "2025-09-18",
@@ -690,21 +224,12 @@
     },
     {
       "id": "t-4",
-      "employeeId": "baceab04-c8f5-4819-9893-285adbf11e5b",
+      "employeeId": "EMP003",
       "title": "Government Procurement Reform Act (RA 9184)",
       "organizer": "Department of Budget and Management",
       "dateConducted": "2025-11-10",
       "certificateFilename": "EMP003_RA9184_Cert.pdf",
       "trainingHours": 16
-    },
-    {
-      "id": "t-1782794754269",
-      "employeeId": "8349950e-2ec6-4a44-b5b2-931a185fcbf8",
-      "title": "sample",
-      "organizer": "sample",
-      "dateConducted": "2026-06-09",
-      "trainingHours": 9,
-      "certificateFilename": "sample"
     }
   ],
   "financialTransactions": [
@@ -751,28 +276,28 @@
         {
           "id": "th-1",
           "status": "Pending Validation",
-          "changedBy": "Maria Clara V. Santos (Dev HR)",
+          "changedBy": "Andres B. Bonifacio",
           "changedAt": "2026-05-10T11:05:00Z",
           "remarks": "Initial upload of vendor official receipt."
         },
         {
           "id": "th-2",
           "status": "Under Review",
-          "changedBy": "Terelyn F. Corpuz",
+          "changedBy": "Juan dela Cruz",
           "changedAt": "2026-05-12T10:00:00Z",
           "remarks": "Under audit review of supporting receipts and disbursement voucher compatibility."
         },
         {
           "id": "th-3",
           "status": "Validated",
-          "changedBy": "Christine Reyes - Juan",
+          "changedBy": "Juan dela Cruz",
           "changedAt": "2026-05-13T09:30:00Z",
           "remarks": "All invoices and purchase orders confirmed correct."
         },
         {
           "id": "th-4",
           "status": "Liquidated",
-          "changedBy": "Paolo Antonio M. Macalino",
+          "changedBy": "Juan dela Cruz",
           "changedAt": "2026-05-15T17:00:00Z",
           "remarks": "Liquidation approved. Records match general ledger entry."
         }
@@ -780,9 +305,8 @@
       "department": "Legal Division",
       "category": "Office Supplies",
       "employeeRef": "EMP006",
-      "createdBy": "Froilan J. Estepa",
-      "dateCreated": "2026-05-10",
-      "employeeId": "bac27c32-0964-474f-8f8b-201151c3f01d"
+      "createdBy": "Samantha C. Bernardo",
+      "dateCreated": "2026-05-10"
     },
     {
       "id": "tx-2",
@@ -806,7 +330,7 @@
         {
           "id": "th-5",
           "status": "Pending Validation",
-          "changedBy": "Eulogio IV Esturas",
+          "changedBy": "Jolly Joy A. Almoite",
           "changedAt": "2026-06-02T09:30:00Z",
           "remarks": "Awaiting submission of structural invoice and job completion certification from service heads."
         }
@@ -814,9 +338,8 @@
       "department": "Administrative and Finance Division",
       "category": "Maintenance",
       "employeeRef": "EMP004",
-      "createdBy": "Eulogio IV Esturas",
-      "dateCreated": "2026-06-01",
-      "employeeId": "9a7af2cd-ccde-42f5-bb04-9bef94340af7"
+      "createdBy": "Jolly Joy A. Almoite",
+      "dateCreated": "2026-06-01"
     },
     {
       "id": "tx-3",
@@ -847,21 +370,21 @@
         {
           "id": "th-6",
           "status": "Pending Validation",
-          "changedBy": "Atty. Alyssa Ronalyn C. Dumlao",
+          "changedBy": "Andres B. Bonifacio",
           "changedAt": "2026-06-03T17:15:00Z",
           "remarks": "Fuel slip submitted."
         },
         {
           "id": "th-7",
           "status": "Under Review",
-          "changedBy": "Lalaine S. Lucido",
+          "changedBy": "Juan dela Cruz",
           "changedAt": "2026-06-04T11:00:00Z",
           "remarks": "Checking itinerary of Trip Ticket."
         },
         {
           "id": "th-8",
           "status": "Validated",
-          "changedBy": "Francisco Balagtas (Dev Budget)",
+          "changedBy": "Juan dela Cruz",
           "changedAt": "2026-06-05T09:12:00Z",
           "remarks": "Validated. Cleared for budget allocation."
         }
@@ -869,9 +392,8 @@
       "department": "Administrative and Finance Division",
       "category": "Fuel/Tolls",
       "employeeRef": "EMP006",
-      "createdBy": "Vanessa Joy P. Ginez",
-      "dateCreated": "2026-06-03",
-      "employeeId": "15a1d320-86c6-47a7-99db-4f57cf02116b"
+      "createdBy": "Samantha C. Bernardo",
+      "dateCreated": "2026-06-03"
     },
     {
       "id": "tx-4",
@@ -887,9 +409,8 @@
       "department": "Administrative and Finance Division",
       "category": "Maintenance",
       "employeeRef": "EMP004",
-      "createdBy": "Christine Reyes - Juan",
-      "dateCreated": "2025-08-15",
-      "employeeId": "8349950e-2ec6-4a44-b5b2-931a185fcbf8"
+      "createdBy": "Jolly Joy A. Almoite",
+      "dateCreated": "2025-08-15"
     },
     {
       "id": "tx-5",
@@ -905,9 +426,8 @@
       "department": "Administrative and Finance Division",
       "category": "Maintenance",
       "employeeRef": "EMP004",
-      "createdBy": "Eulogio IV Esturas",
-      "dateCreated": "2024-03-10",
-      "employeeId": "9a7af2cd-ccde-42f5-bb04-9bef94340af7"
+      "createdBy": "Jolly Joy A. Almoite",
+      "dateCreated": "2024-03-10"
     }
   ],
   "assets": [
@@ -920,8 +440,8 @@
       "dateAcquired": "2024-03-10",
       "cost": 48500,
       "status": "Assigned",
-      "assignedToId": "15a1d320-86c6-47a7-99db-4f57cf02116b",
-      "assignedToName": "Vanessa Joy P. Ginez"
+      "assignedToId": "EMP002",
+      "assignedToName": "Maria Clara V. Santos"
     },
     {
       "id": "ast-2",
@@ -942,8 +462,8 @@
       "dateAcquired": "2023-01-20",
       "cost": 1450000,
       "status": "Assigned",
-      "assignedToId": "be715b94-9ea4-465f-be90-d37717d812f3",
-      "assignedToName": "Jolly Joy A. Almoite"
+      "assignedToId": "EMP001",
+      "assignedToName": "Hon. Romeo M. Alcantara"
     },
     {
       "id": "ast-4",
@@ -954,8 +474,8 @@
       "dateAcquired": "2024-06-15",
       "cost": 18000,
       "status": "Assigned",
-      "assignedToId": "9a7af2cd-ccde-42f5-bb04-9bef94340af7",
-      "assignedToName": "Eulogio IV Esturas"
+      "assignedToId": "EMP-FROILAN",
+      "assignedToName": "Froilan J. Estepa"
     },
     {
       "id": "ast-5",
@@ -993,8 +513,8 @@
       "id": "iss-1",
       "assetId": "ast-1",
       "assetNumber": "HSAC-RAB1-AST-001",
-      "assignedToId": "e6487596-d089-429b-812b-d4033c82684e",
-      "assignedToName": "Krisiha Mae P. Ancheta",
+      "assignedToId": "EMP002",
+      "assignedToName": "Maria Clara V. Santos",
       "dateIssued": "2024-03-12",
       "quantity": 1,
       "conditionOnIssue": "Brand New in box"
@@ -1003,8 +523,8 @@
       "id": "iss-2",
       "assetId": "ast-3",
       "assetNumber": "HSAC-RAB1-AST-003",
-      "assignedToId": "be715b94-9ea4-465f-be90-d37717d812f3",
-      "assignedToName": "Jolly Joy A. Almoite",
+      "assignedToId": "EMP001",
+      "assignedToName": "Hon. Romeo M. Alcantara",
       "dateIssued": "2023-01-22",
       "quantity": 1,
       "conditionOnIssue": "Brand New"
@@ -1013,8 +533,8 @@
       "id": "iss-3",
       "assetId": "ast-4",
       "assetNumber": "HSAC-RAB1-AST-004",
-      "assignedToId": "15a1d320-86c6-47a7-99db-4f57cf02116b",
-      "assignedToName": "Vanessa Joy P. Ginez",
+      "assignedToId": "EMP-FROILAN",
+      "assignedToName": "Froilan J. Estepa",
       "dateIssued": "2024-06-16",
       "quantity": 1,
       "conditionOnIssue": "Good - Minor scratches"
@@ -1062,8 +582,8 @@
       "id": "si-1",
       "supplyId": "sup-1",
       "supplyName": "A4 Multi-purpose Bond Paper (80gsm)",
-      "issuedToId": "1be6eede-2a97-44e1-bebe-ef1490b973d9",
-      "issuedToName": "Samantha C. Bernardo",
+      "issuedToId": "EMP-FROILAN",
+      "issuedToName": "Froilan J. Estepa",
       "quantity": 10,
       "dateIssued": "2026-05-18"
     },
@@ -1071,8 +591,8 @@
       "id": "si-2",
       "supplyId": "sup-2",
       "supplyName": "Black Gel Ink Pen 0.5mm",
-      "issuedToId": "84967893-955e-4a0e-9b1a-717164942c24",
-      "issuedToName": "Lalaine S. Lucido",
+      "issuedToId": "EMP-JOLLY",
+      "issuedToName": "Jolly Joy A. Almoite",
       "quantity": 12,
       "dateIssued": "2026-05-20"
     },
@@ -1080,8 +600,8 @@
       "id": "si-3",
       "supplyId": "sup-5",
       "supplyName": "Heavy Duty Expanding Folders (Legal)",
-      "issuedToId": "15a1d320-86c6-47a7-99db-4f57cf02116b",
-      "issuedToName": "Vanessa Joy P. Ginez",
+      "issuedToId": "EMP-JOLLY",
+      "issuedToName": "Jolly Joy A. Almoite",
       "quantity": 50,
       "dateIssued": "2026-05-22"
     }
@@ -1090,8 +610,8 @@
     {
       "id": "req-1",
       "requestType": "Leave Request",
-      "employeeId": "5e26ab59-af8b-4ab0-b128-f5b14699a82c",
-      "employeeName": "Atty. Alyssa Ronalyn C. Dumlao",
+      "employeeId": "EMP-JOLLY",
+      "employeeName": "Jolly Joy A. Almoite",
       "dateRequested": "2026-06-01",
       "status": "Pending HR Review",
       "leaveType": "Vacation Leave",
@@ -1102,8 +622,8 @@
     {
       "id": "req-2",
       "requestType": "Service Record Request",
-      "employeeId": "1be6eede-2a97-44e1-bebe-ef1490b973d9",
-      "employeeName": "Samantha C. Bernardo",
+      "employeeId": "EMP003",
+      "employeeName": "Juan dela Cruz",
       "dateRequested": "2026-06-03",
       "status": "Approved",
       "purpose": "Loan application requirement with GSIS",
@@ -1114,8 +634,8 @@
     {
       "id": "req-3",
       "requestType": "Vehicle Request",
-      "employeeId": "be715b94-9ea4-465f-be90-d37717d812f3",
-      "employeeName": "Jolly Joy A. Almoite",
+      "employeeId": "emp-samantha",
+      "employeeName": "Samantha C. Bernardo",
       "dateRequested": "2026-06-04",
       "status": "Pending HR Review",
       "destination": "Bangui, Ilocos Norte - Dispute Mediation Site Visit",
@@ -1126,8 +646,8 @@
     {
       "id": "req-4",
       "requestType": "Zoom Access Request",
-      "employeeId": "667dc61f-3f48-47be-83e6-7a78a09902f8",
-      "employeeName": "Atty. Korrine Madeleine Flores - Fontanilla",
+      "employeeId": "EMP001",
+      "employeeName": "Hon. Romeo M. Alcantara",
       "dateRequested": "2026-06-05",
       "status": "Approved",
       "meetingTitle": "RAB 1 En Banc Case Reconciliation Adjudication",
@@ -1141,8 +661,8 @@
     {
       "id": "req-5",
       "requestType": "Supply Request",
-      "employeeId": "5e26ab59-af8b-4ab0-b128-f5b14699a82c",
-      "employeeName": "Atty. Alyssa Ronalyn C. Dumlao",
+      "employeeId": "EMP002",
+      "employeeName": "Maria Clara V. Santos",
       "dateRequested": "2026-06-06",
       "status": "Pending HR Review",
       "supplyId": "sup-1",
@@ -1152,717 +672,6 @@
     }
   ],
   "auditLogs": [
-    {
-      "id": "log-1783520781304-434",
-      "timestamp": "2026-07-08T14:26:21.304Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: hr (Archived)"
-    },
-    {
-      "id": "log-1783520781289-896",
-      "timestamp": "2026-07-08T14:26:21.289Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479817580-983",
-      "timestamp": "2026-07-08T03:03:37.580Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Restored",
-      "details": "Restored user account: test"
-    },
-    {
-      "id": "log-1783479817573-144",
-      "timestamp": "2026-07-08T03:03:37.573Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: test (Deactivated)"
-    },
-    {
-      "id": "log-1783479817559-835",
-      "timestamp": "2026-07-08T03:03:37.559Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479793649-257",
-      "timestamp": "2026-07-08T03:03:13.649Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Restored",
-      "details": "Restored user account: test"
-    },
-    {
-      "id": "log-1783479793643-31",
-      "timestamp": "2026-07-08T03:03:13.643Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: test (Deactivated)"
-    },
-    {
-      "id": "log-1783479793635-557",
-      "timestamp": "2026-07-08T03:03:13.635Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479700757-277",
-      "timestamp": "2026-07-08T03:01:40.757Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Restored",
-      "details": "Restored user account: test"
-    },
-    {
-      "id": "log-1783479700748-515",
-      "timestamp": "2026-07-08T03:01:40.748Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479693967-680",
-      "timestamp": "2026-07-08T03:01:33.967Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479686893-526",
-      "timestamp": "2026-07-08T03:01:26.893Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479561298-465",
-      "timestamp": "2026-07-08T02:59:21.298Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: eulogio.esturas (Active)"
-    },
-    {
-      "id": "log-1783479504390-424",
-      "timestamp": "2026-07-08T02:58:24.390Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: eulogio.esturas (Deactivated)"
-    },
-    {
-      "id": "log-1783479372991-238",
-      "timestamp": "2026-07-08T02:56:12.991Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Archived",
-      "details": "Archived user account: test"
-    },
-    {
-      "id": "log-1783479372987-518",
-      "timestamp": "2026-07-08T02:56:12.987Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: test (Deactivated)"
-    },
-    {
-      "id": "log-1783479372980-134",
-      "timestamp": "2026-07-08T02:56:12.980Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Create User Account",
-      "details": "Created digital user: test with role Employee / Personnel"
-    },
-    {
-      "id": "log-1783479372971-717",
-      "timestamp": "2026-07-08T02:56:12.971Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479320361-518",
-      "timestamp": "2026-07-08T02:55:20.361Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783479225127-87",
-      "timestamp": "2026-07-08T02:53:45.127Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: employee (Active)"
-    },
-    {
-      "id": "log-1783479217100-490",
-      "timestamp": "2026-07-08T02:53:37.100Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Modify User Account",
-      "details": "Modified user details for: employee (Deactivated)"
-    },
-    {
-      "id": "log-1783478928259-283",
-      "timestamp": "2026-07-08T02:48:48.259Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478923169-46",
-      "timestamp": "2026-07-08T02:48:43.169Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478917372-723",
-      "timestamp": "2026-07-08T02:48:37.372Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478908052-842",
-      "timestamp": "2026-07-08T02:48:28.052Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478900434-727",
-      "timestamp": "2026-07-08T02:48:20.434Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478893153-838",
-      "timestamp": "2026-07-08T02:48:13.153Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478886042-219",
-      "timestamp": "2026-07-08T02:48:06.042Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783478671675-999",
-      "timestamp": "2026-07-08T02:44:31.675Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783477537283-46",
-      "timestamp": "2026-07-08T02:25:37.283Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783477336779-133",
-      "timestamp": "2026-07-08T02:22:16.779Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783476651893-293",
-      "timestamp": "2026-07-08T02:10:51.893Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783475547840-787",
-      "timestamp": "2026-07-08T01:52:27.840Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783475518067-991",
-      "timestamp": "2026-07-08T01:51:58.068Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783475304252-71",
-      "timestamp": "2026-07-08T01:48:24.252Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783475287696-411",
-      "timestamp": "2026-07-08T01:48:07.696Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783475255524-636",
-      "timestamp": "2026-07-08T01:47:35.524Z",
-      "userId": "u-hr",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Create Activity",
-      "details": "Created assigned employee activity: Aaojbsoufbu"
-    },
-    {
-      "id": "log-1783474995067-140",
-      "timestamp": "2026-07-08T01:43:15.067Z",
-      "userId": "u-hr",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1783474579865-805",
-      "timestamp": "2026-07-08T01:36:19.865Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782976264407-907",
-      "timestamp": "2026-07-02T07:11:04.407Z",
-      "userId": "u-hr",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782975002444-159",
-      "timestamp": "2026-07-02T06:50:02.444Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782974964272-705",
-      "timestamp": "2026-07-02T06:49:24.272Z",
-      "userId": "u-hr",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782974829788-298",
-      "timestamp": "2026-07-02T06:47:09.788Z",
-      "userId": "u-admin",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782795309183-882",
-      "timestamp": "2026-06-30T04:55:09.183Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782795288818-984",
-      "timestamp": "2026-06-30T04:54:48.818Z",
-      "userId": "u-2",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782795274072-748",
-      "timestamp": "2026-06-30T04:54:34.072Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782795240856-298",
-      "timestamp": "2026-06-30T04:54:00.856Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782795193434-611",
-      "timestamp": "2026-06-30T04:53:13.434Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782795094106-633",
-      "timestamp": "2026-06-30T04:51:34.106Z",
-      "userId": "u-2",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782794754269-807",
-      "timestamp": "2026-06-30T04:45:54.269Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Add Training",
-      "details": "Added training attendance for EMP002: \"sample\" (9 hrs)"
-    },
-    {
-      "id": "log-1782794693046-467",
-      "timestamp": "2026-06-30T04:44:53.046Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Maria Clara V. Santos (EMP002)"
-    },
-    {
-      "id": "log-1782794692729-917",
-      "timestamp": "2026-06-30T04:44:52.729Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Maria Clara V. Santos (EMP002)"
-    },
-    {
-      "id": "log-1782794660918-63",
-      "timestamp": "2026-06-30T04:44:20.918Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794660691-755",
-      "timestamp": "2026-06-30T04:44:20.691Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794660537-802",
-      "timestamp": "2026-06-30T04:44:20.537Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794660381-268",
-      "timestamp": "2026-06-30T04:44:20.381Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794659578-766",
-      "timestamp": "2026-06-30T04:44:19.578Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794659335-444",
-      "timestamp": "2026-06-30T04:44:19.335Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794659144-209",
-      "timestamp": "2026-06-30T04:44:19.144Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794658985-421",
-      "timestamp": "2026-06-30T04:44:18.985Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794658895-829",
-      "timestamp": "2026-06-30T04:44:18.895Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794658724-752",
-      "timestamp": "2026-06-30T04:44:18.724Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794658326-96",
-      "timestamp": "2026-06-30T04:44:18.326Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794645370-438",
-      "timestamp": "2026-06-30T04:44:05.370Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794645221-958",
-      "timestamp": "2026-06-30T04:44:05.221Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794644639-111",
-      "timestamp": "2026-06-30T04:44:04.639Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794644465-466",
-      "timestamp": "2026-06-30T04:44:04.465Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794643721-437",
-      "timestamp": "2026-06-30T04:44:03.721Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Hon. Romeo M. Alcantara (EMP001)"
-    },
-    {
-      "id": "log-1782794638754-722",
-      "timestamp": "2026-06-30T04:43:58.754Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Juan dela Cruz (EMP003)"
-    },
-    {
-      "id": "log-1782794628162-755",
-      "timestamp": "2026-06-30T04:43:48.162Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Andres B. Bonifacio (EMP006)"
-    },
-    {
-      "id": "log-1782794628031-298",
-      "timestamp": "2026-06-30T04:43:48.031Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Andres B. Bonifacio (EMP006)"
-    },
-    {
-      "id": "log-1782794627865-347",
-      "timestamp": "2026-06-30T04:43:47.865Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Andres B. Bonifacio (EMP006)"
-    },
-    {
-      "id": "log-1782794627228-666",
-      "timestamp": "2026-06-30T04:43:47.228Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Andres B. Bonifacio (EMP006)"
-    },
-    {
-      "id": "log-1782794624914-651",
-      "timestamp": "2026-06-30T04:43:44.914Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Upload PDS",
-      "details": "Updated Personal Data Sheet (PDS) for Andres B. Bonifacio (EMP006)"
-    },
-    {
-      "id": "log-1782773577988-96",
-      "timestamp": "2026-06-29T22:52:57.988Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782773427221-852",
-      "timestamp": "2026-06-29T22:50:27.221Z",
-      "userId": "u-6",
-      "username": "employee",
-      "role": "Personnel",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782773384976-361",
-      "timestamp": "2026-06-29T22:49:44.976Z",
-      "userId": "u-2",
-      "username": "hr",
-      "role": "HR Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782773360228-967",
-      "timestamp": "2026-06-29T22:49:20.228Z",
-      "userId": "u-3",
-      "username": "finance",
-      "role": "Financial Officer",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
-    {
-      "id": "log-1782772843247-499",
-      "timestamp": "2026-06-29T22:40:43.247Z",
-      "userId": "u-1",
-      "username": "admin",
-      "role": "Administrator / Division Chief",
-      "action": "Login",
-      "details": "Successful authenticated session login via credentials."
-    },
     {
       "id": "log-1",
       "timestamp": "2026-06-01T08:30:00Z",
@@ -1905,7 +714,7 @@
       "id": "liqp-1",
       "liquidationNo": "LIQ-2026-001",
       "requestRef": "REQ-VHL-091",
-      "employee": "Lalaine S. Lucido",
+      "employee": "Andres B. Bonifacio",
       "department": "Adjudication Division",
       "amountReleased": 5000,
       "amountLiquidated": 4800,
@@ -1914,14 +723,13 @@
       "status": "Completed",
       "notes": "Completed Petron fuel trip liquidation. Refund has been submitted.",
       "approvedBy": "Juan dela Cruz",
-      "createdAt": "2026-06-03T17:00:00Z",
-      "employeeId": "84967893-955e-4a0e-9b1a-717164942c24"
+      "createdAt": "2026-06-03T17:00:00Z"
     },
     {
       "id": "liqp-2",
       "liquidationNo": "LIQ-2026-002",
       "requestRef": "REQ-SPL-044",
-      "employee": "Atty. Alyssa Ronalyn C. Dumlao",
+      "employee": "Jolly Joy A. Almoite",
       "department": "Administrative and Finance Division",
       "amountReleased": 15000,
       "amountLiquidated": 14500,
@@ -1930,14 +738,13 @@
       "status": "Completed",
       "notes": "La Union Office Supplies purchase liquidation.",
       "approvedBy": "Juan dela Cruz",
-      "createdAt": "2026-05-15T16:45:00Z",
-      "employeeId": "5e26ab59-af8b-4ab0-b128-f5b14699a82c"
+      "createdAt": "2026-05-15T16:45:00Z"
     },
     {
       "id": "liqp-3",
       "liquidationNo": "LIQ-2026-003",
       "requestRef": "REQ-TRV-112",
-      "employee": "Paolo Antonio M. Macalino",
+      "employee": "Juan dela Cruz",
       "department": "Administrative and Finance Division",
       "amountReleased": 12000,
       "amountLiquidated": 0,
@@ -1945,14 +752,13 @@
       "liquidationDate": "2026-06-08",
       "status": "Under Review",
       "notes": "Awaiting review of food receipts and accommodation invoice details for mediation trip.",
-      "createdAt": "2026-06-08T09:00:00Z",
-      "employeeId": "baceab04-c8f5-4819-9893-285adbf11e5b"
+      "createdAt": "2026-06-08T09:00:00Z"
     },
     {
       "id": "liqp-4",
       "liquidationNo": "LIQ-2026-004",
       "requestRef": "REQ-PRV-312",
-      "employee": "Niño Romyr H. Saavedra",
+      "employee": "Maria Clara V. Santos",
       "department": "Administrative and Finance Division",
       "amountReleased": 8500,
       "amountLiquidated": 0,
@@ -1960,66 +766,69 @@
       "liquidationDate": "2026-06-09",
       "status": "Pending Submission",
       "notes": "Equipment repairs cash advance for regional branch laptops.",
-      "createdAt": "2026-06-09T08:30:00Z",
-      "employeeId": "b6534354-eb47-4bb4-a142-83413d84fbcd"
-    },
-    {
-      "id": "liqp-5",
-      "liquidationNo": "LIQ-2025-001",
-      "requestRef": "REQ-PRV-311",
-      "employee": "Vanessa Joy P. Ginez",
-      "department": "Administrative and Finance Division",
-      "amountReleased": 5000,
-      "amountLiquidated": 5000,
-      "remainingBalance": 0,
-      "liquidationDate": "2025-08-15",
-      "status": "Completed",
-      "notes": "Previous year liquidation demo.",
-      "createdAt": "2025-08-15T08:30:00Z",
-      "approvedBy": "Juan dela Cruz",
-      "employeeId": "15a1d320-86c6-47a7-99db-4f57cf02116b"
-    },
-    {
-      "id": "liqp-6",
-      "liquidationNo": "LIQ-2024-001",
-      "requestRef": "REQ-PRV-310",
-      "employee": "Atty. Korrine Madeleine Flores - Fontanilla",
-      "department": "Administrative and Finance Division",
-      "amountReleased": 10000,
-      "amountLiquidated": 10000,
-      "remainingBalance": 0,
-      "liquidationDate": "2024-03-10",
-      "status": "Completed",
-      "notes": "Previous year liquidation demo.",
-      "createdAt": "2024-03-10T08:30:00Z",
-      "approvedBy": "Juan dela Cruz",
-      "employeeId": "667dc61f-3f48-47be-83e6-7a78a09902f8"
+      "createdAt": "2026-06-09T08:30:00Z"
     }
   ],
   "budgetAllocations": [
     {
       "id": "b-1",
+      "fiscalYearId": "fy-1",
       "department": "Adjudication Division",
-      "budgetAllocation": 500000,
-      "budgetUtilized": 120000,
-      "remainingBudget": 380000,
-      "budgetPercentageUsed": 24
+      "budgetAllocation": 1200000,
+      "carryOver": 300000,
+      "budgetUtilized": 0,
+      "remainingBudget": 1500000,
+      "budgetPercentageUsed": 0
+    },
+    {
+      "id": "b-1-old",
+      "fiscalYearId": "fy-2",
+      "department": "Adjudication Division",
+      "budgetAllocation": 2400000,
+      "carryOver": 100000,
+      "budgetUtilized": 1500000,
+      "remainingBudget": 1000000,
+      "budgetPercentageUsed": 0
     },
     {
       "id": "b-2",
+      "fiscalYearId": "fy-1",
       "department": "Administrative and Finance Division",
-      "budgetAllocation": 1000000,
-      "budgetUtilized": 450000,
-      "remainingBudget": 550000,
-      "budgetPercentageUsed": 45
+      "budgetAllocation": 2400000,
+      "carryOver": 100000,
+      "budgetUtilized": 0,
+      "remainingBudget": 2500000,
+      "budgetPercentageUsed": 0
+    },
+    {
+      "id": "b-2-old",
+      "fiscalYearId": "fy-2",
+      "department": "Administrative and Finance Division",
+      "budgetAllocation": 800000,
+      "carryOver": 200000,
+      "budgetUtilized": 700000,
+      "remainingBudget": 300000,
+      "budgetPercentageUsed": 0
     },
     {
       "id": "b-3",
+      "fiscalYearId": "fy-1",
       "department": "Legal Division",
-      "budgetAllocation": 400000,
-      "budgetUtilized": 85500,
-      "remainingBudget": 314500,
-      "budgetPercentageUsed": 21
+      "budgetAllocation": 800000,
+      "carryOver": 200000,
+      "budgetUtilized": 0,
+      "remainingBudget": 1000000,
+      "budgetPercentageUsed": 0
+    },
+    {
+      "id": "b-3-old",
+      "fiscalYearId": "fy-2",
+      "department": "Legal Division",
+      "budgetAllocation": 1800000,
+      "carryOver": 0,
+      "budgetUtilized": 1600000,
+      "remainingBudget": 200000,
+      "budgetPercentageUsed": 0
     }
   ],
   "financeAuditLogs": [
@@ -2067,7 +876,7 @@
     {
       "id": "notif-1",
       "title": "Leave Request Submitted",
-      "message": "Adjudicator Atty. Korrine Madeleine Flores - Fontanilla has submitted an urgent Vacation Leave Request for your review.",
+      "message": "Atty. Korrine Madeleine Flores - Fontanilla has submitted an urgent Vacation Leave Request for your review.",
       "type": "urgent",
       "isRead": false,
       "timestamp": "2026-06-16T02:00:00Z",
@@ -2119,19 +928,7 @@
       "targetRole": "Personnel"
     }
   ],
-  "activities": [
-    {
-      "id": "act-1783475255524",
-      "activityNo": "ACT-2026-01",
-      "title": "Aaojbsoufbu",
-      "description": "iabsuogfuoabf",
-      "dateScheduled": "2026-07-08",
-      "allottedBudget": 20000,
-      "budgetId": "b-2",
-      "assignedEmployeeId": "EMP006",
-      "status": "Active"
-    }
-  ],
+  "activities": [],
   "liquidationSubmissions": [],
   "activityBudgetLinks": [
     {
@@ -2153,5 +950,39 @@
       "timestamp": "2026-06-15T11:30:00Z"
     }
   ],
-  "pds": []
+  "pds": [],
+  "fiscalYears": [
+    {
+      "id": "fy-1",
+      "label": "2026",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "status": "Active",
+      "rollover_policy": "Standard"
+    },
+    {
+      "id": "fy-2",
+      "label": "2025",
+      "start_date": "2025-01-01",
+      "end_date": "2025-12-31",
+      "status": "Closed",
+      "rollover_policy": "Standard"
+    }
+  ],
+  "hsacBudgets": [
+    {
+      "id": "hb-1",
+      "fiscalYearId": "fy-1",
+      "approvedBudget": 4400000,
+      "carryOverBudget": 600000,
+      "totalUtilized": 0
+    },
+    {
+      "id": "hb-2",
+      "fiscalYearId": "fy-2",
+      "approvedBudget": 5000000,
+      "carryOverBudget": 300000,
+      "totalUtilized": 3800000
+    }
+  ]
 }

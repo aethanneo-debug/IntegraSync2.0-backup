@@ -143,11 +143,13 @@ export interface Liquidation {
 
 export interface BudgetAllocation {
   id: string;
+  fiscalYearId: string;
   department: string;
   budgetAllocation: number;
   budgetUtilized: number;
   remainingBudget: number;
   budgetPercentageUsed: number;
+  carryOver?: number;
   unliquidatedAdvances?: number;
 }
 

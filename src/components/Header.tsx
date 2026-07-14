@@ -36,7 +36,7 @@ export default function Header({ user, onOpenHelp }: HeaderProps) {
         setNotifications(res.data);
       }
     } catch (err: any) {
-      if (err?.message === "Failed to fetch" || err?.message?.includes("fetch") || err?.toString()?.includes("Failed to fetch")) {
+      if (err?.message === "Failed to fetch" || err?.message?.includes("fetch") || err?.toString()?.includes("Failed to fetch") || err?.message?.includes("HTML response instead of JSON")) {
         console.warn("Desk notifications momentarily unreachable:", err?.message || err);
       } else {
         console.error("Failed to fetch desk notifications", err);

@@ -1,34 +1,66 @@
 const fs = require('fs');
 let content = fs.readFileSync('server.ts', 'utf8');
 
-const target = `    activityBudgetLinks: [
-      { id: "bl-1", liquidationNo: "LIQ-2026-001", employee: "Andres B. Bonifacio", department: "Adjudication Division", amount: 12000.00, budgetId: "b-1", timestamp: "2026-06-14T10:00:00Z" },
-      { id: "bl-2", liquidationNo: "LIQ-2026-002", employee: "Apolinario M. Mabini", department: "Legal Division", amount: 25000.00, budgetId: "b-3", timestamp: "2026-06-15T11:30:00Z" }
-    ],
-    pds: []
-  };`;
+// Patch fiscal years
+content = content.replace(
+  /if \(\!loaded\.fiscalYears\) \{[\s\S]*?changed = true;\n      \}/g,
+  `if (!loaded.fiscalYears) {
+        loaded.fiscalYears = [
+          { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
+          { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" }
+        ];
+        changed = true;
+      }`
+);
 
-const replacement = `    activityBudgetLinks: [
-      { id: "bl-1", liquidationNo: "LIQ-2026-001", employee: "Andres B. Bonifacio", department: "Adjudication Division", amount: 12000.00, budgetId: "b-1", timestamp: "2026-06-14T10:00:00Z" },
-      { id: "bl-2", liquidationNo: "LIQ-2026-002", employee: "Apolinario M. Mabini", department: "Legal Division", amount: 25000.00, budgetId: "b-3", timestamp: "2026-06-15T11:30:00Z" }
-    ],
-    pds: [],
-    fiscalYears: [
+// Patch hsacBudgets
+content = content.replace(
+  /if \(\!loaded\.hsacBudgets\) \{[\s\S]*?changed = true;\n      \}/g,
+  `if (!loaded.hsacBudgets) {
+        loaded.hsacBudgets = [
+          { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 4400000.00, carryOverBudget: 600000.00, totalUtilized: 0 },
+          { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 5000000.00, carryOverBudget: 0, totalUtilized: 4400000.00 }
+        ];
+        changed = true;
+      }`
+);
+
+// Patch budgetAllocations inside loaded check
+content = content.replace(
+  /if \(\!loaded\.budgetAllocations\) \{[\s\S]*?changed = true;\n      \}/g,
+  `if (!loaded.budgetAllocations) {
+        loaded.budgetAllocations = [
+          { id: "b-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 },
+          { id: "b-2", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 },
+          { id: "b-3", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 }
+        ];
+        changed = true;
+      }`
+);
+
+// Patch seedDB fiscal years
+content = content.replace(
+  /fiscalYears: \[[\s\S]*?\],\n    hsacBudgets: \[[\s\S]*?\]/,
+  `fiscalYears: [
       { id: "fy-1", label: "2026", start_date: "2026-01-01", end_date: "2026-12-31", status: "Active", rollover_policy: "Standard" },
-      { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" },
-      { id: "fy-3", label: "2024", start_date: "2024-01-01", end_date: "2024-12-31", status: "Closed", rollover_policy: "Standard" },
-      { id: "fy-4", label: "2023", start_date: "2023-01-01", end_date: "2023-12-31", status: "Closed", rollover_policy: "Standard" }
+      { id: "fy-2", label: "2025", start_date: "2025-01-01", end_date: "2025-12-31", status: "Closed", rollover_policy: "Standard" }
     ],
     hsacBudgets: [
-      { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 2500000.00, carryOverBudget: 450000.00, totalUtilized: 655500.00 },
-      { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 2200000.00, carryOverBudget: 350000.00, totalUtilized: 2100000.00 }
-    ]
-  };`;
+      { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 4400000.00, carryOverBudget: 600000.00, totalUtilized: 0 },
+      { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 5000000.00, carryOverBudget: 0, totalUtilized: 4400000.00 }
+    ]`
+);
 
-if (content.includes(target)) {
-    content = content.replace(target, replacement);
-    fs.writeFileSync('server.ts', content);
-    console.log("Seed patched");
-} else {
-    console.log("Targets not found!");
-}
+// Patch seedDB budgetAllocations
+content = content.replace(
+  /budgetAllocations: \[[\s\S]*?\],\n    financeAuditLogs:/g,
+  `budgetAllocations: [
+      { id: "b-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 },
+      { id: "b-2", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 },
+      { id: "b-3", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 }
+    ],
+    financeAuditLogs:`
+);
+
+fs.writeFileSync('server.ts', content);
+console.log("Successfully patched seed data in server.ts");
