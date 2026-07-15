@@ -23,10 +23,24 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
   const [accountStatus, setAccountStatus] = useState<"Active" | "Archived">("Active");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
+  const [employees, setEmployees] = useState<any[]>([]);
 
   useEffect(() => {
     fetchUsers();
+    fetchEmployees();
   }, []);
+
+  async function fetchEmployees() {
+    try {
+      const res = await apiCall("/api/employees");
+      if (res.status === "success") {
+        setEmployees(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   async function fetchUsers() {
     setLoading(true);
@@ -48,6 +62,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
     setUsername("");
     setEmail("");
     setFullName("");
+    setEmployeeId("");
     setSelectedRole(UserRole.EMPLOYEE);
     setAccountStatus("Active");
     setError("");
@@ -60,6 +75,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
     setUsername(usr.username);
     setEmail(usr.email);
     setFullName(usr.fullName);
+    setEmployeeId(usr.employeeId || "");
     setSelectedRole(usr.role);
     setAccountStatus(usr.status || "Active");
     setError("");
@@ -82,7 +98,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
         // Edit User
         const res = await apiCall(`/api/admin/users/${editingUser.id}`, {
           method: "PUT",
-          body: JSON.stringify({ username, email, fullName, role: selectedRole, status: accountStatus })
+          body: JSON.stringify({ username, email, fullName, role: selectedRole, status: accountStatus, employeeId })
         });
         if (res.status === "success") {
           setSuccess("User account details calibrated successfully.");
@@ -91,9 +107,13 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
         }
       } else {
         // Create User
+        if (!employeeId) {
+          setError("Please select an Employee to link to this account.");
+          return;
+        }
         const res = await apiCall("/api/admin/users", {
           method: "POST",
-          body: JSON.stringify({ username, email, fullName, role: selectedRole, status: accountStatus })
+          body: JSON.stringify({ username, email, fullName, role: selectedRole, status: accountStatus, employeeId })
         });
         if (res.status === "success") {
           setSuccess("Brand new user account successfully registered and activated.");
@@ -207,7 +227,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">System Username</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Email Address</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Access Level Role</th>
-                  <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Plantilla Number</th>
+                  <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Employee ID</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono">Status</th>
                   <th className="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase font-mono text-right">Actions</th>
                 </tr>
@@ -266,7 +286,7 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                         </span>
                       </td>
                       <td className="px-6 py-4 text-xs font-mono text-slate-500">
-                        {usr.plantillaNumber || "None Assigned"}
+                        {usr.employeeId || usr.plantillaNumber || "None Assigned"}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold font-mono tracking-wider border ${usr.status === "Archived" ? "bg-slate-100 text-slate-600 border-slate-300" : (usr.status || "Active") === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"}`}>
@@ -409,6 +429,22 @@ export default function UserAccountsView({ currentUser }: UserAccountsViewProps)
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase font-mono">Linked Employee Profile</label>
+                <select 
+                  value={employeeId} 
+                  onChange={e => setEmployeeId(e.target.value)} 
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+                  required
+                >
+                  <option value="">-- Select Employee --</option>
+                  {employees.map(emp => (
+                    <option key={emp.employeeId} value={emp.employeeId}>{emp.fullName} ({emp.employeeId})</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-slate-500 mt-1">Required to link system accounts to their corresponding HR profiles.</p>
               </div>
 
               <div className="space-y-1">

@@ -163,6 +163,47 @@
       "emergencyContactPhone": "09175554321",
       "pdsFieldName": "EMP007_PDS.pdf",
       "pdsUploadedAt": "2026-04-01T10:00:00Z"
+    },
+    {
+      "id": "emp-1784134260731",
+      "employeeId": "HSAC-RAB1-300",
+      "fullName": "Aethan Neo Fong Vergara",
+      "surname": "Vergara",
+      "firstName": "Aethan Neo",
+      "middleName": "Fong",
+      "nameExtension": "",
+      "position": "Admin Officer",
+      "salary": 50000,
+      "division": "Adjudication Division",
+      "employmentStatus": "Permanent",
+      "email": "neo@hsac.gov.ph",
+      "address": "",
+      "dateHired": "2026-07-16",
+      "contactNumber": "09182738720",
+      "emergencyContactName": "",
+      "emergencyContactPhone": "09981297399"
+    },
+    {
+      "id": "emp-1784134770417",
+      "employeeId": "EMP-TEST-002",
+      "fullName": "Test User",
+      "surname": "Test",
+      "firstName": "User",
+      "position": "Tester",
+      "salary": 60000,
+      "division": "Testing Division",
+      "dateHired": "2026-07-15"
+    },
+    {
+      "id": "emp-1784134822124",
+      "employeeId": "EMP-TEST-003",
+      "fullName": "Test User",
+      "surname": "Test",
+      "firstName": "User",
+      "position": "Tester",
+      "salary": 60000,
+      "division": "Testing Division",
+      "dateHired": "2026-07-15"
     }
   ],
   "employmentHistory": [
@@ -192,6 +233,33 @@
       "newDetails": "Administrative Officer IV (HR)",
       "effectiveDate": "2023-08-15",
       "updatedBy": "System Administrator"
+    },
+    {
+      "id": "h-1784134260731",
+      "employeeId": "HSAC-RAB1-300",
+      "action": "Service Record Update",
+      "previousDetails": "N/A",
+      "newDetails": "Initial employment records set as Admin Officer (Permanent) in Adjudication Division.",
+      "effectiveDate": "2026-07-16",
+      "updatedBy": "Hon. Romeo M. Alcantara (Dev Admin)"
+    },
+    {
+      "id": "h-1784134770417",
+      "employeeId": "EMP-TEST-002",
+      "action": "Service Record Update",
+      "previousDetails": "N/A",
+      "newDetails": "Initial employment records set as Tester (undefined) in Testing Division.",
+      "effectiveDate": "2026-07-15",
+      "updatedBy": "Hon. Romeo M. Alcantara"
+    },
+    {
+      "id": "h-1784134822124",
+      "employeeId": "EMP-TEST-003",
+      "action": "Service Record Update",
+      "previousDetails": "N/A",
+      "newDetails": "Initial employment records set as Tester (undefined) in Testing Division.",
+      "effectiveDate": "2026-07-15",
+      "updatedBy": "Hon. Romeo M. Alcantara"
     }
   ],
   "trainings": [
@@ -672,6 +740,69 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "log-1784134822124-494",
+      "timestamp": "2026-07-15T17:00:22.124Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Create Employee",
+      "details": "Registered new personnel Test User (EMP-TEST-003)"
+    },
+    {
+      "id": "log-1784134822115-948",
+      "timestamp": "2026-07-15T17:00:22.115Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1784134807348-513",
+      "timestamp": "2026-07-15T17:00:07.348Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1784134770417-859",
+      "timestamp": "2026-07-15T16:59:30.417Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Create Employee",
+      "details": "Registered new personnel Test User (EMP-TEST-002)"
+    },
+    {
+      "id": "log-1784134770408-361",
+      "timestamp": "2026-07-15T16:59:30.408Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1784134758827-419",
+      "timestamp": "2026-07-15T16:59:18.827Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
+      "id": "log-1784134260731-20",
+      "timestamp": "2026-07-15T16:51:00.731Z",
+      "userId": "u-admin",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Create Employee",
+      "details": "Registered new personnel Aethan Neo Fong Vergara (HSAC-RAB1-300)"
+    },
     {
       "id": "log-1",
       "timestamp": "2026-06-01T08:30:00Z",

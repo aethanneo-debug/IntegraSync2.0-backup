@@ -266,6 +266,7 @@ export default function App() {
           <FinanceView 
             user={user} 
             transactions={transactions} 
+            employees={employees}
             fetchSummary={fetchSummary}
             onRefresh={triggerRefresh}
             activeSubTab={activeFinanceSubTab}
@@ -277,6 +278,7 @@ export default function App() {
           <FinanceView 
             user={user} 
             transactions={transactions} 
+            employees={employees}
             fetchSummary={fetchSummary}
             onRefresh={triggerRefresh}
             activeSubTab="budgets"

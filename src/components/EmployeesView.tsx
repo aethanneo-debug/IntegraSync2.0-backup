@@ -54,6 +54,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
     middleName: "",
     nameExtension: "",
     position: "",
+    salary: "",
     division: "Adjudication Division",
     employmentStatus: "Permanent",
     email: "",
@@ -139,6 +140,7 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
           middleName: "",
           nameExtension: "",
           position: "",
+          salary: "",
           division: "Adjudication Division",
           employmentStatus: "Permanent",
           email: "",
@@ -606,18 +608,33 @@ export default function EmployeesView({ user, employees, fetchSummary, onRefresh
                   </div>
                 </div>
 
-                {/* POSITION AND DIVISION */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Title / Position *</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Administrative Officer IV"
-                    value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
-                  />
+                
+                {/* POSITION, SALARY AND DIVISION */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Title / Position *</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="Administrative Officer IV"
+                      value={formData.position}
+                      onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                      className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Salary (Initial) *</label>
+                    <input
+                      required
+                      type="number"
+                      placeholder="e.g. 50000"
+                      value={formData.salary}
+                      onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                      className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-xs font-mono"
+                    />
+                  </div>
                 </div>
+                
 
                 <div className="space-y-1">
                   <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">Division *</label>

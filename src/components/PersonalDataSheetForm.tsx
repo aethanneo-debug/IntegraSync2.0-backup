@@ -97,6 +97,8 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
             telephoneNo: emp.contactNumber || "",
             rHouseNo: emp.address || "",
             pHouseNo: emp.address || "",
+            salary: emp.salary || "",
+            position: emp.position || "",
           };
 
           setFormData({
@@ -288,7 +290,19 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
             <tr><td className="border border-black p-1 bg-gray-200">12. PHILHEALTH NO.</td><td className="border border-black p-1">{formData.philhealthId}</td><td colSpan={2} className="border border-black p-1 bg-gray-200"></td></tr>
             <tr><td className="border border-black p-1 bg-gray-200">13. SSS NO.</td><td className="border border-black p-1">{formData.sssId}</td><td colSpan={2} className="border border-black p-1 bg-gray-200"></td></tr>
             <tr><td className="border border-black p-1 bg-gray-200">14. TIN NO.</td><td className="border border-black p-1">{formData.tinNo}</td><td colSpan={2} className="border border-black p-1 bg-gray-200"></td></tr>
-            <tr><td className="border border-black p-1 bg-gray-200">15. AGENCY EMPLOYEE NO.</td><td className="border border-black p-1">{formData.agencyEmployeeNo}</td><td colSpan={2} className="border border-black p-1 bg-gray-200"></td></tr>
+            
+            <tr>
+              <td className="border border-black p-1 bg-gray-200">15. AGENCY EMPLOYEE NO.</td>
+              <td className="border border-black p-1">{formData.agencyEmployeeNo}</td>
+              <td className="border border-black p-1 bg-gray-200">16. SALARY</td>
+              <td className="border border-black p-1">{formData.salary}</td>
+            </tr>
+            <tr>
+              <td colSpan={2} className="border border-black p-1 bg-gray-200"></td>
+              <td className="border border-black p-1 bg-gray-200">17. POSITION</td>
+              <td className="border border-black p-1">{formData.position}</td>
+            </tr>
+
           </tbody>
         </table>
 
@@ -557,6 +571,7 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
                     {renderField('heightM', 'Height (m)', 'number')}
                     {renderField('weightKg', 'Weight (kg)', 'number')}
                   </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {renderField('bloodType', 'Blood Type')}
                     {renderField('gsisId', 'GSIS ID No.')}
@@ -565,7 +580,20 @@ export const PersonalDataSheetForm = ({ user, employees }) => {
                     {renderField('sssId', 'SSS No.')}
                     {renderField('tinNo', 'TIN No.')}
                     {renderField('agencyEmployeeNo', 'Agency Employee No.')}
+                    {renderField('position', 'Position')}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Salary</label>
+                      <input 
+                        type="number" 
+                        name="salary" 
+                        value={formData.salary || ''} 
+                        onChange={handleChange} 
+                        className={`border border-slate-300 p-2 text-xs rounded w-full ${user.role === 'Administrator / Division Chief' ? '' : 'bg-slate-200 cursor-not-allowed'}`}
+                        readOnly={user.role !== 'Administrator / Division Chief'}
+                      />
+                    </div>
                   </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 border border-slate-200 rounded">
                     <div>
                       <h4 className="text-xs font-bold uppercase mb-2 text-slate-700 border-b pb-1">Residential Address</h4>

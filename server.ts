@@ -1217,6 +1217,7 @@ app.post("/api/employees", authenticateToken, (req: any, res) => {
     middleName: data.middleName,
     nameExtension: data.nameExtension,
     position: data.position,
+    salary: data.salary ? Number(data.salary) : undefined,
     division: data.division,
     employmentStatus: data.employmentStatus,
     email: data.email,
@@ -1358,7 +1359,9 @@ app.get("/api/employees/:employeeId/pds-profile", authenticateToken, (req: any, 
         fullName: employee.fullName,
         email: employee.email,
         contactNumber: employee.contactNumber,
-        address: employee.address
+        address: employee.address,
+        salary: employee.salary,
+        position: employee.position
       },
       pds: pdsRecord ? pdsRecord : null
     }
@@ -1379,9 +1382,20 @@ app.post("/api/employees/:employeeId/pds", authenticateToken, (req: any, res) =>
     emp.pdsUploadedAt = new Date().toISOString();
   }
 
+
   if (data) {
     if (!db.pds) db.pds = [];
+    
+    // Update salary across the system if Admin modifies it
+    if (data.salary !== undefined && req.user.role === UserRole.SUPER_ADMIN) {
+      emp.salary = Number(data.salary);
+    }
+    if (data.position !== undefined) {
+      emp.position = data.position;
+    }
+
     const existingIndex = db.pds.findIndex((p: any) => p.employeeId === employeeId);
+
     if (existingIndex >= 0) {
       db.pds[existingIndex] = { ...db.pds[existingIndex], ...data };
     } else {
@@ -2440,9 +2454,9 @@ app.post("/api/admin/users", authenticateToken, (req: any, res) => {
   if (req.user.role !== UserRole.SUPER_ADMIN) {
     return res.status(403).json({ status: "error", message: "Requires Administrator / Division Chief privileges" });
   }
-  const { username, email, fullName, role, status } = req.body;
-  if (!username || !email || !fullName || !role) {
-    return res.status(400).json({ status: "error", message: "Please supply all required properties" });
+  const { username, email, fullName, role, status, employeeId } = req.body;
+  if (!username || !email || !fullName || !role || !employeeId) {
+    return res.status(400).json({ status: "error", message: "Please supply all required properties including employeeId" });
   }
   
   const existing = db.users.find(u => u.username === username || u.email === email);
@@ -2457,7 +2471,7 @@ app.post("/api/admin/users", authenticateToken, (req: any, res) => {
     fullName,
     role,
     status: status || "Active",
-    employeeId: `EMP${Math.floor(100 + Math.random() * 900)}`,
+    employeeId,
     createdAt: new Date().toISOString()
   };
 
@@ -2472,7 +2486,7 @@ app.put("/api/admin/users/:id", authenticateToken, (req: any, res) => {
     return res.status(403).json({ status: "error", message: "Requires Administrator / Division Chief privileges" });
   }
   const { id } = req.params;
-  const { fullName, email, role, username, status } = req.body;
+  const { fullName, email, role, username, status, employeeId } = req.body;
   
   const targetUser = db.users.find(u => u.id === id);
   if (!targetUser) {
@@ -2483,6 +2497,7 @@ app.put("/api/admin/users/:id", authenticateToken, (req: any, res) => {
   if (email) targetUser.email = email;
   if (role) targetUser.role = role;
   if (username) targetUser.username = username;
+  if (employeeId) targetUser.employeeId = employeeId;
   if (status) {
     targetUser.status = (status === "Deactivated") ? "Archived" : status;
   }

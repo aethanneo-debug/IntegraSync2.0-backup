@@ -14,6 +14,7 @@ export interface User {
   role: UserRole;
   employeeId?: string;
   plantillaNumber?: string;
+  salary?: number;
   status?: "Active" | "Deactivated" | "Archived";
   passwordHash?: string;
   requirePasswordChange?: boolean;
@@ -33,6 +34,7 @@ export interface Employee {
   position: string;
   division: string;
   employmentStatus: string;
+  salary?: number;
   salaryGrade?: number;
   step?: number;
   email?: string;

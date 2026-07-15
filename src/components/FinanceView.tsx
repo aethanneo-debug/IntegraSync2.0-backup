@@ -46,6 +46,7 @@ import { apiCall, formatCurrency, formatDate, downloadCSV } from "../utils";
 interface FinanceViewProps {
   user: User;
   transactions: FinancialTransaction[];
+  employees?: any[];
   fetchSummary: () => void;
   onRefresh: () => void;
   activeSubTab?: string;
@@ -55,6 +56,7 @@ interface FinanceViewProps {
 export default function FinanceView({ 
   user, 
   transactions, 
+  employees = [],
   fetchSummary, 
   onRefresh,
   activeSubTab: propsActiveSubTab,
@@ -563,7 +565,9 @@ export default function FinanceView({
       const headers = ["Department Module", "Budget Allocation (PHP)", "Utilized Treasury", "Remaining Reserve", "Utilization Percent"];
       const rows = budgets.map(b => {
         const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
-        const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+        const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const obligations = txObligations + totalPayroll;
         return [
           b.department,
           (b.budgetAllocation + (b.carryOver || 0)).toString(),
@@ -806,7 +810,9 @@ export default function FinanceView({
                 <div className="space-y-4 pt-1">
                   {budgets.map((b) => {
                     const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
-                    const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const obligations = txObligations + totalPayroll;
                     const isOverspent = obligations >= (b.budgetAllocation + (b.carryOver || 0));
                     const percentageUsed = Math.round((obligations / Math.max(1, b.budgetAllocation + (b.carryOver || 0))) * 100);
                     return (
@@ -1914,7 +1920,9 @@ export default function FinanceView({
                     .map((b) => {
                     // DERIVING DETAILED OBLIGATIONS METRICS FOR DETAILED TRACKING requirements
                     const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
-                    const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const obligations = txObligations + totalPayroll;
                     const isOverspent = obligations >= (b.budgetAllocation + (b.carryOver || 0));
                     const disbursements = deptYearTxns.filter(t => t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
                     const unpaidObligations = obligations - disbursements; 
@@ -2518,7 +2526,8 @@ export default function FinanceView({
                          .filter(t => t.status === "Liquidated")
                          .reduce((sum, t) => sum + t.amount, 0);
 
-                       const obligations = txObligations;
+                       const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                       const obligations = txObligations + totalPayroll;
                        const disbursements = txDisbursements;
 
                        totals.allotment += b.budgetAllocation;
@@ -2594,7 +2603,8 @@ export default function FinanceView({
                                    .filter(t => t.status === "Liquidated")
                                    .reduce((sum, t) => sum + t.amount, 0);
 
-                                 const obligations = txObligations;
+                                 const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                                 const obligations = txObligations + totalPayroll;
                                  const disbursements = txDisbursements;
                                  const unliquidated = b.unliquidatedAdvances || 0;
 
@@ -2644,7 +2654,9 @@ export default function FinanceView({
                           {
                             const data = budgets.map(b => {
                               const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
-                              const obligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                              const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const obligations = txObligations + totalPayroll;
                               return {
                                 "UACS Code": b.uacsCode || "N/A",
                                 "Department": b.department,
