@@ -97,12 +97,10 @@ export default function FinanceView({
   const [isLiqActionModalOpen, setIsLiqActionModalOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [innerBudgetTab, setInnerBudgetTab] = useState<"allocations" | "requests" | "linking" | "reporting">("allocations");
-  const [isAddBudgetOpen, setIsAddBudgetOpen] = useState(false);
-  const [selectedDivisionFilter, setSelectedDivisionFilter] = useState("All Divisions");
+    const [selectedDivisionFilter, setSelectedDivisionFilter] = useState("Adjudication Division");
   const [isAddBudgetRequestOpen, setIsAddBudgetRequestOpen] = useState(false);
   
-  const [addBudgetForm, setAddBudgetForm] = useState({ department: "Adjudication Division", budgetAllocation: "" });
-  const [addBudgetRequestForm, setAddBudgetRequestForm] = useState({ department: "Adjudication Division", amountRequested: "", requestType: "Augmentation" as const, purpose: "" });
+    const [addBudgetRequestForm, setAddBudgetRequestForm] = useState({ department: "Adjudication Division", amountRequested: "", requestType: "Augmentation" as const, purpose: "" });
   
   // Local state to store linked employee activities/liquidations to budgets
   const [budgetLinks, setBudgetLinks] = useState<Array<{ id: string, liquidationNo: string, employee: string, department: string, amount: number, budgetId: string, timestamp: string }>>([]);
@@ -123,9 +121,7 @@ export default function FinanceView({
   const [newAllocationVal, setNewAllocationVal] = useState("");
   const [editingHsacBudgetId, setEditingHsacBudgetId] = useState<string | null>(null);
   const [newHsacApprVal, setNewHsacApprVal] = useState("");
-  const [editingBudgetCapId, setEditingBudgetCapId] = useState<string | null>(null);
-  const [newBudgetCapVal, setNewBudgetCapVal] = useState("");
-  const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
+        const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   // Document replacement & versioning modals
@@ -456,11 +452,11 @@ export default function FinanceView({
   }
 
   // Create budget allocation
-  async function handleCreateBudget(department: string, budgetAllocation: number) {
+  async function handleCreateBudget(department: string, ps: number, mooe: number, co: number) {
     try {
       const res = await apiCall(`/api/finance/budgets`, {
         method: "POST",
-        body: JSON.stringify({ department, budgetAllocation })
+        body: JSON.stringify({ department, allocatedPS: ps, allocatedMOOE: mooe, allocatedCO: co })
       });
       if (res.status === "success") {
         alert("New division budget allocation successfully created!");
@@ -566,7 +562,7 @@ export default function FinanceView({
       const rows = budgets.map(b => {
         const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
         const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
-                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const totalPayroll = 0; // Employees payroll disabled to allow zero start
                     const obligations = txObligations + totalPayroll;
         return [
           b.department,
@@ -811,7 +807,7 @@ export default function FinanceView({
                   {budgets.map((b) => {
                     const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
                     const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
-                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const totalPayroll = 0; // Employees payroll disabled to allow zero start
                     const obligations = txObligations + totalPayroll;
                     const isOverspent = obligations >= (b.budgetAllocation + (b.carryOver || 0));
                     const percentageUsed = Math.round((obligations / Math.max(1, b.budgetAllocation + (b.carryOver || 0))) * 100);
@@ -832,78 +828,15 @@ export default function FinanceView({
                           />
                         </div>
 
-                        <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                                                <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
                           <span>Spent: {formatCurrency(obligations)}</span>
                           <span>Allocation: {formatCurrency(b.budgetAllocation)}</span>
                         </div>
-                        {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) && (
-                          <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-                            {editingBudgetCapId === b.id ? (
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="number"
-                                  value={newBudgetCapVal}
-                                  onChange={(e) => setNewBudgetCapVal(e.target.value)}
-                                  className="w-32 text-xs font-mono p-1 border rounded"
-                                  autoFocus
-                                />
-                                <button
-                                  onClick={() => {
-                                    const val = Number(newBudgetCapVal);
-                                    if (!isNaN(val)) {
-                                      const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
-                                      const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
-                                      const approved = hb ? hb.approvedBudget : 0;
-                                      
-                                      const otherBudgetsSum = budgets.filter(bg => bg.id !== b.id).reduce((sum, bg) => sum + bg.budgetAllocation, 0);
-                                      if (val + otherBudgetsSum > approved) {
-                                        alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ".");
-                                        return;
-                                      }
-                                      
-                                      apiCall("/api/budgets/" + b.id, {
-                                        method: "PUT",
-                                        body: JSON.stringify({ budgetAllocation: val })
-                                      }).then(res => {
-                                        if (res.status === "success") {
-                                          setBudgets(budgets.map(bg => bg.id === b.id ? res.data : bg));
-                                        }
-                                        setEditingBudgetCapId(null);
-                                      });
-                                    } else {
-                                      setEditingBudgetCapId(null);
-                                    }
-                                  }}
-                                  className="text-[10px] uppercase font-bold text-white bg-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-900"
-                                >
-                                  Save Cap
-                                </button>
-                                <button
-                                  onClick={() => setEditingBudgetCapId(null)}
-                                  className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setEditingBudgetCapId(b.id);
-                                  setNewBudgetCapVal(b.budgetAllocation.toString());
-                                }}
-                                className="text-[10px] uppercase font-mono tracking-wider text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 cursor-pointer font-bold border"
-                              >
-                                Set Budget Fund Pool Cap
-                              </button>
-                            )}
-                          </div>
-                        )}
                       </div>
                     );
                   })}
                 </div>
               </div>
-
               {/* CHART 2: RECENT TRANSACTIONS CHRONOLOGY SLIDES */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
                 <div className="border-b pb-2 flex justify-between items-center">
@@ -1831,234 +1764,140 @@ export default function FinanceView({
                   );
                 })()}
 
-                {/* DIVISION FILTER BUTTONS - Styled pill layout for division selection */}
-                <div className="flex flex-wrap gap-2 mb-4 p-1.5 bg-slate-50/80 rounded-2xl border border-slate-200/60 shadow-sm">
-                  {["All Divisions", "Adjudication Division", "Administrative and Finance Division", "Legal Division"].map((div) => (
-                    <button
-                      key={div}
-                      onClick={() => setSelectedDivisionFilter(div)}
-                      className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center space-x-2 cursor-pointer border shadow-xs ${
-                        selectedDivisionFilter === div
-                          ? "bg-slate-900 text-white border-slate-900 ring-4 ring-slate-900/10 shadow-lg"
-                          : "bg-white text-slate-500 border-slate-200 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30"
-                      }`}
-                    >
-                      {div === "All Divisions" ? <Layers size={14} /> : <Building2 size={14} />}
-                      <span>{div === "All Divisions" ? "All Programs" : div}</span>
-                    </button>
-                  ))}
+                
+
+                <div className="flex justify-between items-center mb-4">
+                    <p className="text-xs text-slate-500 italic">Review division fund caps and real-time obligation burns.</p>
                 </div>
 
-                {/* INLINE SQUEEZED FORM TO CREATE AN ALLOCATION */}
-                {isAddBudgetOpen ? (
-                  <div className="bg-white border border-blue-200 rounded-2xl p-5 shadow-sm space-y-4">
-                    <div className="flex justify-between items-center pb-2 border-b">
-                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Create New Program/Division Budget</h3>
-                      <button onClick={() => setIsAddBudgetOpen(false)} className="text-slate-400 hover:text-slate-950 font-bold text-xs">✕ Close Form</button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-mono tracking-wider font-extrabold text-slate-500">Program / Division Name</label>
-                        <select
-                          value={addBudgetForm.department}
-                          onChange={(e) => setAddBudgetForm({ ...addBudgetForm, department: e.target.value })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-semibold"
-                        >
-                          <option value="Adjudication Division">Adjudication Division</option>
-                          <option value="Administrative and Finance Division">Administrative and Finance Division</option>
-                          <option value="Legal Division">Legal Division</option>
-                          <option value="Information and Communications Division">Information and Communications Division</option>
-                          <option value="Executive Management Office">Executive Management Office</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-mono tracking-wider font-extrabold text-slate-500">Initial Allocation Fund Cap (PHP)</label>
-                        <input
-                          type="number"
-                          placeholder="e.g. 750000"
-                          value={addBudgetForm.budgetAllocation}
-                          onChange={(e) => setAddBudgetForm({ ...addBudgetForm, budgetAllocation: e.target.value })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-mono font-bold"
-                        />
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => {
-                        if (!addBudgetForm.budgetAllocation) return alert("Allocation amount is required");
-                        const val = Number(addBudgetForm.budgetAllocation);
-                        if (!isNaN(val)) {
-                          const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
-                          const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
-                          const approved = hb ? hb.approvedBudget : 0;
+                {/* BUDGET MONITORING TABLE */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-mono tracking-wider text-slate-500">
+                          <th className="p-3 font-bold">Division / Department</th>
+                          <th className="p-3 font-bold text-right">Personnel Services (PS)</th>
+                          <th className="p-3 font-bold text-right">Maint. & Other Op. Exp. (MOOE)</th>
+                          <th className="p-3 font-bold text-right">Capital Outlays (CO)</th>
+                          <th className="p-3 font-bold text-right">Total Base Allocation</th>
+                          <th className="p-3 font-bold text-right">Retained Carryover</th>
+                          <th className="p-3 font-bold text-right">Spent / Obligated</th>
+                          <th className="p-3 font-bold text-right text-blue-800 bg-blue-50/50">Total Active Cap</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {["Adjudication Division", "Administrative and Finance Division", "Legal Division"].map(div => {
+                          const b = budgets.find(bg => bg.department === div);
                           
-                          const otherBudgetsSum = budgets.reduce((sum, bg) => sum + bg.budgetAllocation, 0);
-                          if (val + otherBudgetsSum > approved) {
-                            alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ".");
-                            return;
-                          }
-                          handleCreateBudget(addBudgetForm.department, val);
-                          setIsAddBudgetOpen(false);
-                        }
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-mono text-xs px-4 py-2 font-bold shadow-sm"
-                    >
-                      Initialize Budget Allocation
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center">
-                    <p className="text-xs text-slate-500 italic">Review division fund caps and real-time obligation burns.</p>
-                  </div>
-                )}
-
-                {/* DETAILED MONITORING CARDS - tracking allotments, expenditures, obligations, disbursements, unpaid obligations, available balances, and fund-utilization status */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {budgets
-                    .filter(b => selectedDivisionFilter === "All Divisions" || b.department === selectedDivisionFilter)
-                    .map((b) => {
-                    // DERIVING DETAILED OBLIGATIONS METRICS FOR DETAILED TRACKING requirements
-                    const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
-                    const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
-                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
-                    const obligations = txObligations + totalPayroll;
-                    const isOverspent = obligations >= (b.budgetAllocation + (b.carryOver || 0));
-                    const disbursements = deptYearTxns.filter(t => t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
-                    const unpaidObligations = obligations - disbursements; 
-                    const availableBalance = b.budgetAllocation + (b.carryOver || 0) - obligations;
-                    
-                    return (
-                      <div key={b.id} className="bg-white border border-slate-200 hover:border-blue-400 transition-all rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="flex justify-between items-start">
-                            <span className="text-xs font-black text-slate-900 uppercase block tracking-wide font-sans">{b.department}</span>
-                            <span className="text-[10px] font-mono uppercase bg-slate-100 text-slate-800 rounded px-1.5 py-0.5 font-bold border">Active</span>
-                          </div>
+                          const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === div.toLowerCase());
+                          const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
+                          const totalPayroll = 0; // Removing automatic payroll addition to let the user start at exactly 0. You can re-enable this or log payroll as transactions.
+                          const obligations = txObligations + totalPayroll;
                           
-                          {isOverspent && (
-                            <div className="mt-3 p-2 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-[10px] font-bold flex items-center space-x-1.5">
-                              <AlertTriangle size={12} className="text-rose-600 shrink-0" />
-                              <span>OVERSPENDING NOTIFICATION: Spending cap exceeded. Reassign funds!</span>
-                            </div>
-                          )}
+                          const id = b ? b.id : null;
+                          const ps = b ? (b.allocatedPS || 0) : 0;
+                          const mooe = b ? (b.allocatedMOOE || 0) : 0;
+                          const co = b ? (b.allocatedCO || 0) : 0;
+                          const totalBase = ps + mooe + co;
+                          const carryOver = b ? (b.carryOver || 0) : 0;
+                          const activeCap = totalBase + carryOver;
+                          const isOverspent = obligations >= Math.max(1, activeCap);
 
-                          <div className="pt-4 space-y-2 border-t mt-3 border-slate-100">
-                            <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                              <span>Base Allotment:</span>
-                              <span className="font-bold text-slate-900">{formatCurrency(b.budgetAllocation)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                              <span>Retained Carryover:</span>
-                              <span className="font-bold text-teal-700">{formatCurrency(b.carryOver || 0)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-slate-800 bg-slate-50 p-1 rounded">
-                              <span className="font-bold">Total Active Cap:</span>
-                              <span className="font-black text-blue-700">{formatCurrency(b.budgetAllocation + (b.carryOver || 0))}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                              <span>Total Expenditures:</span>
-                              <span className="font-semibold text-slate-700">{formatCurrency(obligations)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                              <span>Obligations (Committed):</span>
-                              <span className="font-semibold text-slate-700">{formatCurrency(obligations)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                              <span>Disbursements (Paid):</span>
-                              <span className="font-semibold text-emerald-700">{formatCurrency(disbursements)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-rose-500">
-                              <span>Unpaid Obligations:</span>
-                              <span className="font-semibold text-rose-600">{formatCurrency(unpaidObligations)}</span>
-                            </div>
-                            <div className="flex justify-between text-[11px] font-mono text-slate-500 pt-1 border-t border-dashed">
-                              <span>Available Free Balance:</span>
-                              <span className={`font-black ${availableBalance < 0 ? "text-rose-700" : "text-emerald-700 font-bold"}`}>
-                                {formatCurrency(availableBalance)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                          const handleBlur = async (field, value) => {
+                            const numVal = Number(value) || 0;
+                            let newPs = ps;
+                            let newMooe = mooe;
+                            let newCo = co;
+                            if (field === 'ps') newPs = numVal;
+                            if (field === 'mooe') newMooe = numVal;
+                            if (field === 'co') newCo = numVal;
+                            
+                            const val = newPs + newMooe + newCo;
+                            const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
+                            const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
+                            const approved = hb ? hb.approvedBudget : 0;
+                            
+                            const otherBudgetsSum = budgets.filter(bg => bg.department !== div).reduce((sum, bg) => sum + bg.budgetAllocation, 0);
+                            if (val + otherBudgetsSum > approved) {
+                              alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ". Reverting changes.");
+                              fetchFinanceAddons();
+                              return;
+                            }
 
-                        <div className="pt-3 border-t border-slate-100 space-y-2">
-                          <div className="flex justify-between items-center text-[11px]">
-                                                        <span className="font-semibold text-slate-500">Fund-Utilization Status:</span>
-                            <span className="font-black text-slate-800">{b.budgetPercentageUsed}% spent</span>
-                          </div>
-                          
-                          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full ${isOverspent ? "bg-rose-500" : b.budgetPercentageUsed > 75 ? "bg-amber-500" : "bg-blue-600"}`}
-                              style={{ width: `${Math.min(b.budgetPercentageUsed, 100)}%` }}
-                            />
-                          </div>
-                          {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) && (
-                            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-                              {editingBudgetCapId === b.id ? (
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="number"
-                                    value={newBudgetCapVal}
-                                    onChange={(e) => setNewBudgetCapVal(e.target.value)}
-                                    className="w-32 text-xs font-mono p-1 border rounded"
-                                    autoFocus
+                            if (id) {
+                              apiCall("/api/budgets/" + id, {
+                                method: "PUT",
+                                body: JSON.stringify({ budgetAllocation: val, allocatedPS: newPs, allocatedMOOE: newMooe, allocatedCO: newCo })
+                              }).then(res => { if(res.status === 'success') setBudgets(budgets.map(bg => bg.id === id ? res.data : bg)); });
+                            } else {
+                              apiCall("/api/finance/budgets", {
+                                method: "POST",
+                                body: JSON.stringify({ department: div, allocatedPS: newPs, allocatedMOOE: newMooe, allocatedCO: newCo })
+                              }).then(res => { if(res.status === 'success') fetchFinanceAddons(); });
+                            }
+                          };
+
+                          return (
+                            <tr key={div} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="p-3 text-xs font-bold text-slate-800">
+                                {div}
+                                {isOverspent && obligations > 0 && <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 outline outline-1 outline-rose-200 animate-pulse">OVERSPENT</span>}
+                              </td>
+                              <td className="p-3 text-right">
+                                {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) ? (
+                                  <input 
+                                    type="number" 
+                                    className="w-24 text-right p-1.5 text-xs font-mono bg-white border border-slate-200 rounded outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                    defaultValue={ps}
+                                    onBlur={(e) => handleBlur('ps', e.target.value)}
                                   />
-                                  <button
-                                    onClick={() => {
-                                      const val = Number(newBudgetCapVal);
-                                      if (!isNaN(val)) {
-                                        const currentFy = fiscalYears.find(fy => fy.label === activeFiscalYear);
-                                        const hb = currentFy ? hsacBudgets.find(hb => hb.fiscalYearId === currentFy.id) : null;
-                                        const approved = hb ? hb.approvedBudget : 0;
-                                        
-                                        const otherBudgetsSum = budgets.filter(bg => bg.id !== b.id).reduce((sum, bg) => sum + bg.budgetAllocation, 0);
-                                        if (val + otherBudgetsSum > approved) {
-                                          alert("Division budget cannot exceed the total approved budget for the fiscal year. Remaining available allocation is " + formatCurrency(approved - otherBudgetsSum) + ".");
-                                          return;
-                                        }
-                                        
-                                        apiCall("/api/budgets/" + b.id, {
-                                          method: "PUT",
-                                          body: JSON.stringify({ budgetAllocation: val })
-                                        }).then(res => {
-                                          if (res.status === "success") {
-                                            setBudgets(budgets.map(bg => bg.id === b.id ? res.data : bg));
-                                          }
-                                          setEditingBudgetCapId(null);
-                                        });
-                                      } else {
-                                        setEditingBudgetCapId(null);
-                                      }
-                                    }}
-                                    className="text-[10px] uppercase font-bold text-white bg-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-900"
-                                  >
-                                    Save Cap
-                                  </button>
-                                  <button
-                                    onClick={() => setEditingBudgetCapId(null)}
-                                    className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200"
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => {
-                                    setEditingBudgetCapId(b.id);
-                                    setNewBudgetCapVal(b.budgetAllocation.toString());
-                                  }}
-                                  className="text-[10px] uppercase font-mono tracking-wider text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 cursor-pointer font-bold border"
-                                >
-                                  Set Budget Fund Pool Cap
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                                ) : (
+                                  <span className="text-xs font-mono text-slate-600">{formatCurrency(ps)}</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-right">
+                                {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) ? (
+                                  <input 
+                                    type="number" 
+                                    className="w-24 text-right p-1.5 text-xs font-mono bg-white border border-slate-200 rounded outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                    defaultValue={mooe}
+                                    onBlur={(e) => handleBlur('mooe', e.target.value)}
+                                  />
+                                ) : (
+                                  <span className="text-xs font-mono text-slate-600">{formatCurrency(mooe)}</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-right">
+                                {[UserRole.SUPER_ADMIN, UserRole.BUDGET_OFFICER].includes(user.role) ? (
+                                  <input 
+                                    type="number" 
+                                    className="w-24 text-right p-1.5 text-xs font-mono bg-white border border-slate-200 rounded outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                    defaultValue={co}
+                                    onBlur={(e) => handleBlur('co', e.target.value)}
+                                  />
+                                ) : (
+                                  <span className="text-xs font-mono text-slate-600">{formatCurrency(co)}</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-right text-xs font-black text-slate-900 font-mono">
+                                {formatCurrency(totalBase)}
+                              </td>
+                              <td className="p-3 text-right text-xs text-emerald-700 font-mono font-semibold">
+                                {formatCurrency(carryOver)}
+                              </td>
+                              <td className="p-3 text-right text-xs font-semibold text-slate-700 font-mono">
+                                {formatCurrency(obligations)}
+                              </td>
+                              <td className="p-3 text-right text-xs font-black text-blue-900 font-mono bg-blue-50/30">
+                                {formatCurrency(activeCap)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
@@ -2526,7 +2365,7 @@ export default function FinanceView({
                          .filter(t => t.status === "Liquidated")
                          .reduce((sum, t) => sum + t.amount, 0);
 
-                       const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                       const totalPayroll = 0; // Employees payroll disabled to allow zero start
                        const obligations = txObligations + totalPayroll;
                        const disbursements = txDisbursements;
 
@@ -2603,7 +2442,7 @@ export default function FinanceView({
                                    .filter(t => t.status === "Liquidated")
                                    .reduce((sum, t) => sum + t.amount, 0);
 
-                                 const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                                 const totalPayroll = 0; // Employees payroll disabled to allow zero start
                                  const obligations = txObligations + totalPayroll;
                                  const disbursements = txDisbursements;
                                  const unliquidated = b.unliquidatedAdvances || 0;
@@ -2655,7 +2494,7 @@ export default function FinanceView({
                             const data = budgets.map(b => {
                               const deptYearTxns = yearFilteredTxns.filter(t => (t.department || "").toLowerCase() === b.department.toLowerCase());
                               const txObligations = deptYearTxns.filter(t => t.status === "Validated" || t.status === "Liquidated").reduce((sum, t) => sum + t.amount, 0);
-                    const totalPayroll = employees.filter(e => (e.division || "").toLowerCase() === b.department.toLowerCase()).reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+                    const totalPayroll = 0; // Employees payroll disabled to allow zero start
                     const obligations = txObligations + totalPayroll;
                               return {
                                 "UACS Code": b.uacsCode || "N/A",

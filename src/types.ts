@@ -125,6 +125,7 @@ export interface TransactionHistory {
   changedBy: string;
   changedAt: string;
   remarks: string;
+  expenseCategory?: "PS" | "MOOE" | "CO";
 }
 
 export interface Liquidation {
@@ -147,12 +148,25 @@ export interface BudgetAllocation {
   id: string;
   fiscalYearId: string;
   department: string;
+  
   budgetAllocation: number;
   budgetUtilized: number;
   remainingBudget: number;
   budgetPercentageUsed: number;
   carryOver?: number;
   unliquidatedAdvances?: number;
+  
+  allocatedPS: number;
+  utilizedPS: number;
+  remainingPS: number;
+  
+  allocatedMOOE: number;
+  utilizedMOOE: number;
+  remainingMOOE: number;
+  
+  allocatedCO: number;
+  utilizedCO: number;
+  remainingCO: number;
 }
 
 export interface BudgetRequestItem {

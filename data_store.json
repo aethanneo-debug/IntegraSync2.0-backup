@@ -302,168 +302,6 @@
   ],
   "financialTransactions": [
     {
-      "id": "tx-1",
-      "transactionId": "TXN-2026-001",
-      "transactionDate": "2026-05-10",
-      "supplier": "La Union Office Supplies Trading",
-      "amount": 14500,
-      "description": "Purchase of high-speed heavy-duty staplers and binding materials for the Legal Records Section",
-      "receiptFilename": "receipt_001_legal.png",
-      "status": "Liquidated",
-      "supportingDocuments": [
-        {
-          "id": "doc-1",
-          "name": "Approved Purchase Request",
-          "type": "Purchase Request",
-          "filename": "PR_2026_001.pdf",
-          "uploadedAt": "2026-05-09T08:00:00Z"
-        },
-        {
-          "id": "doc-2",
-          "name": "Official Vendor Invoice",
-          "type": "Invoice",
-          "filename": "INV_92318.pdf",
-          "uploadedAt": "2026-05-10T11:00:00Z"
-        },
-        {
-          "id": "doc-3",
-          "name": "Disbursement Voucher DV-26-882",
-          "type": "Disbursement Voucher",
-          "filename": "DV_26_882.pdf",
-          "uploadedAt": "2026-05-11T14:00:00Z"
-        },
-        {
-          "id": "doc-4",
-          "name": "Liquidation Report Signed",
-          "type": "Liquidation Report",
-          "filename": "LR_2026_01.pdf",
-          "uploadedAt": "2026-05-15T16:30:00Z"
-        }
-      ],
-      "history": [
-        {
-          "id": "th-1",
-          "status": "Pending Validation",
-          "changedBy": "Andres B. Bonifacio",
-          "changedAt": "2026-05-10T11:05:00Z",
-          "remarks": "Initial upload of vendor official receipt."
-        },
-        {
-          "id": "th-2",
-          "status": "Under Review",
-          "changedBy": "Juan dela Cruz",
-          "changedAt": "2026-05-12T10:00:00Z",
-          "remarks": "Under audit review of supporting receipts and disbursement voucher compatibility."
-        },
-        {
-          "id": "th-3",
-          "status": "Validated",
-          "changedBy": "Juan dela Cruz",
-          "changedAt": "2026-05-13T09:30:00Z",
-          "remarks": "All invoices and purchase orders confirmed correct."
-        },
-        {
-          "id": "th-4",
-          "status": "Liquidated",
-          "changedBy": "Juan dela Cruz",
-          "changedAt": "2026-05-15T17:00:00Z",
-          "remarks": "Liquidation approved. Records match general ledger entry."
-        }
-      ],
-      "department": "Legal Division",
-      "category": "Office Supplies",
-      "employeeRef": "EMP006",
-      "createdBy": "Samantha C. Bernardo",
-      "dateCreated": "2026-05-10"
-    },
-    {
-      "id": "tx-2",
-      "transactionId": "TXN-2026-002",
-      "transactionDate": "2026-06-01",
-      "supplier": "A3 Tech Solutions and Services",
-      "amount": 32000,
-      "description": "IT Maintenance services and network diagnostic tests for the server room of RAB 1",
-      "receiptFilename": "receipt_02_server.png",
-      "status": "Pending Validation",
-      "supportingDocuments": [
-        {
-          "id": "doc-5",
-          "name": "Scope of Work Approval",
-          "type": "Other",
-          "filename": "SOW_A3Tech.pdf",
-          "uploadedAt": "2026-06-01T09:00:00Z"
-        }
-      ],
-      "history": [
-        {
-          "id": "th-5",
-          "status": "Pending Validation",
-          "changedBy": "Jolly Joy A. Almoite",
-          "changedAt": "2026-06-02T09:30:00Z",
-          "remarks": "Awaiting submission of structural invoice and job completion certification from service heads."
-        }
-      ],
-      "department": "Administrative and Finance Division",
-      "category": "Maintenance",
-      "employeeRef": "EMP004",
-      "createdBy": "Jolly Joy A. Almoite",
-      "dateCreated": "2026-06-01"
-    },
-    {
-      "id": "tx-3",
-      "transactionId": "TXN-2026-003",
-      "transactionDate": "2026-06-03",
-      "supplier": "Petron Fuel Station SF",
-      "amount": 4800,
-      "description": "Official travel fuel refuel package for the Service Isuzu D-MAX - RAB 1 field mission",
-      "receiptFilename": "fuel_receipt_03.jpg",
-      "status": "Validated",
-      "supportingDocuments": [
-        {
-          "id": "doc-6",
-          "name": "Approved Trip Ticket No 119",
-          "type": "Other",
-          "filename": "TripTicket_119.pdf",
-          "uploadedAt": "2026-06-03T07:45:00Z"
-        },
-        {
-          "id": "doc-7",
-          "name": "Official Fuel Invoice",
-          "type": "Invoice",
-          "filename": "PetronInv_9921.pdf",
-          "uploadedAt": "2026-06-03T16:00:00Z"
-        }
-      ],
-      "history": [
-        {
-          "id": "th-6",
-          "status": "Pending Validation",
-          "changedBy": "Andres B. Bonifacio",
-          "changedAt": "2026-06-03T17:15:00Z",
-          "remarks": "Fuel slip submitted."
-        },
-        {
-          "id": "th-7",
-          "status": "Under Review",
-          "changedBy": "Juan dela Cruz",
-          "changedAt": "2026-06-04T11:00:00Z",
-          "remarks": "Checking itinerary of Trip Ticket."
-        },
-        {
-          "id": "th-8",
-          "status": "Validated",
-          "changedBy": "Juan dela Cruz",
-          "changedAt": "2026-06-05T09:12:00Z",
-          "remarks": "Validated. Cleared for budget allocation."
-        }
-      ],
-      "department": "Administrative and Finance Division",
-      "category": "Fuel/Tolls",
-      "employeeRef": "EMP006",
-      "createdBy": "Samantha C. Bernardo",
-      "dateCreated": "2026-06-03"
-    },
-    {
       "id": "tx-4",
       "transactionId": "TXN-2025-099",
       "transactionDate": "2025-08-15",
@@ -741,6 +579,15 @@
   ],
   "auditLogs": [
     {
+      "id": "log-1784235716661-492",
+      "timestamp": "2026-07-16T21:01:56.661Z",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "Administrator / Division Chief",
+      "action": "Login",
+      "details": "Successful authenticated session login via credentials."
+    },
+    {
       "id": "log-1784134822124-494",
       "timestamp": "2026-07-15T17:00:22.124Z",
       "userId": "u-1",
@@ -905,11 +752,17 @@
       "id": "b-1",
       "fiscalYearId": "fy-1",
       "department": "Adjudication Division",
-      "budgetAllocation": 1200000,
+      "budgetAllocation": 1150000,
       "carryOver": 300000,
       "budgetUtilized": 0,
-      "remainingBudget": 1500000,
-      "budgetPercentageUsed": 0
+      "remainingBudget": 1450000,
+      "budgetPercentageUsed": 0,
+      "allocatedPS": 1000000,
+      "allocatedMOOE": 100000,
+      "allocatedCO": 50000,
+      "remainingPS": 1000000,
+      "remainingMOOE": 100000,
+      "remainingCO": 50000
     },
     {
       "id": "b-1-old",
@@ -919,17 +772,29 @@
       "carryOver": 100000,
       "budgetUtilized": 1500000,
       "remainingBudget": 1000000,
-      "budgetPercentageUsed": 0
+      "budgetPercentageUsed": 0,
+      "allocatedPS": 0,
+      "allocatedMOOE": 0,
+      "allocatedCO": 0,
+      "remainingPS": 0,
+      "remainingMOOE": 0,
+      "remainingCO": 0
     },
     {
       "id": "b-2",
       "fiscalYearId": "fy-1",
       "department": "Administrative and Finance Division",
-      "budgetAllocation": 2400000,
+      "budgetAllocation": 0,
       "carryOver": 100000,
       "budgetUtilized": 0,
-      "remainingBudget": 2500000,
-      "budgetPercentageUsed": 0
+      "remainingBudget": 100000,
+      "budgetPercentageUsed": 0,
+      "allocatedPS": 0,
+      "allocatedMOOE": 0,
+      "allocatedCO": 0,
+      "remainingPS": 0,
+      "remainingMOOE": 0,
+      "remainingCO": 0
     },
     {
       "id": "b-2-old",
@@ -939,17 +804,29 @@
       "carryOver": 200000,
       "budgetUtilized": 700000,
       "remainingBudget": 300000,
-      "budgetPercentageUsed": 0
+      "budgetPercentageUsed": 0,
+      "allocatedPS": 0,
+      "allocatedMOOE": 0,
+      "allocatedCO": 0,
+      "remainingPS": 0,
+      "remainingMOOE": 0,
+      "remainingCO": 0
     },
     {
       "id": "b-3",
       "fiscalYearId": "fy-1",
       "department": "Legal Division",
-      "budgetAllocation": 800000,
+      "budgetAllocation": 0,
       "carryOver": 200000,
       "budgetUtilized": 0,
       "remainingBudget": 1000000,
-      "budgetPercentageUsed": 0
+      "budgetPercentageUsed": 0,
+      "allocatedPS": 0,
+      "allocatedMOOE": 0,
+      "allocatedCO": 0,
+      "remainingPS": 400000,
+      "remainingMOOE": 240000,
+      "remainingCO": 160000
     },
     {
       "id": "b-3-old",
@@ -959,7 +836,13 @@
       "carryOver": 0,
       "budgetUtilized": 1600000,
       "remainingBudget": 200000,
-      "budgetPercentageUsed": 0
+      "budgetPercentageUsed": 0,
+      "allocatedPS": 0,
+      "allocatedMOOE": 0,
+      "allocatedCO": 0,
+      "remainingPS": 0,
+      "remainingMOOE": 0,
+      "remainingCO": 0
     }
   ],
   "financeAuditLogs": [
@@ -1104,7 +987,7 @@
     {
       "id": "hb-1",
       "fiscalYearId": "fy-1",
-      "approvedBudget": 4400000,
+      "approvedBudget": 9000000,
       "carryOverBudget": 600000,
       "totalUtilized": 0
     },

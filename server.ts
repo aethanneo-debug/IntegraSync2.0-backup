@@ -152,12 +152,12 @@ function getInitialData(): DBStructure {
       }
       if (!loaded.budgetAllocations) {
         loaded.budgetAllocations = [
-          { id: "b-1", fiscalYearId: "fy-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 },
-          { id: "b-1-old", fiscalYearId: "fy-2", department: "Adjudication Division", budgetAllocation: 2400000.00, carryOver: 0, budgetUtilized: 1500000.00, remainingBudget: 900000.00, budgetPercentageUsed: 0 },
-          { id: "b-2", fiscalYearId: "fy-1", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 },
-          { id: "b-2-old", fiscalYearId: "fy-2", department: "Administrative and Finance Division", budgetAllocation: 800000.00, carryOver: 0, budgetUtilized: 700000.00, remainingBudget: 100000.00, budgetPercentageUsed: 0 },
-          { id: "b-3", fiscalYearId: "fy-1", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 },
-          { id: "b-3-old", fiscalYearId: "fy-2", department: "Legal Division", budgetAllocation: 1800000.00, carryOver: 0, budgetUtilized: 1600000.00, remainingBudget: 200000.00, budgetPercentageUsed: 0 }
+          { id: "b-1", fiscalYearId: "fy-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 , allocatedPS: 600000, utilizedPS: 0, remainingPS: 600000, allocatedMOOE: 360000, utilizedMOOE: 0, remainingMOOE: 360000, allocatedCO: 240000, utilizedCO: 0, remainingCO: 240000 },
+          { id: "b-1-old", fiscalYearId: "fy-2", department: "Adjudication Division", budgetAllocation: 2400000.00, carryOver: 0, budgetUtilized: 1500000.00, remainingBudget: 900000.00, budgetPercentageUsed: 0 , allocatedPS: 1200000, utilizedPS: 750000, remainingPS: 450000, allocatedMOOE: 720000, utilizedMOOE: 450000, remainingMOOE: 270000, allocatedCO: 480000, utilizedCO: 300000, remainingCO: 180000 },
+          { id: "b-2", fiscalYearId: "fy-1", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 , allocatedPS: 1200000, utilizedPS: 0, remainingPS: 1200000, allocatedMOOE: 720000, utilizedMOOE: 0, remainingMOOE: 720000, allocatedCO: 480000, utilizedCO: 0, remainingCO: 480000 },
+          { id: "b-2-old", fiscalYearId: "fy-2", department: "Administrative and Finance Division", budgetAllocation: 800000.00, carryOver: 0, budgetUtilized: 700000.00, remainingBudget: 100000.00, budgetPercentageUsed: 0 , allocatedPS: 400000, utilizedPS: 350000, remainingPS: 50000, allocatedMOOE: 240000, utilizedMOOE: 210000, remainingMOOE: 30000, allocatedCO: 160000, utilizedCO: 140000, remainingCO: 20000 },
+          { id: "b-3", fiscalYearId: "fy-1", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 , allocatedPS: 400000, utilizedPS: 0, remainingPS: 400000, allocatedMOOE: 240000, utilizedMOOE: 0, remainingMOOE: 240000, allocatedCO: 160000, utilizedCO: 0, remainingCO: 160000 },
+          { id: "b-3-old", fiscalYearId: "fy-2", department: "Legal Division", budgetAllocation: 1800000.00, carryOver: 0, budgetUtilized: 1600000.00, remainingBudget: 200000.00, budgetPercentageUsed: 0 , allocatedPS: 900000, utilizedPS: 800000, remainingPS: 100000, allocatedMOOE: 540000, utilizedMOOE: 480000, remainingMOOE: 60000, allocatedCO: 360000, utilizedCO: 320000, remainingCO: 40000 }
         ];
         changed = true;
       }
@@ -364,7 +364,7 @@ function getInitialData(): DBStructure {
       }
       if (!loaded.hsacBudgets) {
         loaded.hsacBudgets = [
-          { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 4400000.00, carryOverBudget: 600000.00, totalUtilized: 0 },
+          { id: "hb-1", fiscalYearId: "fy-1", approvedBudget: 10000000.00, carryOverBudget: 600000.00, totalUtilized: 0 },
           { id: "hb-2", fiscalYearId: "fy-2", approvedBudget: 5000000.00, carryOverBudget: 300000.00, totalUtilized: 3800000.00 }
         ];
         changed = true;
@@ -754,12 +754,12 @@ function getInitialData(): DBStructure {
       }
     ],
         budgetAllocations: [
-      { id: "b-1", fiscalYearId: "fy-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 },
-      { id: "b-1-old", fiscalYearId: "fy-2", department: "Adjudication Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 1500000.00, remainingBudget: 1000000.00, budgetPercentageUsed: 0 },
-      { id: "b-2", fiscalYearId: "fy-1", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 },
-      { id: "b-2-old", fiscalYearId: "fy-2", department: "Administrative and Finance Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 700000.00, remainingBudget: 300000.00, budgetPercentageUsed: 0 },
-      { id: "b-3", fiscalYearId: "fy-1", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 },
-      { id: "b-3-old", fiscalYearId: "fy-2", department: "Legal Division", budgetAllocation: 1800000.00, carryOver: 0, budgetUtilized: 1600000.00, remainingBudget: 200000.00, budgetPercentageUsed: 0 }
+      { id: "b-1", fiscalYearId: "fy-1", department: "Adjudication Division", budgetAllocation: 1200000.00, carryOver: 300000.00, budgetUtilized: 0, remainingBudget: 1500000.00, budgetPercentageUsed: 0 , allocatedPS: 600000, utilizedPS: 0, remainingPS: 600000, allocatedMOOE: 360000, utilizedMOOE: 0, remainingMOOE: 360000, allocatedCO: 240000, utilizedCO: 0, remainingCO: 240000 },
+      { id: "b-1-old", fiscalYearId: "fy-2", department: "Adjudication Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 1500000.00, remainingBudget: 1000000.00, budgetPercentageUsed: 0 , allocatedPS: 1200000, utilizedPS: 750000, remainingPS: 450000, allocatedMOOE: 720000, utilizedMOOE: 450000, remainingMOOE: 270000, allocatedCO: 480000, utilizedCO: 300000, remainingCO: 180000 },
+      { id: "b-2", fiscalYearId: "fy-1", department: "Administrative and Finance Division", budgetAllocation: 2400000.00, carryOver: 100000.00, budgetUtilized: 0, remainingBudget: 2500000.00, budgetPercentageUsed: 0 , allocatedPS: 1200000, utilizedPS: 0, remainingPS: 1200000, allocatedMOOE: 720000, utilizedMOOE: 0, remainingMOOE: 720000, allocatedCO: 480000, utilizedCO: 0, remainingCO: 480000 },
+      { id: "b-2-old", fiscalYearId: "fy-2", department: "Administrative and Finance Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 700000.00, remainingBudget: 300000.00, budgetPercentageUsed: 0 , allocatedPS: 400000, utilizedPS: 350000, remainingPS: 50000, allocatedMOOE: 240000, utilizedMOOE: 210000, remainingMOOE: 30000, allocatedCO: 160000, utilizedCO: 140000, remainingCO: 20000 },
+      { id: "b-3", fiscalYearId: "fy-1", department: "Legal Division", budgetAllocation: 800000.00, carryOver: 200000.00, budgetUtilized: 0, remainingBudget: 1000000.00, budgetPercentageUsed: 0 , allocatedPS: 400000, utilizedPS: 0, remainingPS: 400000, allocatedMOOE: 240000, utilizedMOOE: 0, remainingMOOE: 240000, allocatedCO: 160000, utilizedCO: 0, remainingCO: 160000 },
+      { id: "b-3-old", fiscalYearId: "fy-2", department: "Legal Division", budgetAllocation: 1800000.00, carryOver: 0, budgetUtilized: 1600000.00, remainingBudget: 200000.00, budgetPercentageUsed: 0 , allocatedPS: 900000, utilizedPS: 800000, remainingPS: 100000, allocatedMOOE: 540000, utilizedMOOE: 480000, remainingMOOE: 60000, allocatedCO: 360000, utilizedCO: 320000, remainingCO: 40000 }
     ],
     financeAuditLogs: [
       { id: "fl-1", user: "Juan dela Cruz", action: "Validate Transaction", module: "Financial Transactions", timestamp: "2026-05-13T09:30:00Z", previousValue: "Under Review", newValue: "Validated" },
@@ -915,11 +915,21 @@ app.post("/api/fiscal-years", authenticateToken, (req: any, res) => {
           ...b,
           id: `b-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           fiscalYearId: newFy.id,
-          budgetAllocation: spentLastYear,
+          budgetAllocation: 0,
           carryOver: leftover,
           budgetUtilized: 0,
-          remainingBudget: spentLastYear + leftover,
-          budgetPercentageUsed: 0
+          remainingBudget: leftover,
+          budgetPercentageUsed: 0,
+          allocatedPS: 0,
+          allocatedMOOE: 0,
+          allocatedCO: 0,
+          utilizedPS: 0,
+          utilizedMOOE: 0,
+          utilizedCO: 0,
+          remainingPS: 0,
+          remainingMOOE: 0,
+          remainingCO: 0,
+          unliquidatedAdvances: 0
         };
       });
       db.budgetAllocations = [...(db.budgetAllocations || []), ...newAllocations];
@@ -984,6 +994,15 @@ app.put("/api/budgets/:id", authenticateToken, (req: any, res) => {
       budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized - (budget.unliquidatedAdvances || 0);
       budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
     }
+    if (req.body.allocatedPS !== undefined) budget.allocatedPS = Number(req.body.allocatedPS);
+    if (req.body.allocatedMOOE !== undefined) budget.allocatedMOOE = Number(req.body.allocatedMOOE);
+    if (req.body.allocatedCO !== undefined) budget.allocatedCO = Number(req.body.allocatedCO);
+    
+    // Recalculate remaining amounts based on updated allocations
+    budget.remainingPS = (budget.allocatedPS || 0) - (budget.utilizedPS || 0);
+    budget.remainingMOOE = (budget.allocatedMOOE || 0) - (budget.utilizedMOOE || 0);
+    budget.remainingCO = (budget.allocatedCO || 0) - (budget.utilizedCO || 0);
+
     saveDB();
     res.json({ status: "success", data: budget });
   } else {
@@ -1719,27 +1738,15 @@ app.get("/api/finance/budgets", authenticateToken, (req, res) => {
 });
 
 app.post("/api/finance/budgets", authenticateToken, (req: any, res) => {
-  const { department, budgetAllocation, approvedRequestId } = req.body;
+  const { department, budgetAllocation, allocatedPS, allocatedMOOE, allocatedCO, approvedRequestId } = req.body;
   if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.BUDGET_OFFICER && req.user.role !== UserRole.FINANCE_OFFICER) {
     return res.status(403).json({ status: "error", message: "Unauthorized. Requires Budget Officer or Admin." });
   }
 
-  // If NOT Super Admin, they must provide a valid approved request ID to change/create allocation totals
-  if (req.user.role !== UserRole.SUPER_ADMIN) {
-    if (!approvedRequestId) {
-      return res.status(403).json({ 
-        status: "error", 
-        message: "Direct budget allocation adjustments that alter approved totals require Chief concurrence. Please submit a Budget Request first, or provide an Approved Request ID." 
-      });
-    }
-    const reqItem = db.budgetRequests?.find(r => r.id === approvedRequestId && r.status === "Approved");
-    if (!reqItem) {
-      return res.status(403).json({ 
-        status: "error", 
-        message: "The provided Request ID is either invalid or not yet approved by the Division Chief." 
-      });
-    }
-  }
+  // Allow Budget Officer to create the initial budget allocation based on the GAA/WFP offline documents.
+  // We only require approvedRequestId if this is a subsequent supplemental creation, 
+  // but since we only allow one allocation per department per FY (see 'existing' check below),
+  // this is always the initial creation. So we skip the approvedRequestId requirement here.
 
   const existing = db.budgetAllocations.find(b => b.department.toLowerCase() === department.toLowerCase());
   if (existing) {
@@ -1747,14 +1754,29 @@ app.post("/api/finance/budgets", authenticateToken, (req: any, res) => {
   }
 
   const activeFy = (db.fiscalYears || []).find((f: any) => f.status === "Active");
+  const ps = Number(allocatedPS) || 0;
+  const mooe = Number(allocatedMOOE) || 0;
+  const co = Number(allocatedCO) || 0;
+  const total = ps + mooe + co;
+  const finalBudgetAllocation = budgetAllocation ? Number(budgetAllocation) : total;
+
   const newBudget: BudgetAllocation = {
     id: `b-${Date.now()}`,
     fiscalYearId: activeFy?.id || "fy-1",
     department,
-    budgetAllocation: Number(budgetAllocation),
+    budgetAllocation: finalBudgetAllocation,
     budgetUtilized: 0,
-    remainingBudget: Number(budgetAllocation),
-    budgetPercentageUsed: 0
+    remainingBudget: finalBudgetAllocation,
+    budgetPercentageUsed: 0,
+    allocatedPS: ps,
+    utilizedPS: 0,
+    remainingPS: ps,
+    allocatedMOOE: mooe,
+    utilizedMOOE: 0,
+    remainingMOOE: mooe,
+    allocatedCO: co,
+    utilizedCO: 0,
+    remainingCO: co
   };
   db.budgetAllocations.push(newBudget);
   logFinanceAudit(req.user.fullName, "Create Budget Allocation", "Budget Monitoring", "None", `${budgetAllocation} for ${department}`);
@@ -1765,7 +1787,7 @@ app.post("/api/finance/budgets", authenticateToken, (req: any, res) => {
 
 app.put("/api/finance/budgets/:id", authenticateToken, (req: any, res) => {
   const { id } = req.params;
-  const { budgetAllocation, approvedRequestId } = req.body;
+  const { budgetAllocation, allocatedPS, allocatedMOOE, allocatedCO, approvedRequestId } = req.body;
 
   if (req.user.role !== UserRole.SUPER_ADMIN && req.user.role !== UserRole.BUDGET_OFFICER && req.user.role !== UserRole.FINANCE_OFFICER) {
     return res.status(403).json({ status: "error", message: "Only Budget or Finance Officers can adjust budget allocations." });
@@ -1797,6 +1819,22 @@ app.put("/api/finance/budgets/:id", authenticateToken, (req: any, res) => {
   }
 
   budget.budgetAllocation = targetAmount;
+  if (allocatedPS !== undefined) {
+    budget.allocatedPS = Number(allocatedPS);
+    budget.remainingPS = budget.allocatedPS - (budget.utilizedPS || 0);
+  }
+  if (allocatedMOOE !== undefined) {
+    budget.allocatedMOOE = Number(allocatedMOOE);
+    budget.remainingMOOE = budget.allocatedMOOE - (budget.utilizedMOOE || 0);
+  }
+  if (allocatedCO !== undefined) {
+    budget.allocatedCO = Number(allocatedCO);
+    budget.remainingCO = budget.allocatedCO - (budget.utilizedCO || 0);
+  }
+  // Recompute total if breakdowns were passed
+  if (allocatedPS !== undefined || allocatedMOOE !== undefined || allocatedCO !== undefined) {
+    budget.budgetAllocation = (budget.allocatedPS || 0) + (budget.allocatedMOOE || 0) + (budget.allocatedCO || 0);
+  }
   budget.remainingBudget = budget.budgetAllocation + (budget.carryOver || 0) - budget.budgetUtilized;
   budget.budgetPercentageUsed = Math.round((budget.budgetUtilized / (budget.budgetAllocation + (budget.carryOver || 0))) * 100);
 
@@ -1864,7 +1902,12 @@ app.post("/api/finance/budget-requests/:id/action", authenticateToken, (req: any
         budgetAllocation: reqItem.amountRequested,
         budgetUtilized: 0,
         remainingBudget: reqItem.amountRequested,
-        budgetPercentageUsed: 0
+        budgetPercentageUsed: 0,
+        allocatedPS: reqItem.amountRequested,
+        utilizedPS: 0,
+        remainingPS: reqItem.amountRequested,
+        allocatedMOOE: 0, utilizedMOOE: 0, remainingMOOE: 0,
+        allocatedCO: 0, utilizedCO: 0, remainingCO: 0
       });
     }
   }
@@ -1912,7 +1955,12 @@ app.put("/api/budget-requests/:id/approve", authenticateToken, (req: any, res) =
         budgetAllocation: reqItem.amountRequested,
         budgetUtilized: 0,
         remainingBudget: reqItem.amountRequested,
-        budgetPercentageUsed: 0
+        budgetPercentageUsed: 0,
+        allocatedPS: reqItem.amountRequested,
+        utilizedPS: 0,
+        remainingPS: reqItem.amountRequested,
+        allocatedMOOE: 0, utilizedMOOE: 0, remainingMOOE: 0,
+        allocatedCO: 0, utilizedCO: 0, remainingCO: 0
       });
     }
   }
