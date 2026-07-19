@@ -1849,7 +1849,7 @@ export default function FinanceView({
                                   <input 
                                     type="number" 
                                     className="w-24 text-right p-1.5 text-xs font-mono bg-white border border-slate-200 rounded outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-                                    defaultValue={ps}
+                                    key={`ps-${id}-${ps}`} defaultValue={ps}
                                     onBlur={(e) => handleBlur('ps', e.target.value)}
                                   />
                                 ) : (
@@ -1861,7 +1861,7 @@ export default function FinanceView({
                                   <input 
                                     type="number" 
                                     className="w-24 text-right p-1.5 text-xs font-mono bg-white border border-slate-200 rounded outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-                                    defaultValue={mooe}
+                                    key={`mooe-${id}-${mooe}`} defaultValue={mooe}
                                     onBlur={(e) => handleBlur('mooe', e.target.value)}
                                   />
                                 ) : (
@@ -1873,7 +1873,7 @@ export default function FinanceView({
                                   <input 
                                     type="number" 
                                     className="w-24 text-right p-1.5 text-xs font-mono bg-white border border-slate-200 rounded outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-                                    defaultValue={co}
+                                    key={`co-${id}-${co}`} defaultValue={co}
                                     onBlur={(e) => handleBlur('co', e.target.value)}
                                   />
                                 ) : (
